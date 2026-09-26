@@ -88,6 +88,8 @@ header{position:sticky;top:0;z-index:50;background:rgba(13,15,30,.92);backdrop-f
 .mp-body h3{margin:0 0 14px;font-size:17px;}
 .mp-foot{display:flex;justify-content:space-between;align-items:center;}
 .price-tag{font-weight:800;color:var(--accent2);font-size:16px;}
+.old-price{text-decoration:line-through;color:var(--muted);font-weight:600;font-size:13px;margin-inline-end:4px;}
+.discount-badge{background:var(--danger);color:#fff;font-size:11px;font-weight:800;padding:2px 7px;border-radius:20px;margin-inline-start:4px;}
 
 /* Categories / Platforms */
 .cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;}
@@ -575,6 +577,9 @@ textarea{resize:vertical;min-height:70px;}
               <select id="pfPlatform"></select>
             </div>
             <div class="field"><label>الكمية بالمخزون</label><input id="pfStock" type="number" value="20"></div>
+            <div class="field"><label>نسبة الخصم % (اتركها صفر لعدم وجود خصم)</label><input id="pfDiscount" type="number" min="0" max="90" value="0"></div>
+            <div class="field"><label>بداية الخصم (اختياري)</label><input id="pfDiscountStart" type="date"></div>
+            <div class="field"><label>نهاية الخصم (اختياري)</label><input id="pfDiscountEnd" type="date"></div>
             <div class="field"><label>الأيقونة (إيموجي احتياطي)</label><input id="pfIcon" value="🎮"></div>
             <div class="field" style="display:flex;align-items:center;gap:8px;padding-top:26px;">
               <input id="pfFeatured" type="checkbox" style="width:18px;height:18px;">
@@ -802,7 +807,7 @@ function platformIconHtml(name, size){
 // يحوّل بيانات المنتجات القديمة (سعر ونسخة واحدة) إلى الصيغة الجديدة (قائمة نسخ متعددة) حتى لا تفقد بيانات محفوظة سابقاً
 function migrateProducts(list){
   return (list||[]).map(p=>{
-    const withFeatured = {featured:false, ...p};
+    const withFeatured = {featured:false, discountPercent:0, discountStart:null, discountEnd:null, ...p};
     if(Array.isArray(withFeatured.editions) && withFeatured.editions.length) return withFeatured;
     return {...withFeatured, editions:[{id:uid(), name:'نسخة قياسية', price:withFeatured.price ?? 0}]};
   });
@@ -941,11 +946,27 @@ function loadImageResized(file, maxDim, quality){
   });
 }
 function thumbHtml(p){ return p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}">` : p.icon; }
-function minPrice(p){ return Math.min(...p.editions.map(e=>e.price)); }
+function minPrice(p){ return Math.min(...p.editions.map(e=>effPrice(e.price,p))); }
+function isDiscountActive(p){
+  if(!p.discountPercent || p.discountPercent<=0) return false;
+  const now = new Date();
+  if(p.discountStart){ const start = new Date(p.discountStart); if(now < start) return false; }
+  if(p.discountEnd){ const end = new Date(p.discountEnd); end.setHours(23,59,59,999); if(now > end) return false; }
+  return true;
+}
+function effPrice(price, p){
+  return isDiscountActive(p) ? Math.round(price - price*p.discountPercent/100) : price;
+}
 function priceRangeText(p){
   const prices = p.editions.map(e=>e.price);
   const min = Math.min(...prices), max = Math.max(...prices);
-  return min===max ? fmt(min) : `${fmt(min)} - ${fmt(max)}`;
+  const original = min===max ? fmt(min) : `${fmt(min)} - ${fmt(max)}`;
+  if(isDiscountActive(p)){
+    const effMin = effPrice(min,p), effMax = effPrice(max,p);
+    const discounted = effMin===effMax ? fmt(effMin) : `${fmt(effMin)} - ${fmt(effMax)}`;
+    return `<span class="old-price">${original}</span> ${discounted} <span class="discount-badge">خصم ${p.discountPercent}%</span>`;
+  }
+  return original;
 }
 // إضافة سريعة: لو في نسخة واحدة تُضاف مباشرة، ولو في أكتر من نسخة تفتح نافذة الاختيار
 function quickAdd(id){
@@ -970,10 +991,13 @@ function openProductModal(id){
 function renderModalEditions(p){
   document.getElementById('pmodalEditions').innerHTML = p.editions.map((e,i)=>`
     <button type="button" class="edition-pill ${e.id===modalEditionId?'active':''}" onclick="selectModalEdition('${e.id}')">
-      ${escapeHtml(e.name)}<span class="p">${fmt(e.price)}</span>
+      ${escapeHtml(e.name)}<span class="p">${fmt(effPrice(e.price,p))}</span>
     </button>`).join('');
   const selected = p.editions.find(e=>e.id===modalEditionId) || p.editions[0];
-  document.getElementById('pmodalPrice').textContent = fmt(selected.price);
+  const eff = effPrice(selected.price, p);
+  document.getElementById('pmodalPrice').innerHTML = isDiscountActive(p)
+    ? `<span class="old-price">${fmt(selected.price)}</span> ${fmt(eff)} <span class="discount-badge">خصم ${p.discountPercent}%</span>`
+    : fmt(eff);
 }
 function selectModalEdition(editionId){
   modalEditionId = editionId;
@@ -1146,7 +1170,7 @@ function changeQty(id,editionId,delta){
 function cartSubtotal(){
   return cart.reduce((s,c)=>{
     const p=products.find(p=>p.id===c.id); const ed=p?.editions.find(e=>e.id===c.editionId);
-    return s + (ed?ed.price*c.qty:0);
+    return s + (ed?effPrice(ed.price,p)*c.qty:0);
   },0);
 }
 function renderCart(){
@@ -1159,9 +1183,10 @@ function renderCart(){
       const p = products.find(p=>p.id===c.id);
       if(!p) return '';
       const ed = p.editions.find(e=>e.id===c.editionId) || p.editions[0];
+      const price = effPrice(ed.price, p);
       return `<div class="citem">
         <div class="ico">${thumbHtml(p)}</div>
-        <div class="info"><b>${escapeHtml(p.name)}</b>${escapeHtml(ed.name)} — ${fmt(ed.price)}</div>
+        <div class="info"><b>${escapeHtml(p.name)}</b>${escapeHtml(ed.name)} — ${fmt(price)}</div>
         <div class="qty">
           <button onclick="changeQty('${p.id}','${c.editionId}',-1)">−</button>${c.qty}<button onclick="changeQty('${p.id}','${c.editionId}',1)">+</button>
         </div>
@@ -1646,6 +1671,9 @@ function openProductForm(id){
     document.getElementById('pfName').value = p.name;
     renderPlatformSelectOptions(p.platform);
     document.getElementById('pfStock').value = p.stock ?? 20;
+    document.getElementById('pfDiscount').value = p.discountPercent || 0;
+    document.getElementById('pfDiscountStart').value = p.discountStart || '';
+    document.getElementById('pfDiscountEnd').value = p.discountEnd || '';
     document.getElementById('pfIcon').value = p.icon;
     document.getElementById('pfFeatured').checked = !!p.featured;
     document.getElementById('pfDesc').value = p.desc;
@@ -1656,6 +1684,9 @@ function openProductForm(id){
     document.getElementById('pfTitle').textContent = 'إضافة لعبة جديدة';
     ['pfName','pfDesc'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('pfStock').value = 20;
+    document.getElementById('pfDiscount').value = 0;
+    document.getElementById('pfDiscountStart').value = '';
+    document.getElementById('pfDiscountEnd').value = '';
     document.getElementById('pfIcon').value = '🎮';
     document.getElementById('pfFeatured').checked = false;
     renderPlatformSelectOptions(platforms[0] ? platforms[0].name : '');
@@ -1689,6 +1720,9 @@ function saveProduct(){
     name,
     platform: document.getElementById('pfPlatform').value,
     stock: parseFloat(document.getElementById('pfStock').value) || 0,
+    discountPercent: Math.min(90, Math.max(0, parseFloat(document.getElementById('pfDiscount').value) || 0)),
+    discountStart: document.getElementById('pfDiscountStart').value || null,
+    discountEnd: document.getElementById('pfDiscountEnd').value || null,
     icon: document.getElementById('pfIcon').value || '🎮',
     featured: document.getElementById('pfFeatured').checked,
     image: pfImage,

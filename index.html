@@ -510,7 +510,7 @@ textarea{resize:vertical;min-height:70px;}
       <b style="font-size:16px;color:var(--accent2);" id="tySupportNumber"></b>
     </div>
     <a id="tyWhatsappBtn" href="#" target="_blank" rel="noopener" class="btn" style="width:100%;margin-top:12px;background:#25D366;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
-      <span style="font-size:18px;">🟢</span> تواصل معنا على واتساب
+      <span style="font-size:18px;">🟢</span> تواصل معنا على واتساب بالضغط على الزر الأخضر لإكمال طلبك
     </a>
     <button class="btn" style="width:100%;margin-top:10px;" onclick="closeThankYou()">تم</button>
   </div>
@@ -645,7 +645,11 @@ textarea{resize:vertical;min-height:70px;}
       <div class="page" id="page-orders" style="display:none;">
         <div class="admin-top"><h2>الطلبات</h2></div>
         <div class="panel">
-          <table><thead><tr><th>#</th><th>العميل</th><th>الموبايل</th><th>البريد الإلكتروني</th><th>الألعاب</th><th>الدفع</th><th>المبلغ</th><th>الحالة</th><th></th></tr></thead>
+          <div class="field" style="max-width:320px;margin-bottom:14px;">
+            <label>ابحث بكود الطلب</label>
+            <input id="orderSearchInput" placeholder="مثال: A1B2C" oninput="renderAdminData()">
+          </div>
+          <table><thead><tr><th>كود الطلب</th><th>العميل</th><th>الموبايل</th><th>البريد الإلكتروني</th><th>الألعاب</th><th>الدفع</th><th>المبلغ</th><th>الحالة</th><th></th></tr></thead>
           <tbody id="ordersBody"></tbody></table>
         </div>
       </div>
@@ -806,8 +810,8 @@ function migrateProducts(list){
 
 function defaultOrders(){
   return [
-    {id:uid(),customer:'محمود سعيد',item:'أساطير الحدود 6',amount:1450,status:'مكتمل'},
-    {id:uid(),customer:'ياسمين علي',item:'سباق الشوارع الليلي',amount:990,status:'جديد'},
+    {id:uid(),code:genOrderCode(),customer:'محمود سعيد',item:'أساطير الحدود 6',amount:1450,status:'مكتمل'},
+    {id:uid(),code:genOrderCode(),customer:'ياسمين علي',item:'سباق الشوارع الليلي',amount:990,status:'جديد'},
   ];
 }
 function defaultCoupons(){
@@ -1290,6 +1294,9 @@ function updateCheckoutTotals(){
   document.getElementById('coDiscount').textContent = '- ' + fmt(discount);
   document.getElementById('coTotal').textContent = fmt(total);
 }
+function genOrderCode(){
+  return uid().slice(0,6).toUpperCase();
+}
 function confirmCheckout(){
   const name = document.getElementById('coName').value.trim();
   const phone = document.getElementById('coPhone').value.trim();
@@ -1305,24 +1312,25 @@ function confirmCheckout(){
     return ed ? `${p.name} (${ed.name}) × ${c.qty}` : `${p.name} × ${c.qty}`;
   }).filter(Boolean).join('، ');
   const pm = PAYMENT_METHODS.find(m=>m.id===selectedPayment);
-  orders.unshift({
-    id:uid(), customer:name, phone, email,
+  const newOrder = {
+    id:uid(), code: genOrderCode(), customer:name, phone, email,
     payment: pm ? pm.name : '', coupon: appliedCoupon ? appliedCoupon.code : null, discount,
     item:names, amount:total, status:'جديد'
-  });
+  };
+  orders.unshift(newOrder);
   cart = [];
   persist(); renderCart(); closeCheckout(); renderAdminData();
-  openThankYou(name, pm);
+  openThankYou(name, pm, newOrder.code);
 }
-function openThankYou(name, pm){
+function openThankYou(name, pm, orderCode){
   document.getElementById('tyName').textContent = name;
   const transferNote = pm && pm.needsTransfer
     ? `من فضلك حوّل قيمة الطلب عبر ${pm.name} على الرقم أدناه، وسيتواصل معك فريق الدعم للتأكيد.`
     : 'سيتواصل معك فريق الدعم قريباً لتأكيد طلبك.';
-  document.getElementById('tyMessage').textContent = 'تم استلام طلبك بنجاح! ' + transferNote;
+  document.getElementById('tyMessage').textContent = `تم استلام طلبك بنجاح! كود طلبك هو ${orderCode}. ${transferNote} سيتم الرد عليك في أقرب وقت.`;
   document.getElementById('tySupportNumber').textContent = SUPPORT_NUMBER;
   const waNumber = '20' + SUPPORT_NUMBER.replace(/^0/, '');
-  const waMsg = encodeURIComponent(`مرحباً، أنا ${name}، لدي استفسار بخصوص طلبي.`);
+  const waMsg = encodeURIComponent(`مرحباً، أنا ${name}، كود طلبي هو ${orderCode}، لدي استفسار بخصوص طلبي.`);
   document.getElementById('tyWhatsappBtn').href = `https://wa.me/${waNumber}?text=${waMsg}`;
   document.getElementById('thankyouOverlay').classList.add('show');
 }
@@ -1385,9 +1393,12 @@ function renderAdminData(){
     </td></tr>`;
   }).join('') || '<tr><td colspan="7">لا توجد منتجات</td></tr>';
 
-  document.getElementById('ordersBody').innerHTML = orders.map(o=>{
+  const orderSearchEl = document.getElementById('orderSearchInput');
+  const orderSearch = orderSearchEl ? orderSearchEl.value.trim().toUpperCase() : '';
+  const filteredOrders = orderSearch ? orders.filter(o=>(o.code||'').toUpperCase().includes(orderSearch)) : orders;
+  document.getElementById('ordersBody').innerHTML = filteredOrders.map(o=>{
     const statusClass = o.status==='مكتمل' ? 'done' : (o.status==='ملغي' ? 'cancelled' : 'new');
-    return `<tr><td>#${o.id.slice(0,5)}</td><td>${escapeHtml(o.customer)}</td><td>${escapeHtml(o.phone||'-')}</td><td style="max-width:180px;white-space:normal;">${escapeHtml(o.email||'-')}</td><td>${escapeHtml(o.item)}</td><td>${escapeHtml(o.payment||'-')}${o.coupon?`<br><span style="color:var(--ok);font-size:11px;">كوبون: ${escapeHtml(o.coupon)}</span>`:''}</td><td>${fmt(o.amount)}</td>
+    return `<tr><td><b>${o.code || o.id.slice(0,5).toUpperCase()}</b></td><td>${escapeHtml(o.customer)}</td><td>${escapeHtml(o.phone||'-')}</td><td style="max-width:180px;white-space:normal;">${escapeHtml(o.email||'-')}</td><td>${escapeHtml(o.item)}</td><td>${escapeHtml(o.payment||'-')}${o.coupon?`<br><span style="color:var(--ok);font-size:11px;">كوبون: ${escapeHtml(o.coupon)}</span>`:''}</td><td>${fmt(o.amount)}</td>
     <td><span class="pill ${statusClass}">${o.status}</span></td>
     <td class="row-actions">
       <button onclick="approveOrder('${o.id}')" title="الموافقة على الطلب" ${o.status==='مكتمل'?'disabled':''}>✓</button>

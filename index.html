@@ -248,6 +248,7 @@ tr:last-child td{border-bottom:none;}
 .pill{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;}
 .pill.new{background:rgba(255,93,59,.18);color:var(--accent);}
 .pill.done{background:rgba(61,220,151,.18);color:var(--ok);}
+.pill.cancelled{background:rgba(255,93,122,.18);color:var(--danger);}
 .row-actions{display:flex;gap:8px;}
 .row-actions button{background:var(--bg2);color:var(--text);border:1px solid var(--line);width:30px;height:30px;border-radius:8px;}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
@@ -508,7 +509,10 @@ textarea{resize:vertical;min-height:70px;}
       لأي استفسار أو متابعة لطلبك، تواصل مع فريق الدعم على الرقم<br>
       <b style="font-size:16px;color:var(--accent2);" id="tySupportNumber"></b>
     </div>
-    <button class="btn" style="width:100%;margin-top:16px;" onclick="closeThankYou()">تم</button>
+    <a id="tyWhatsappBtn" href="#" target="_blank" rel="noopener" class="btn" style="width:100%;margin-top:12px;background:#25D366;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+      <span style="font-size:18px;">🟢</span> تواصل معنا على واتساب
+    </a>
+    <button class="btn" style="width:100%;margin-top:10px;" onclick="closeThankYou()">تم</button>
   </div>
 </div>
 
@@ -1317,6 +1321,9 @@ function openThankYou(name, pm){
     : 'سيتواصل معك فريق الدعم قريباً لتأكيد طلبك.';
   document.getElementById('tyMessage').textContent = 'تم استلام طلبك بنجاح! ' + transferNote;
   document.getElementById('tySupportNumber').textContent = SUPPORT_NUMBER;
+  const waNumber = '20' + SUPPORT_NUMBER.replace(/^0/, '');
+  const waMsg = encodeURIComponent(`مرحباً، أنا ${name}، لدي استفسار بخصوص طلبي.`);
+  document.getElementById('tyWhatsappBtn').href = `https://wa.me/${waNumber}?text=${waMsg}`;
   document.getElementById('thankyouOverlay').classList.add('show');
 }
 function closeThankYou(){ document.getElementById('thankyouOverlay').classList.remove('show'); }
@@ -1351,14 +1358,14 @@ function showPage(name){
 }
 
 function renderAdminData(){
-  document.getElementById('kpiSales').textContent = fmt(orders.reduce((s,o)=>s+o.amount,0));
+  document.getElementById('kpiSales').textContent = fmt(orders.filter(o=>o.status!=='ملغي').reduce((s,o)=>s+o.amount,0));
   document.getElementById('kpiOrders').textContent = orders.length;
   document.getElementById('kpiProducts').textContent = products.length;
   document.getElementById('kpiNew').textContent = orders.filter(o=>o.status==='جديد').length;
 
   document.getElementById('recentOrdersBody').innerHTML = orders.slice(0,5).map(o=>`
     <tr><td>${escapeHtml(o.customer)}</td><td>${escapeHtml(o.item)}</td><td>${fmt(o.amount)}</td>
-    <td><span class="pill ${o.status==='مكتمل'?'done':'new'}">${o.status}</span></td></tr>`).join('') || '<tr><td colspan="4">لا توجد طلبات بعد</td></tr>';
+    <td><span class="pill ${o.status==='مكتمل'?'done':(o.status==='ملغي'?'cancelled':'new')}">${o.status}</span></td></tr>`).join('') || '<tr><td colspan="4">لا توجد طلبات بعد</td></tr>';
 
   document.getElementById('productsBody').innerHTML = products.map((p,idx)=>{
     const stock = p.stock ?? 20;
@@ -1378,10 +1385,15 @@ function renderAdminData(){
     </td></tr>`;
   }).join('') || '<tr><td colspan="7">لا توجد منتجات</td></tr>';
 
-  document.getElementById('ordersBody').innerHTML = orders.map(o=>`
-    <tr><td>#${o.id.slice(0,5)}</td><td>${escapeHtml(o.customer)}</td><td>${escapeHtml(o.phone||'-')}</td><td style="max-width:180px;white-space:normal;">${escapeHtml(o.email||'-')}</td><td>${escapeHtml(o.item)}</td><td>${escapeHtml(o.payment||'-')}${o.coupon?`<br><span style="color:var(--ok);font-size:11px;">كوبون: ${escapeHtml(o.coupon)}</span>`:''}</td><td>${fmt(o.amount)}</td>
-    <td><span class="pill ${o.status==='مكتمل'?'done':'new'}">${o.status}</span></td>
-    <td class="row-actions"><button onclick="toggleOrderStatus('${o.id}')">✓</button></td></tr>`).join('') || '<tr><td colspan="9">لا توجد طلبات</td></tr>';
+  document.getElementById('ordersBody').innerHTML = orders.map(o=>{
+    const statusClass = o.status==='مكتمل' ? 'done' : (o.status==='ملغي' ? 'cancelled' : 'new');
+    return `<tr><td>#${o.id.slice(0,5)}</td><td>${escapeHtml(o.customer)}</td><td>${escapeHtml(o.phone||'-')}</td><td style="max-width:180px;white-space:normal;">${escapeHtml(o.email||'-')}</td><td>${escapeHtml(o.item)}</td><td>${escapeHtml(o.payment||'-')}${o.coupon?`<br><span style="color:var(--ok);font-size:11px;">كوبون: ${escapeHtml(o.coupon)}</span>`:''}</td><td>${fmt(o.amount)}</td>
+    <td><span class="pill ${statusClass}">${o.status}</span></td>
+    <td class="row-actions">
+      <button onclick="approveOrder('${o.id}')" title="الموافقة على الطلب" ${o.status==='مكتمل'?'disabled':''}>✓</button>
+      <button onclick="cancelOrder('${o.id}')" title="التراجع عن الطلب" ${o.status==='ملغي'?'disabled':''}>✕</button>
+    </td></tr>`;
+  }).join('') || '<tr><td colspan="9">لا توجد طلبات</td></tr>';
 
   renderSalesChart();
   renderCustomers();
@@ -1570,9 +1582,15 @@ function applySettingsToStore(){
   if(heroIcon) heroIcon.innerHTML = settings.heroImage ? `<img src="${settings.heroImage}">` : '🎮';
 }
 
-function toggleOrderStatus(id){
+function approveOrder(id){
   const o = orders.find(o=>o.id===id); if(!o) return;
-  o.status = o.status==='مكتمل' ? 'جديد' : 'مكتمل';
+  o.status = 'مكتمل';
+  persist(); renderAdminData();
+}
+function cancelOrder(id){
+  const o = orders.find(o=>o.id===id); if(!o) return;
+  if(!confirm('هل أنت متأكد من التراجع عن هذا الطلب؟')) return;
+  o.status = 'ملغي';
   persist(); renderAdminData();
 }
 

@@ -268,6 +268,11 @@ textarea{resize:vertical;min-height:70px;}
 .chart-bar{width:100%;max-width:42px;background:linear-gradient(180deg,var(--accent2),var(--accent));border-radius:8px 8px 0 0;min-height:4px;}
 .chart-bar-wrap span{font-size:11px;color:var(--muted);text-align:center;}
 .stock-low{color:var(--danger);font-weight:700;}
+.soldout-badge{display:inline-block;background:rgba(255,93,122,.18);color:var(--danger);font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;}
+.is-soldout .thumb,.is-soldout .mp-img,.pmodal-img.is-soldout{position:relative;overflow:hidden;}
+.is-soldout .thumb::after,.is-soldout .mp-img::after,.pmodal-img.is-soldout::after{content:"نفدت الكمية";position:absolute;top:20px;right:-42px;width:160px;text-align:center;transform:rotate(45deg);background:linear-gradient(135deg,#FF5D7A,#E11D48);color:#fff;font-size:12.5px;font-weight:800;line-height:1;padding:8px 0;letter-spacing:.2px;box-shadow:0 4px 14px rgba(225,29,72,.5),0 0 0 1px rgba(255,255,255,.25) inset;text-shadow:0 1px 2px rgba(0,0,0,.35);z-index:2;pointer-events:none;}
+.pmodal-img.is-soldout::after{top:28px;right:-52px;width:200px;font-size:15px;padding:10px 0;}
+.btn.disabled,.btn:disabled,.icon-round:disabled{opacity:.45;cursor:not-allowed;pointer-events:none;box-shadow:none;transform:none;}
 .stock-ok{color:var(--muted);}
 
 .login-box{max-width:360px;margin:12vh auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:32px;}
@@ -417,7 +422,7 @@ textarea{resize:vertical;min-height:70px;}
           <div class="edition-pill-group" id="pmodalEditions"></div>
         </div>
         <div class="pmodal-actions">
-          <button class="btn" onclick="handleModalAdd()">أضف إلى السلة</button>
+          <button class="btn" id="pmodalAddBtn" onclick="handleModalAdd()">أضف إلى السلة</button>
         </div>
       </div>
     </div>
@@ -584,6 +589,10 @@ textarea{resize:vertical;min-height:70px;}
             <div class="field" style="display:flex;align-items:center;gap:8px;padding-top:26px;">
               <input id="pfFeatured" type="checkbox" style="width:18px;height:18px;">
               <label for="pfFeatured" style="margin:0;">⭐ لعبة مروّجة (تظهر في الأكثر رواجاً)</label>
+            </div>
+            <div class="field" style="display:flex;align-items:center;gap:8px;padding-top:26px;">
+              <input id="pfSoldOut" type="checkbox" style="width:18px;height:18px;">
+              <label for="pfSoldOut" style="margin:0;">🚫 نفدت الكمية (إخفاء زر الشراء)</label>
             </div>
             <div class="field full">
               <label>النسخ المتاحة والأسعار</label>
@@ -807,7 +816,7 @@ function platformIconHtml(name, size){
 // يحوّل بيانات المنتجات القديمة (سعر ونسخة واحدة) إلى الصيغة الجديدة (قائمة نسخ متعددة) حتى لا تفقد بيانات محفوظة سابقاً
 function migrateProducts(list){
   return (list||[]).map(p=>{
-    const withFeatured = {featured:false, discountPercent:0, discountStart:null, discountEnd:null, ...p};
+    const withFeatured = {featured:false, soldOut:false, discountPercent:0, discountStart:null, discountEnd:null, ...p};
     if(Array.isArray(withFeatured.editions) && withFeatured.editions.length) return withFeatured;
     return {...withFeatured, editions:[{id:uid(), name:'نسخة قياسية', price:withFeatured.price ?? 0}]};
   });
@@ -946,6 +955,7 @@ function loadImageResized(file, maxDim, quality){
   });
 }
 function thumbHtml(p){ return p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}">` : p.icon; }
+function isSoldOut(p){ return !!(p && p.soldOut); }
 function minPrice(p){ return Math.min(...p.editions.map(e=>effPrice(e.price,p))); }
 function isDiscountActive(p){
   if(!p.discountPercent || p.discountPercent<=0) return false;
@@ -971,6 +981,7 @@ function priceRangeText(p){
 // إضافة سريعة: لو في نسخة واحدة تُضاف مباشرة، ولو في أكتر من نسخة تفتح نافذة الاختيار
 function quickAdd(id){
   const p = products.find(p=>p.id===id); if(!p) return;
+  if(isSoldOut(p)){ alert('نأسف، نفدت الكمية من هذه اللعبة حالياً'); return; }
   if(p.editions.length>1){ openProductModal(id); }
   else { addToCart(id, p.editions[0].id); }
 }
@@ -982,10 +993,16 @@ function openProductModal(id){
   modalProductId = id;
   modalEditionId = p.editions[0].id;
   document.getElementById('pmodalImg').innerHTML = thumbHtml(p);
+  document.getElementById('pmodalImg').classList.toggle('is-soldout', isSoldOut(p));
   document.getElementById('pmodalPlat').textContent = p.platform;
   document.getElementById('pmodalName').textContent = p.name;
   document.getElementById('pmodalDesc').textContent = p.desc;
   renderModalEditions(p);
+  const addBtn = document.getElementById('pmodalAddBtn');
+  if(addBtn){
+    addBtn.disabled = isSoldOut(p);
+    addBtn.textContent = isSoldOut(p) ? 'نفدت الكمية' : 'أضف إلى السلة';
+  }
   document.getElementById('pmodalOverlay').classList.add('show');
 }
 function renderModalEditions(p){
@@ -1018,11 +1035,11 @@ function renderTrending(){
   const featured = products.filter(p=>p.featured);
   const list = (featured.length ? featured : products).slice(0,4);
   document.getElementById('trendRow').innerHTML = list.map(p=>`
-    <div class="tcard">
+    <div class="tcard ${isSoldOut(p)?'is-soldout':''}">
       <div class="thumb" onclick="openProductModal('${p.id}')">${thumbHtml(p)}</div>
       <div class="tcard-info">
         <div><span class="plat">${p.platform}</span><h3>${escapeHtml(p.name)}</h3></div>
-        <button class="icon-round" onclick="quickAdd('${p.id}')">🛒</button>
+        <button class="icon-round" ${isSoldOut(p)?'disabled':''} onclick="quickAdd('${p.id}')">${isSoldOut(p)?'⛔':'🛒'}</button>
       </div>
     </div>`).join('');
 }
@@ -1030,14 +1047,14 @@ function renderTrending(){
 function renderMostPlayed(){
   const list = products.slice(0,6);
   document.getElementById('mpGrid').innerHTML = list.map(p=>`
-    <div class="mp-card">
+    <div class="mp-card ${isSoldOut(p)?'is-soldout':''}">
       <div class="mp-img" onclick="openProductModal('${p.id}')">${thumbHtml(p)}</div>
       <div class="mp-body">
         <p class="genre">${p.platform}</p>
         <h3>${escapeHtml(p.name)}</h3>
         <div class="mp-foot">
           <span class="price-tag">${priceRangeText(p)}</span>
-          <button class="btn small" onclick="quickAdd('${p.id}')">استكشف</button>
+          <button class="btn small" ${isSoldOut(p)?'disabled':''} onclick="quickAdd('${p.id}')">${isSoldOut(p)?'نفدت الكمية':'استكشف'}</button>
         </div>
       </div>
     </div>`).join('');
@@ -1132,14 +1149,14 @@ function renderGrid(){
   const totalCount = list.length;
   const visibleList = (!showAllGames && totalCount > GAMES_PREVIEW_COUNT) ? list.slice(0, GAMES_PREVIEW_COUNT) : list;
   grid.innerHTML = visibleList.map(p=>`
-    <div class="card">
+    <div class="card ${isSoldOut(p)?'is-soldout':''}">
       <div class="thumb" onclick="openProductModal('${p.id}')">${thumbHtml(p)}</div>
       <div class="card-body">
         <span class="plat">${p.platform}</span>
         <h4>${escapeHtml(p.name)}</h4>
         <div class="card-foot">
           <span class="price-tag" style="font-size:17px;">${priceRangeText(p)}</span>
-          <button class="btn small" onclick="quickAdd('${p.id}')">أضف</button>
+          <button class="btn small" ${isSoldOut(p)?'disabled':''} onclick="quickAdd('${p.id}')">${isSoldOut(p)?'نفدت الكمية':'أضف'}</button>
         </div>
       </div>
     </div>`).join('');
@@ -1156,6 +1173,7 @@ function renderGrid(){
 
 function addToCart(id, editionId){
   const p = products.find(p=>p.id===id); if(!p) return;
+  if(isSoldOut(p)){ alert('نأسف، نفدت الكمية من هذه اللعبة حالياً'); return; }
   if(!editionId) editionId = p.editions[0].id;
   const found = cart.find(c=>c.id===id && c.editionId===editionId);
   if(found) found.qty++; else cart.push({id, editionId, qty:1});
@@ -1323,6 +1341,14 @@ function genOrderCode(){
   return uid().slice(0,6).toUpperCase();
 }
 function confirmCheckout(){
+  const soldOutInCart = cart.filter(c=>isSoldOut(products.find(p=>p.id===c.id)));
+  if(soldOutInCart.length){
+    const names = soldOutInCart.map(c=>products.find(p=>p.id===c.id).name).join('، ');
+    cart = cart.filter(c=>!soldOutInCart.includes(c));
+    persist(); renderCart(); updateCheckoutTotals();
+    alert('تم حذف ألعاب نفدت كميتها من السلة: ' + names);
+    return;
+  }
   const name = document.getElementById('coName').value.trim();
   const phone = document.getElementById('coPhone').value.trim();
   const email = document.getElementById('coEmail').value.trim();
@@ -1410,13 +1436,14 @@ function renderAdminData(){
       <button onclick="moveProduct(${idx},1)" ${idx===products.length-1?'disabled':''} title="نقل لأسفل">▼</button>
     </td>
     <td>${p.image ? `<img src="${p.image}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;">` : `<span style="font-size:20px;">${p.icon}</span>`}</td><td>${escapeHtml(p.name)}${p.featured?' <span title="مروّجة" style="color:var(--accent);">⭐</span>':''}</td><td>${p.platform}</td><td style="display:flex;flex-wrap:wrap;gap:5px;">${editionBadges}</td><td>${priceRangeText(p)}</td>
-    <td class="${low?'stock-low':'stock-ok'}">${stock}${low?' ⚠':''}</td>
+    <td class="${low?'stock-low':'stock-ok'}">${stock}${low?' ⚠':''}${p.soldOut?' <span class="soldout-badge">نفدت</span>':''}</td>
     <td class="row-actions">
+      <button onclick="toggleSoldOut('${p.id}')" title="${p.soldOut?'إعادة التوفر':'تحديد كنفدت الكمية'}">${p.soldOut?'✅':'🚫'}</button>
       <button onclick="toggleFeatured('${p.id}')" title="${p.featured?'إلغاء الترويج':'ترويج اللعبة'}">${p.featured?'⭐':'☆'}</button>
       <button onclick="openProductForm('${p.id}')">✎</button>
       <button onclick="deleteProduct('${p.id}')">🗑</button>
     </td></tr>`;
-  }).join('') || '<tr><td colspan="7">لا توجد منتجات</td></tr>';
+  }).join('') || '<tr><td colspan="8">لا توجد منتجات</td></tr>';
 
   const orderSearchEl = document.getElementById('orderSearchInput');
   const orderSearch = orderSearchEl ? orderSearchEl.value.trim().toUpperCase() : '';
@@ -1676,6 +1703,7 @@ function openProductForm(id){
     document.getElementById('pfDiscountEnd').value = p.discountEnd || '';
     document.getElementById('pfIcon').value = p.icon;
     document.getElementById('pfFeatured').checked = !!p.featured;
+    document.getElementById('pfSoldOut').checked = !!p.soldOut;
     document.getElementById('pfDesc').value = p.desc;
     pfEditions = p.editions.map(e=>({...e}));
     pfImage = p.image || null;
@@ -1689,6 +1717,7 @@ function openProductForm(id){
     document.getElementById('pfDiscountEnd').value = '';
     document.getElementById('pfIcon').value = '🎮';
     document.getElementById('pfFeatured').checked = false;
+    document.getElementById('pfSoldOut').checked = false;
     renderPlatformSelectOptions(platforms[0] ? platforms[0].name : '');
     pfEditions = [{id:uid(), name:'نسخة قياسية', price:''}];
     pfImage = null;
@@ -1725,6 +1754,7 @@ function saveProduct(){
     discountEnd: document.getElementById('pfDiscountEnd').value || null,
     icon: document.getElementById('pfIcon').value || '🎮',
     featured: document.getElementById('pfFeatured').checked,
+    soldOut: document.getElementById('pfSoldOut').checked,
     image: pfImage,
     desc: document.getElementById('pfDesc').value.trim() || 'لا يوجد وصف بعد.',
     editions: cleanEditions
@@ -1736,6 +1766,11 @@ function saveProduct(){
     products.unshift({id:uid(), ...data});
   }
   persist(); closeProductForm(); renderAdminData(); renderAll();
+}
+function toggleSoldOut(id){
+  const p = products.find(p=>p.id===id); if(!p) return;
+  p.soldOut = !p.soldOut;
+  persist(); renderAdminData(); renderAll();
 }
 function toggleFeatured(id){
   const p = products.find(p=>p.id===id); if(!p) return;

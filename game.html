@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تفاصيل اللعبة | استور HGF</title>
+<meta name="description" content="تفاصيل اللعبة والنسخ المتاحة والتقييمات">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#0D0F1E; --bg2:#141833; --card:#191D40; --line:#2A2F5F;
+  --text:#EDEEF7; --muted:#9AA0D0; --accent:#FF5D3B; --accent2:#22D3EE;
+  --danger:#FF5D7A; --ok:#3DDC97;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Cairo',sans-serif;min-height:100%;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;border:none;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px;}
+img{max-width:100%;}
+
+/* Header */
+header{position:sticky;top:0;z-index:50;background:rgba(13,15,30,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+.navbar{display:flex;align-items:center;justify-content:space-between;padding:16px 0;}
+.logo{font-size:22px;font-weight:800;display:flex;align-items:center;gap:8px;}
+.logo img{height:34px;width:34px;object-fit:cover;border-radius:8px;flex-shrink:0;}
+.logo span{color:var(--accent);}
+.navlinks{display:flex;gap:30px;font-weight:600;color:var(--muted);}
+.navlinks a:hover{color:var(--text);}
+.nav-actions{display:flex;align-items:center;gap:14px;}
+.icon-btn{background:var(--card);border:1px solid var(--line);color:var(--text);width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;position:relative;font-size:17px;}
+.badge{position:absolute;top:-6px;left:-6px;background:var(--accent);color:#fff;font-size:11px;font-weight:800;border-radius:20px;padding:1px 6px;}
+.admin-link{font-size:13px;color:var(--muted);border:1px solid var(--line);padding:9px 16px;border-radius:8px;}
+.admin-link:hover{border-color:var(--accent);color:var(--text);}
+
+/* HERO */
+.hero{padding:70px 0 60px;position:relative;overflow:hidden;}
+.hero::before{content:"";position:absolute;inset:-30% -10% auto -10%;height:460px;background:radial-gradient(circle at 20% 30%, rgba(255,93,59,.28), transparent 55%),radial-gradient(circle at 80% 60%, rgba(34,211,238,.22), transparent 55%);filter:blur(20px);pointer-events:none;}
+.hero-inner{position:relative;display:grid;grid-template-columns:1fr .95fr;gap:50px;align-items:center;}
+.welcome{color:var(--accent2);font-weight:700;font-size:14px;letter-spacing:.3px;margin:0 0 10px;}
+.slogan{font-size:46px;line-height:1.22;font-weight:800;margin:0 0 18px;}
+.hero-desc{color:var(--muted);font-size:16px;max-width:48ch;margin:0 0 30px;}
+.searchbar{display:flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px;max-width:440px;}
+.searchbar input{flex:1;background:transparent;border:none;color:var(--text);padding:10px 14px;font-family:inherit;font-size:14px;outline:none;}
+.searchbar button{background:var(--accent);color:#fff;font-weight:700;font-size:13px;padding:0 22px;border-radius:8px;}
+.hero-art{position:relative;border-radius:24px;overflow:hidden;background:linear-gradient(150deg,var(--card),var(--bg2));border:1px solid var(--line);aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;}
+.hero-art .glow-icon{font-size:120px;filter:drop-shadow(0 20px 40px rgba(255,93,59,.35));}
+.hero-art img{width:100%;height:100%;object-fit:cover;}
+
+/* Section shells */
+.section{padding:44px 0;}
+.eyebrow-tag{color:var(--accent);font-weight:700;font-size:13px;margin:0 0 6px;}
+.section-title-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px;}
+.section-title-row h2{font-size:26px;margin:0;font-weight:800;}
+.btn{background:var(--accent);color:#fff;padding:11px 22px;border-radius:10px;font-weight:700;font-size:13px;transition:transform .15s ease, box-shadow .15s ease;}
+.btn:hover{box-shadow:0 8px 22px rgba(255,93,59,.35);transform:translateY(-1px);}
+.btn.outline{background:transparent;border:1px solid var(--line);color:var(--text);}
+.btn.small{padding:9px 16px;font-size:12.5px;}
+.btn.danger{background:var(--danger);}
+.btn.ok{background:var(--ok);color:#0E1022;}
+.filters{display:flex;gap:10px;flex-wrap:wrap;}
+.chip{padding:8px 16px;border-radius:20px;border:1px solid var(--line);color:var(--muted);font-weight:600;font-size:13px;background:transparent;}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* Trending row */
+.trend-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+.tcard{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:border-color .15s ease, transform .15s ease;}
+.tcard:hover{border-color:var(--accent);transform:translateY(-3px);}
+.tcard .thumb{height:150px;display:flex;align-items:center;justify-content:center;font-size:44px;background:linear-gradient(135deg,var(--bg2),var(--card));border-bottom:1px solid var(--line);overflow:hidden;}
+.tcard .thumb img{width:100%;height:100%;object-fit:cover;}
+.tcard-info{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;gap:10px;}
+.tcard-info .plat{color:var(--accent2);font-size:11px;font-weight:700;display:block;margin-bottom:4px;}
+.tcard-info h3{font-size:15px;margin:0;font-weight:700;}
+.icon-round{background:var(--bg2);border:1px solid var(--line);width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text);font-size:16px;}
+
+/* Most played grid */
+.mp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.mp-card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:border-color .15s ease, transform .15s ease;}
+.mp-card:hover{border-color:var(--accent2);transform:translateY(-3px);}
+.mp-img{height:170px;display:flex;align-items:center;justify-content:center;font-size:48px;background:linear-gradient(135deg,var(--bg2),var(--card));overflow:hidden;}
+.mp-img img{width:100%;height:100%;object-fit:cover;}
+.mp-body{padding:18px;}
+.mp-body .genre{color:var(--muted);font-size:12px;margin:0 0 6px;}
+.mp-body h3{margin:0 0 14px;font-size:17px;}
+.mp-foot{display:flex;justify-content:space-between;align-items:center;}
+.price-tag{font-weight:800;color:var(--accent2);font-size:16px;}
+.old-price{text-decoration:line-through;color:var(--muted);font-weight:600;font-size:13px;margin-inline-end:4px;}
+.discount-badge{background:var(--danger);color:#fff;font-size:11px;font-weight:800;padding:2px 7px;border-radius:20px;margin-inline-start:4px;}
+
+/* Categories / Platforms */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;}
+.cat-card{position:relative;overflow:hidden;border-radius:20px;min-height:230px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid var(--line);color:#fff;transition:transform .15s ease, box-shadow .15s ease;}
+.cat-card:hover{transform:translateY(-4px);box-shadow:0 14px 34px rgba(0,0,0,.35);}
+.cat-card.has-img{background-size:cover;background-position:center;}
+.cat-card.has-img::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,7,18,.55),rgba(6,7,18,.85));z-index:0;}
+.cat-card .cc-top,.cat-card .cc-bottom{position:relative;z-index:1;}
+.cat-card .cc-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.cat-card .cc-icon{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.cat-card .cc-sub{font-size:11px;font-weight:800;letter-spacing:.4px;opacity:.85;padding-top:8px;}
+.cat-card .cc-name{font-size:27px;font-weight:800;margin:0 0 10px;line-height:1.15;}
+.cat-card .cc-tags{display:flex;flex-wrap:wrap;align-items:center;gap:6px 0;font-size:12.5px;font-weight:700;opacity:.92;margin-bottom:16px;}
+.cat-card .cc-tags span:not(:last-child)::after{content:"•";opacity:.4;font-weight:400;margin:0 8px;}
+.cat-card .cc-link{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;background:rgba(255,255,255,.16);padding:8px 14px;border-radius:10px;width:fit-content;}
+.cat-c0{background:linear-gradient(150deg,#132922,#070c0a);}
+.cat-c0 .cc-icon{color:#3ddc97;}
+.cat-c1{background:linear-gradient(150deg,#111c3d,#050813);}
+.cat-c1 .cc-icon{color:#8fb1ff;}
+.cat-c2{background:linear-gradient(150deg,#ff6a44,#b8241f);border-color:transparent;}
+.cat-c2::before{content:"";position:absolute;inset:0;z-index:0;background:repeating-linear-gradient(135deg, rgba(255,255,255,.07) 0 10px, transparent 10px 22px);pointer-events:none;}
+.cat-c3{background:linear-gradient(150deg,#123663,#050d20);}
+.cat-c3 .cc-icon{color:#22d3ee;}
+
+/* Full catalog grid (shop) */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s ease, transform .15s ease;}
+.card:hover{border-color:var(--accent);transform:translateY(-3px);}
+.thumb{height:130px;display:flex;align-items:center;justify-content:center;font-size:40px;background:linear-gradient(135deg,var(--bg2),var(--card));border-bottom:1px solid var(--line);overflow:hidden;}
+.thumb img{width:100%;height:100%;object-fit:cover;}
+.card-body{padding:16px;display:flex;flex-direction:column;gap:8px;flex:1;}
+.plat{font-size:11px;font-weight:700;color:var(--accent2);}
+.card-body h4{margin:0;font-size:16px;}
+.card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:6px;}
+.empty{color:var(--muted);text-align:center;padding:40px 0;}
+
+footer{border-top:1px solid var(--line);padding:26px 0;color:var(--muted);font-size:13px;text-align:center;}
+
+/* Edition badges (store table + pills) — colors cycle by position */
+.edition-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:11.5px;font-weight:800;white-space:nowrap;}
+.edition-c0{background:rgba(154,160,208,.16);color:var(--muted);border:1px solid var(--line);}
+.edition-c1{background:rgba(34,211,238,.16);color:var(--accent2);border:1px solid rgba(34,211,238,.4);}
+.edition-c2{background:rgba(255,93,59,.16);color:var(--accent);border:1px solid rgba(255,93,59,.4);}
+.edition-c3{background:rgba(61,220,151,.16);color:var(--ok);border:1px solid rgba(61,220,151,.4);}
+
+/* Product quick-view modal */
+.thumb, .mp-img{cursor:pointer;}
+.pmodal-overlay{position:fixed;inset:0;background:rgba(6,7,18,.72);backdrop-filter:blur(3px);z-index:120;display:none;align-items:center;justify-content:center;padding:20px;}
+.pmodal-overlay.show{display:flex;}
+.pmodal{background:var(--bg2);border:1px solid var(--line);border-radius:22px;max-width:760px;width:100%;max-height:88vh;overflow-y:auto;position:relative;box-shadow:0 30px 80px rgba(0,0,0,.5);}
+.pmodal-close{position:absolute;top:14px;left:14px;background:rgba(0,0,0,.4);color:#fff;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;z-index:2;}
+.pmodal-body{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.pmodal-img{background:linear-gradient(150deg,var(--card),var(--bg2));min-height:320px;display:flex;align-items:center;justify-content:center;font-size:90px;border-left:1px solid var(--line);overflow:hidden;border-radius:22px 0 0 22px;}
+.pmodal-img img{width:100%;height:100%;object-fit:cover;}
+.pmodal-info{padding:28px 26px;display:flex;flex-direction:column;gap:16px;}
+.pmodal-plat{color:var(--accent2);font-size:12px;font-weight:800;letter-spacing:.3px;}
+.pmodal-info h2{margin:0;font-size:23px;font-weight:800;}
+.pmodal-desc{color:var(--muted);font-size:14.5px;line-height:1.8;margin:0;}
+.pmodal-price{font-size:26px;font-weight:800;color:var(--accent2);}
+.pmodal-price span{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px;}
+.pmodal-edition-label{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;}
+.pmodal-actions{margin-top:auto;padding-top:6px;}
+.pmodal-actions .btn{width:100%;}
+@media (max-width:640px){
+  .pmodal-body{grid-template-columns:1fr;}
+  .pmodal-img{border-radius:22px 22px 0 0;border-left:none;min-height:220px;}
+}
+
+/* Edition pills — customer picks one inside the modal */
+.edition-pill-group{display:flex;flex-wrap:wrap;gap:8px;}
+.edition-pill{background:var(--bg2);border:1.5px solid var(--line);border-radius:12px;padding:9px 14px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-weight:700;font-size:13px;transition:all .15s ease;}
+.edition-pill span.p{font-size:11px;font-weight:700;opacity:.85;color:var(--accent2);}
+.edition-pill.active{border-color:var(--accent);color:var(--text);background:rgba(255,93,59,.1);}
+.edition-pill.active span.p{color:var(--accent);}
+
+/* Admin: dynamic editions manager — add as many editions as needed, each with its own name & price */
+.editions-manager{display:flex;flex-direction:column;gap:10px;margin-bottom:10px;}
+.edition-row{display:flex;gap:8px;align-items:center;}
+.edition-row input[type="text"]{flex:2;}
+.edition-row input[type="number"]{flex:1;min-width:0;}
+.row-del-btn{background:var(--bg2);border:1px solid var(--line);color:var(--danger);width:38px;height:38px;flex-shrink:0;border-radius:10px;font-size:14px;}
+.row-del-btn:disabled{opacity:.35;cursor:not-allowed;}
+.add-edition-btn{background:transparent;border:1.5px dashed var(--line);color:var(--accent2);width:100%;padding:10px;border-radius:10px;font-weight:700;font-size:13px;}
+.add-edition-btn:hover{border-color:var(--accent2);}
+
+/* Generic simple modal (auth + checkout) */
+.simple-modal-overlay{position:fixed;inset:0;background:rgba(6,7,18,.72);backdrop-filter:blur(3px);z-index:130;display:none;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;}
+.simple-modal-overlay.show{display:flex;}
+.simple-modal{background:var(--bg2);border:1px solid var(--line);border-radius:20px;width:100%;position:relative;margin:4vh auto;padding:28px 24px;box-shadow:0 30px 80px rgba(0,0,0,.5);}
+.simple-modal.narrow{max-width:400px;}
+.simple-modal.mid{max-width:480px;}
+.simple-modal h3{margin:0 0 18px;font-size:19px;font-weight:800;}
+.simple-modal .field{margin-bottom:14px;}
+.simple-modal .hint{color:var(--muted);font-size:12.5px;margin-top:14px;text-align:center;}
+.simple-modal .hint b{color:var(--accent2);}
+
+/* Auth tabs */
+.auth-tabs{display:flex;gap:8px;margin-bottom:18px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:4px;}
+.auth-tab{flex:1;background:transparent;color:var(--muted);font-weight:700;font-size:13px;padding:9px;border-radius:9px;}
+.auth-tab.active{background:var(--accent);color:#fff;}
+.account-view{display:flex;flex-direction:column;gap:4px;}
+.account-view .acc-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;}
+.account-view .acc-row span:first-child{color:var(--muted);}
+
+/* Payment method cards */
+.payment-methods{display:flex;flex-direction:column;gap:10px;}
+.payment-card{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg2);color:var(--text);font-weight:700;font-size:14px;text-align:right;}
+.payment-card .pico{font-size:20px;}
+.payment-card.active{border-color:var(--accent);background:rgba(255,93,59,.1);box-shadow:0 0 0 1px var(--accent) inset;}
+.support-note{background:var(--bg2);border:1px solid var(--line);padding:12px 14px;border-radius:12px;font-size:13px;color:var(--muted);margin-top:12px;line-height:1.7;}
+.support-note b{color:var(--accent2);}
+
+/* Checkout summary */
+.checkout-summary{margin-top:16px;border-top:1px solid var(--line);padding-top:12px;}
+.checkout-summary .row{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);padding:5px 0;}
+.checkout-summary .row.total{font-weight:800;font-size:18px;color:var(--text);border-top:1px solid var(--line);margin-top:6px;padding-top:10px;}
+
+/* Cart drawer */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:90;display:none;}
+.overlay.show{display:block;}
+.drawer{position:fixed;top:0;bottom:0;left:0;width:min(380px,90vw);background:var(--bg2);z-index:91;transform:translateX(-100%);transition:transform .25s ease;display:flex;flex-direction:column;border-right:1px solid var(--line);
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);}
+.drawer.show{transform:translateX(0);}
+.drawer-head{padding:20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+.drawer-items{padding:14px 20px;overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px;}
+.citem{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;}
+.citem .ico{width:40px;height:40px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;}
+.citem .info{flex:1;font-size:13px;}
+.citem .info b{display:block;font-size:14px;}
+.qty{display:flex;align-items:center;gap:6px;}
+.qty button{width:22px;height:22px;border-radius:6px;background:var(--bg);color:var(--text);}
+.drawer-foot{padding:18px 20px;border-top:1px solid var(--line);}
+.drawer-foot .total{display:flex;justify-content:space-between;font-weight:800;margin-bottom:12px;font-size:17px;}
+.close-x{background:none;color:var(--muted);font-size:20px;}
+
+/* Admin */
+#admin{display:none;min-height:100vh;background:var(--bg);}
+.admin-shell{display:grid;grid-template-columns:230px 1fr;min-height:100vh;}
+.sidebar{background:var(--bg2);border-left:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:6px;
+  padding-top:calc(22px + env(safe-area-inset-top,0px));}
+.sidebar .logo{margin-bottom:24px;padding:0 6px;}
+.side-link{padding:11px 14px;border-radius:10px;color:var(--muted);font-weight:700;font-size:14px;display:flex;gap:10px;align-items:center;}
+.side-link.active,.side-link:hover{background:var(--card);color:var(--text);}
+.side-link.exit{margin-top:auto;color:var(--danger);}
+.admin-main{padding:26px 30px;overflow-x:auto;}
+.admin-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.admin-top h2{margin:0;font-size:22px;}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:26px;}
+.stat-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;}
+.stat-card span{color:var(--muted);font-size:13px;}
+.stat-card b{display:block;font-size:26px;margin-top:6px;}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:20px;}
+.panel h3{margin:0 0 16px;font-size:16px;}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:600px;}
+th,td{padding:10px 8px;text-align:right;border-bottom:1px solid var(--line);}
+th{color:var(--muted);font-size:12px;font-weight:700;}
+tr:last-child td{border-bottom:none;}
+.pill{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;}
+.pill.new{background:rgba(255,93,59,.18);color:var(--accent);}
+.pill.done{background:rgba(61,220,151,.18);color:var(--ok);}
+.pill.cancelled{background:rgba(255,93,122,.18);color:var(--danger);}
+.row-actions{display:flex;gap:8px;}
+.row-actions button{background:var(--bg2);color:var(--text);border:1px solid var(--line);width:30px;height:30px;border-radius:8px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted);}
+.field.full{grid-column:1/-1;}
+input,select,textarea{background:var(--bg2);border:1px solid var(--line);color:var(--text);padding:10px 12px;border-radius:10px;font-family:inherit;font-size:14px;}
+textarea{resize:vertical;min-height:70px;}
+.img-upload{display:flex;align-items:center;gap:12px;}
+.img-preview{width:64px;height:64px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;flex-shrink:0;}
+.img-preview img{width:100%;height:100%;object-fit:cover;}
+.file-btn{background:var(--bg2);border:1px solid var(--line);color:var(--text);padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;}
+
+.chart-row{display:flex;align-items:flex-end;gap:14px;height:160px;padding-top:10px;}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end;}
+.chart-bar{width:100%;max-width:42px;background:linear-gradient(180deg,var(--accent2),var(--accent));border-radius:8px 8px 0 0;min-height:4px;}
+.chart-bar-wrap span{font-size:11px;color:var(--muted);text-align:center;}
+.stock-low{color:var(--danger);font-weight:700;}
+.soldout-badge{display:inline-block;background:rgba(255,93,122,.18);color:var(--danger);font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;}
+.is-soldout .thumb,.is-soldout .mp-img,.pmodal-img.is-soldout{position:relative;overflow:hidden;}
+.is-soldout .thumb::after,.is-soldout .mp-img::after,.pmodal-img.is-soldout::after{content:"نفدت الكمية";position:absolute;top:20px;right:-42px;width:160px;text-align:center;transform:rotate(45deg);background:linear-gradient(135deg,#FF5D7A,#E11D48);color:#fff;font-size:12.5px;font-weight:800;line-height:1;padding:8px 0;letter-spacing:.2px;box-shadow:0 4px 14px rgba(225,29,72,.5),0 0 0 1px rgba(255,255,255,.25) inset;text-shadow:0 1px 2px rgba(0,0,0,.35);z-index:2;pointer-events:none;}
+.pmodal-img.is-soldout::after{top:28px;right:-52px;width:200px;font-size:15px;padding:10px 0;}
+.btn.disabled,.btn:disabled,.icon-round:disabled{opacity:.45;cursor:not-allowed;pointer-events:none;box-shadow:none;transform:none;}
+.stock-ok{color:var(--muted);}
+
+.login-box{max-width:360px;margin:12vh auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:32px;}
+.login-box h2{margin-top:0;}
+.login-box .field{margin-bottom:14px;}
+.hint{color:var(--muted);font-size:12px;margin-top:10px;}
+
+@media (max-width:900px){
+  .hero-inner{grid-template-columns:1fr;}
+  .hero-art{max-width:340px;}
+  .trend-row{grid-template-columns:repeat(2,1fr);}
+  .mp-grid{grid-template-columns:repeat(2,1fr);}
+  .cat-grid{grid-template-columns:repeat(2,1fr);}
+  .admin-shell{grid-template-columns:1fr;}
+  .sidebar{position:sticky;top:0;flex-direction:row;overflow-x:auto;padding:12px;z-index:10;}
+  .sidebar .logo{display:none;}
+  .side-link.exit{margin-top:0;}
+  .form-grid{grid-template-columns:1fr;}
+  .navlinks{display:none;}
+}
+
+/* Age rating */
+.thumb,.mp-img,.pmodal-img{position:relative;}
+.age-3{--a1:#46E0A0;--a2:#17995F;--atx:#fff;}
+.age-7{--a1:#3CD3F2;--a2:#1580A8;--atx:#fff;}
+.age-12{--a1:#FFD34D;--a2:#E0951A;--atx:#2A1B00;}
+.age-16{--a1:#FF9650;--a2:#DD4F16;--atx:#fff;}
+.age-18{--a1:#FF5D7A;--a2:#C4162F;--atx:#fff;}
+/* شارة صغيرة زجاجية في الركن حتى تبقى صورة اللعبة ظاهرة بالكامل */
+.age-badge{position:absolute;top:8px;left:8px;z-index:2;height:28px;padding:0 3px;border-radius:30px;
+  display:flex;align-items:center;gap:6px;
+  background:rgba(10,12,28,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.2);box-shadow:0 4px 12px rgba(0,0,0,.35);
+  pointer-events:none;transition:transform .2s ease;}
+.age-badge .n{min-width:22px;height:22px;padding:0 4px;border-radius:30px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,var(--a1),var(--a2));color:var(--atx);
+  font-size:12px;font-weight:800;line-height:1;direction:ltr;box-shadow:inset 0 1px 0 rgba(255,255,255,.4);}
+.age-badge .n i{font-style:normal;font-size:10px;}
+.pmodal-img .age-badge{top:14px;left:14px;height:32px;}
+.pmodal-img .age-badge .n{min-width:25px;height:25px;font-size:13px;}
+.thumb:hover .age-badge,.mp-img:hover .age-badge{transform:translateY(-1px) scale(1.05);}
+.age-chip{display:inline-flex;align-items:center;gap:6px;margin-inline-start:8px;padding:3px 12px 3px 10px;border-radius:20px;font-size:12px;font-weight:800;
+  color:var(--atx,#fff);background:linear-gradient(135deg,var(--a1),var(--a2));border:1.5px solid rgba(255,255,255,.7);
+  box-shadow:0 3px 10px rgba(0,0,0,.35);vertical-align:middle;}
+.age-chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.85;}
+
+/* ===== نافذة تفاصيل اللعبة الكبيرة ===== */
+.pmodal.pm-big{max-width:1080px;max-height:92vh;}
+.pm-big .pmodal-body{grid-template-columns:1.05fr 1fr;}
+.pm-big .pmodal-img{min-height:460px;font-size:140px;border-radius:0;}
+.pm-big .pmodal-info{padding:36px 34px 30px;gap:16px;}
+.pm-big .pmodal-info h2{font-size:30px;line-height:1.3;}
+.pm-big .pmodal-img .age-badge{top:16px;left:auto;right:16px;}
+.pm-rating-sum{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:700;color:var(--muted);}
+.pm-rating-sum b{color:var(--text);font-size:15px;}
+.pm-rating-sum:hover{color:var(--text);}
+.stars{--v:0;display:inline-block;position:relative;font-size:17px;line-height:1;letter-spacing:2px;color:#323868;direction:ltr;white-space:nowrap;}
+.stars::after{content:"★★★★★";position:absolute;top:0;left:0;width:calc(var(--v) / 5 * 100%);overflow:hidden;color:#FFC24B;white-space:nowrap;}
+.pm-price-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.pm-price{font-size:34px;font-weight:800;color:var(--accent2);display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;line-height:1.1;}
+.pm-price .old-price{font-size:17px;}
+.pm-price .discount-badge{font-size:12px;padding:3px 9px;}
+.pm-stock{font-size:12.5px;font-weight:800;padding:5px 12px;border-radius:20px;background:rgba(61,220,151,.12);color:var(--ok);}
+.pm-stock.out{background:rgba(255,93,122,.12);color:var(--danger);}
+.pm-big .pmodal-actions .btn{padding:15px 22px;font-size:15px;border-radius:12px;}
+.pm-tabs{display:flex;gap:4px;padding:0 24px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(0,0,0,.14);overflow-x:auto;position:sticky;top:0;z-index:3;backdrop-filter:blur(8px);}
+.pm-tab{background:transparent;color:var(--muted);padding:16px 20px;font-weight:700;font-size:14.5px;border-bottom:3px solid transparent;white-space:nowrap;margin-bottom:-1px;}
+.pm-tab:hover{color:var(--text);}
+.pm-tab.active{color:var(--text);border-bottom-color:var(--accent);}
+.pm-tab .cnt{font-size:11px;background:var(--line);color:var(--text);padding:1px 7px;border-radius:20px;margin-inline-start:6px;}
+.pm-panels{padding:30px 34px 36px;}
+.pm-panel{display:none;}
+.pm-panel.active{display:block;}
+.pm-panel h3{margin:0 0 14px;font-size:18px;font-weight:800;}
+.pm-desc{color:#C8CCEC;font-size:15px;line-height:2;margin:0 0 26px;white-space:pre-line;}
+.pm-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.pm-fact{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+.pm-fact span{display:block;font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:6px;}
+.pm-fact b{font-size:15px;font-weight:800;}
+.pm-specs-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.pm-spec-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;}
+.pm-spec-card h4{margin:0 0 12px;font-size:15px;font-weight:800;color:var(--accent2);}
+.pm-spec-card.rec h4{color:var(--accent);}
+.pm-spec-row{display:flex;gap:14px;padding:10px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.7;}
+.pm-spec-row:first-of-type{border-top:none;}
+.pm-spec-row .k{flex:0 0 38%;color:var(--muted);font-weight:700;}
+.pm-spec-row .v{flex:1;font-weight:600;unicode-bidi:plaintext;text-align:right;}
+.pm-empty{color:var(--muted);font-size:14px;padding:18px;text-align:center;background:var(--card);border:1px dashed var(--line);border-radius:14px;}
+.pm-rv-top{display:grid;grid-template-columns:200px 1fr;gap:30px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 26px;margin-bottom:22px;}
+.pm-rv-avg{text-align:center;}
+.pm-rv-avg .big{font-size:52px;font-weight:800;line-height:1;margin-bottom:8px;}
+.pm-rv-avg .stars{font-size:19px;}
+.pm-rv-avg small{display:block;margin-top:8px;color:var(--muted);font-weight:700;font-size:12.5px;}
+.pm-bar{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:700;color:var(--muted);margin:6px 0;}
+.pm-bar .track{flex:1;height:8px;border-radius:8px;background:var(--bg2);overflow:hidden;}
+.pm-bar .track div{height:100%;background:linear-gradient(90deg,#FFC24B,#FF9650);border-radius:8px;}
+.pm-bar span:first-child{width:26px;direction:ltr;text-align:left;}
+.pm-bar .c{width:22px;text-align:left;}
+.pm-rv-list{display:flex;flex-direction:column;gap:12px;margin-bottom:26px;}
+.pm-rv{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;}
+.pm-rv-head{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.pm-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#FF9650);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pm-rv-head .nm{font-weight:800;font-size:14px;}
+.pm-rv-head .dt{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.pm-rv-head .stars{margin-right:auto;font-size:15px;}
+.pm-rv p{margin:0;color:#C8CCEC;font-size:14px;line-height:1.8;white-space:pre-line;}
+.pm-rv-form{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;display:flex;flex-direction:column;gap:12px;}
+.pm-rv-form h4{margin:0;font-size:16px;font-weight:800;}
+.pm-star-input{display:flex;gap:4px;direction:ltr;justify-content:flex-end;}
+.pm-star-input button{background:transparent;font-size:30px;line-height:1;color:#323868;padding:0 2px;transition:transform .12s ease,color .12s ease;}
+.pm-star-input button.on{color:#FFC24B;}
+.pm-star-input button:hover{transform:scale(1.15);}
+.pm-rv-form .btn{align-self:flex-start;}
+@media (max-width:760px){
+  .pm-big .pmodal-body{grid-template-columns:1fr;}
+  .pm-big .pmodal-img{min-height:250px;font-size:100px;}
+  .pm-big .pmodal-info{padding:24px 20px;}
+  .pm-big .pmodal-info h2{font-size:24px;}
+  .pm-price{font-size:28px;}
+  .pm-tabs{padding:0 10px;}
+  .pm-tab{padding:14px 14px;font-size:13.5px;}
+  .pm-panels{padding:22px 18px 28px;}
+  .pm-facts{grid-template-columns:1fr 1fr;}
+  .pm-specs-grid{grid-template-columns:1fr;}
+  .pm-rv-top{grid-template-columns:1fr;gap:18px;padding:18px;}
+  .pm-spec-row .k{flex-basis:42%;}
+}
+
+
+/* ===== صفحة اللعبة (إضافات) ===== */
+.logo{cursor:pointer;}
+.gp{padding-top:22px;padding-bottom:30px;}
+.crumbs{font-size:13px;font-weight:600;color:var(--muted);margin:0 0 16px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.crumbs a:hover{color:var(--text);}
+.crumbs .cur{color:var(--text);}
+.gp .pmodal.pm-big{max-height:none;overflow:hidden;margin:0 auto;max-width:1180px;}
+.gp-section{margin-top:44px;}
+.gp-section h2{font-size:22px;font-weight:800;margin:0 0 18px;}
+.rel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+.rel-grid .tcard{display:block;}
+.rel-grid .tcard-info h3{font-size:14.5px;}
+.rel-price{color:var(--accent2);font-weight:800;font-size:13px;white-space:nowrap;}
+@media (max-width:900px){.rel-grid{grid-template-columns:repeat(2,1fr);}}
+.gp-notfound{text-align:center;padding:90px 20px;}
+.gp-notfound .big{font-size:64px;margin-bottom:10px;}
+.gp-notfound h2{margin:0 0 8px;font-size:24px;}
+.gp-notfound p{color:var(--muted);margin:0 0 22px;}
+footer{padding:30px 20px;text-align:center;color:var(--muted);font-size:13px;border-top:1px solid var(--line);margin-top:30px;}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translate(-50%,30px);opacity:0;pointer-events:none;background:var(--card);border:1px solid var(--accent);border-radius:14px;padding:12px 16px;display:flex;gap:14px;align-items:center;z-index:200;box-shadow:0 18px 50px rgba(0,0,0,.5);transition:transform .25s ease,opacity .25s ease;max-width:92vw;font-size:14px;font-weight:600;}
+.toast.show{transform:translate(-50%,0);opacity:1;pointer-events:auto;}
+.toast a{background:var(--accent);color:#fff;border-radius:8px;padding:7px 14px;font-size:12.5px;font-weight:800;white-space:nowrap;}
+@keyframes gl-spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap navbar">
+    <a class="logo" id="logo" href="index.html">🎮 نيون<span>ستور</span></a>
+    <div class="nav-actions">
+      <a class="admin-link" href="index.html#games">← كل الألعاب</a>
+      <a class="icon-btn" href="index.html?cart=1" title="السلة">🛒<span class="badge" id="cartCount">0</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap gp" id="gameMain">
+  <nav class="crumbs" id="crumbs" style="display:none;">
+    <a href="index.html">الرئيسية</a><span>›</span>
+    <a id="crumbPlat" href="index.html#games"></a><span>›</span>
+    <span class="cur" id="crumbName"></span>
+  </nav>
+
+  <div id="gameBox" class="pmodal pm-big" style="display:none;">
+    <div class="pmodal-body">
+      <div class="pmodal-img" id="pmodalImg"></div>
+      <div class="pmodal-info">
+        <div>
+          <span class="pmodal-plat" id="pmodalPlat"></span><span class="age-chip" id="pmodalAge" style="display:none;"></span>
+          <h1 id="pmodalName" style="margin:6px 0 0;font-size:30px;line-height:1.3;font-weight:800;"></h1>
+        </div>
+        <a class="pm-rating-sum" id="pmodalRatingSum" onclick="pmShowTab('reviews', true)"></a>
+        <div class="pm-price-row">
+          <div class="pm-price" id="pmodalPrice"></div>
+          <span class="pm-stock" id="pmodalStock"></span>
+        </div>
+        <div id="pmodalEditionsWrap">
+          <p class="pmodal-edition-label">اختر النسخة</p>
+          <div class="edition-pill-group" id="pmodalEditions"></div>
+        </div>
+        <div class="pmodal-actions">
+          <button class="btn" id="pmodalAddBtn" onclick="addToCart()">أضف إلى السلة</button>
+        </div>
+      </div>
+    </div>
+    <div class="pm-tabs" id="pmTabs">
+      <button type="button" class="pm-tab active" data-tab="desc" onclick="pmShowTab('desc')">الوصف</button>
+      <button type="button" class="pm-tab" data-tab="specs" id="pmTabSpecs" onclick="pmShowTab('specs')">مواصفات التشغيل</button>
+      <button type="button" class="pm-tab" data-tab="reviews" id="pmTabReviews" onclick="pmShowTab('reviews')">التقييمات</button>
+    </div>
+    <div class="pm-panels">
+      <div class="pm-panel active" id="pmPanel-desc"></div>
+      <div class="pm-panel" id="pmPanel-specs"></div>
+      <div class="pm-panel" id="pmPanel-reviews"></div>
+    </div>
+  </div>
+
+  <section class="gp-section" id="relatedSection" style="display:none;">
+    <h2>ألعاب ممكن تعجبك</h2>
+    <div class="rel-grid" id="relatedGrid"></div>
+  </section>
+
+  <div class="gp-notfound" id="notFound" style="display:none;">
+    <div class="big">🕹️</div>
+    <h2>اللعبة دي مش موجودة</h2>
+    <p>ممكن تكون اتشالت من المتجر أو الرابط مش صح.</p>
+    <a class="btn" href="index.html#games">شوف كل الألعاب</a>
+  </div>
+</main>
+
+<footer id="siteFooter">© 2026 نيون ستور — متجر الألعاب الإلكترونية. جميع الحقوق محفوظة.</footer>
+
+<div class="toast" id="toast"><span id="toastMsg"></span><a href="index.html?cart=1">عرض السلة</a></div>
+
+<div id="globalLoader" style="position:fixed;inset:0;background:#0D0F1E;color:#EDEEF7;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:9999;font-family:'Cairo',sans-serif;">
+  <div style="width:40px;height:40px;border:4px solid #2A2F5F;border-top-color:#FF5D3B;border-radius:50%;animation:gl-spin 1s linear infinite;"></div>
+  <div>جاري تحميل اللعبة...</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* نفس قاعدة البيانات المشتركة بتاعة المتجر (Supabase) */
+const SUPABASE_URL = 'https://vdmtspzmdwkccfxbwxdq.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_lGVi9hRmMSrdAZM7yDCB3Q_uBiaxRJH';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const LS_PRODUCTS='ns_products', LS_CART='ns_cart', LS_SETTINGS='ns_settings', LS_CUSTOMERS='ns_customers', LS_CURRENT_CUSTOMER='ns_current_customer';
+
+let products = [];
+let settings = {storeName:'نيون ستور', currency:'ج.م'};
+let customers = [];
+let currentCustomerId = localStorage.getItem(LS_CURRENT_CUSTOMER) || null;
+let current = null, editionId = null, rvStars = 0;
+
+function uid(){return Math.random().toString(36).slice(2,9);}
+function fmt(n){ return `${n} ${settings.currency}`; }
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s==null?'':s; return d.innerHTML; }
+function readJSON(key, fallback){ try{ const v = JSON.parse(localStorage.getItem(key)||'null'); return v==null?fallback:v; }catch(e){ return fallback; } }
+function readCart(){ const c = readJSON(LS_CART, []); return Array.isArray(c) ? c : []; }
+
+function migrateProducts(list){
+  return (list||[]).map(p=>{
+    const w = {age:'', sysMin:'', sysRec:'', reviews:[], featured:false, soldOut:false, discountPercent:0, discountStart:null, discountEnd:null, ...p};
+    if(Array.isArray(w.editions) && w.editions.length) return w;
+    return {...w, editions:[{id:uid(), name:'نسخة قياسية', price:w.price ?? 0}]};
+  });
+}
+function ageBadgeHtml(p){ return p && p.age ? `<span class="age-badge age-${p.age}" title="التصنيف العمري: ${p.age}+"><span class="n">${p.age}<i>+</i></span></span>` : ''; }
+function thumbHtml(p){ return p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}">` : (p.icon||'🎮'); }
+function isSoldOut(p){ return !!(p && p.soldOut); }
+function isDiscountActive(p){
+  if(!p.discountPercent || p.discountPercent<=0) return false;
+  const now = new Date();
+  if(p.discountStart){ if(now < new Date(p.discountStart)) return false; }
+  if(p.discountEnd){ const end = new Date(p.discountEnd); end.setHours(23,59,59,999); if(now > end) return false; }
+  return true;
+}
+function effPrice(price, p){ return isDiscountActive(p) ? Math.round(price - price*p.discountPercent/100) : price; }
+function minPrice(p){ return Math.min(...p.editions.map(e=>effPrice(e.price,p))); }
+function avgRating(p){ const r=(p&&p.reviews)||[]; return r.length ? r.reduce((s,x)=>s+(x.stars||0),0)/r.length : 0; }
+function starsHtml(v){ return `<span class="stars" style="--v:${(+v||0).toFixed(2)}">★★★★★</span>`; }
+function getCurrentCustomer(){ return customers.find(c=>c.id===currentCustomerId) || null; }
+
+/* ---------- تحميل البيانات ---------- */
+async function loadData(){
+  try{
+    const { data, error } = await sb.from('store_state').select('products,settings,customers').eq('id', 1).maybeSingle();
+    if(error) throw error;
+    if(!data) throw new Error('no store data');
+    products = migrateProducts(data.products);
+    settings = {...settings, ...(data.settings||{})};
+    customers = data.customers || [];
+  }catch(e){
+    console.error('تعذر تحميل البيانات من الخادم، هنستخدم آخر نسخة محفوظة على الجهاز', e);
+    products = migrateProducts(readJSON(LS_PRODUCTS, []));
+    settings = {...settings, ...readJSON(LS_SETTINGS, {})};
+    customers = readJSON(LS_CUSTOMERS, []);
+  }
+}
+
+/* ---------- السلة (بتتخزن في المتصفح وبتظهر في صفحة المتجر) ---------- */
+function updateCartBadge(){
+  document.getElementById('cartCount').textContent = readCart().reduce((s,c)=>s+c.qty,0);
+}
+let toastTimer = null;
+function showToast(msg){
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast'); t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 5000);
+}
+function addToCart(){
+  const p = current; if(!p) return;
+  if(isSoldOut(p)){ alert('نأسف، نفدت الكمية من هذه اللعبة حالياً'); return; }
+  const cart = readCart();
+  const found = cart.find(c=>c.id===p.id && c.editionId===editionId);
+  if(found) found.qty++; else cart.push({id:p.id, editionId, qty:1});
+  try{ localStorage.setItem(LS_CART, JSON.stringify(cart)); }catch(e){ alert('تعذر حفظ السلة على هذا الجهاز'); return; }
+  updateCartBadge();
+  showToast('تمت إضافة «' + p.name + '» إلى السلة ✓');
+}
+
+/* ---------- عرض الصفحة ---------- */
+function parseSpecLines(txt){
+  return (txt||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{
+    const m = l.match(/^([^:：]+)[:：]\s*(.+)$/);
+    return m ? {k:m[1].trim(), v:m[2].trim()} : {k:'', v:l};
+  });
+}
+function specCardHtml(title, txt, cls){
+  const rows = parseSpecLines(txt); if(!rows.length) return '';
+  return `<div class="pm-spec-card ${cls||''}"><h4>${title}</h4>${rows.map(r=>`<div class="pm-spec-row">${r.k?`<span class="k">${escapeHtml(r.k)}</span>`:''}<span class="v">${escapeHtml(r.v)}</span></div>`).join('')}</div>`;
+}
+function pmShowTab(name, scroll){
+  document.querySelectorAll('#pmTabs .pm-tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  document.querySelectorAll('.pm-panel').forEach(p=>p.classList.toggle('active', p.id==='pmPanel-'+name));
+  if(scroll){ document.getElementById('pmTabs').scrollIntoView({behavior:'smooth', block:'start'}); }
+}
+function renderRatingSummary(p){
+  const n = (p.reviews||[]).length, avg = avgRating(p);
+  document.getElementById('pmodalRatingSum').innerHTML = n
+    ? `${starsHtml(avg)} <b>${avg.toFixed(1)}</b> <span>(${n} ${n===1?'تقييم':'تقييمات'})</span>`
+    : `${starsHtml(0)} <span>لا توجد تقييمات بعد — كن أول من يقيّم</span>`;
+  document.getElementById('pmTabReviews').innerHTML = 'التقييمات' + (n ? `<span class="cnt">${n}</span>` : '');
+}
+function renderDescPanel(p){
+  const ageTxt = p.age ? (p.age + '+') : 'غير مصنفة';
+  document.getElementById('pmPanel-desc').innerHTML = `
+    <h3>عن اللعبة</h3>
+    <p class="pm-desc">${escapeHtml(p.desc || 'لا يوجد وصف بعد.')}</p>
+    <h3>تفاصيل</h3>
+    <div class="pm-facts">
+      <div class="pm-fact"><span>المنصة</span><b>${escapeHtml(p.platform||'-')}</b></div>
+      <div class="pm-fact"><span>التصنيف العمري</span><b style="unicode-bidi:plaintext;display:block;text-align:right;">${ageTxt}</b></div>
+      <div class="pm-fact"><span>النسخ المتاحة</span><b>${p.editions.length}</b></div>
+      <div class="pm-fact"><span>الحالة</span><b>${isSoldOut(p)?'نفدت الكمية':'متوفرة'}</b></div>
+    </div>`;
+}
+function renderSpecsPanel(p){
+  const min = specCardHtml('الحد الأدنى للتشغيل', p.sysMin, '');
+  const rec = specCardHtml('المواصفات الموصى بها', p.sysRec, 'rec');
+  const hasSpecs = !!(min || rec);
+  document.getElementById('pmTabSpecs').style.display = hasSpecs ? '' : 'none';
+  document.getElementById('pmPanel-specs').innerHTML = hasSpecs
+    ? `<h3>مواصفات التشغيل</h3><div class="pm-specs-grid">${min}${rec}</div>`
+    : '<div class="pm-empty">لم تتم إضافة مواصفات التشغيل لهذه اللعبة بعد.</div>';
+}
+function setRvStars(n){
+  rvStars = n;
+  document.querySelectorAll('#pmStarInput button').forEach(b=>b.classList.toggle('on', +b.dataset.s <= n));
+}
+function renderReviewsPanel(p){
+  const list = (p.reviews||[]).slice().sort((a,b)=>(b.date||0)-(a.date||0));
+  const n = list.length, avg = avgRating(p);
+  const counts = [5,4,3,2,1].map(s=>list.filter(r=>r.stars===s).length);
+  const bars = [5,4,3,2,1].map((s,i)=>`<div class="pm-bar"><span>${s} ★</span><div class="track"><div style="width:${n?(counts[i]/n*100):0}%"></div></div><span class="c">${counts[i]}</span></div>`).join('');
+  const top = n ? `
+    <div class="pm-rv-top">
+      <div class="pm-rv-avg"><div class="big">${avg.toFixed(1)}</div>${starsHtml(avg)}<small>من ${n} ${n===1?'تقييم':'تقييمات'}</small></div>
+      <div>${bars}</div>
+    </div>` : '';
+  const items = n ? `<div class="pm-rv-list">${list.map(r=>`
+      <div class="pm-rv">
+        <div class="pm-rv-head">
+          <div class="pm-av">${escapeHtml((r.name||'?').trim().charAt(0).toUpperCase())}</div>
+          <div><div class="nm">${escapeHtml(r.name||'عميل')}</div><div class="dt">${r.date ? new Date(r.date).toLocaleDateString('ar-EG') : ''}</div></div>
+          ${starsHtml(r.stars)}
+        </div>
+        ${r.text ? `<p>${escapeHtml(r.text)}</p>` : ''}
+      </div>`).join('')}</div>` : '<div class="pm-empty" style="margin-bottom:22px;">لا توجد تقييمات لهذه اللعبة بعد. شاركنا رأيك!</div>';
+  document.getElementById('pmPanel-reviews').innerHTML = `
+    <h3>تقييمات العملاء</h3>
+    ${top}${items}
+    <div class="pm-rv-form">
+      <h4>أضف تقييمك</h4>
+      <div class="pm-star-input" id="pmStarInput">${[1,2,3,4,5].map(s=>`<button type="button" data-s="${s}" onclick="setRvStars(${s})" title="${s} من 5">★</button>`).join('')}</div>
+      <input id="rvName" placeholder="اسمك" maxlength="40">
+      <textarea id="rvText" placeholder="اكتب رأيك في اللعبة (اختياري)" maxlength="500"></textarea>
+      <button class="btn" id="rvSubmit" type="button" onclick="submitReview()">إرسال التقييم</button>
+    </div>`;
+  const cust = getCurrentCustomer();
+  if(cust) document.getElementById('rvName').value = cust.name || '';
+  const mine = cust ? (p.reviews||[]).find(r=>r.customerId===cust.id) : null;
+  if(mine){ document.getElementById('rvText').value = mine.text || ''; setRvStars(mine.stars); }
+  else setRvStars(0);
+}
+async function submitReview(){
+  const p = current; if(!p) return;
+  const name = (document.getElementById('rvName').value||'').trim().slice(0,40);
+  const text = (document.getElementById('rvText').value||'').trim().slice(0,500);
+  if(!rvStars){ alert('اختار عدد النجوم الأول'); return; }
+  if(!name){ alert('اكتب اسمك من فضلك'); return; }
+  const btn = document.getElementById('rvSubmit'); btn.disabled = true;
+  try{
+    // بنجيب أحدث نسخة من قاعدة البيانات ونعدّل تقييمات اللعبة دي بس، عشان منمسحش أي تعديل تاني اتعمل في المتجر
+    const { data, error } = await sb.from('store_state').select('products').eq('id', 1).maybeSingle();
+    if(error || !data) throw (error || new Error('no data'));
+    const all = data.products || [];
+    const rp = all.find(x=>x.id===p.id);
+    if(!rp) throw new Error('product not found');
+    rp.reviews = rp.reviews || [];
+    const cust = getCurrentCustomer();
+    const mine = cust ? rp.reviews.find(r=>r.customerId===cust.id) : null;
+    if(mine) Object.assign(mine, {name, stars:rvStars, text, date:Date.now()});
+    else rp.reviews.push({id:uid(), customerId:cust?cust.id:null, name, stars:rvStars, text, date:Date.now()});
+    const { error: upErr } = await sb.from('store_state').update({products: all, updated_at: new Date().toISOString()}).eq('id', 1);
+    if(upErr) throw upErr;
+    p.reviews = rp.reviews;
+    renderRatingSummary(p); renderReviewsPanel(p);
+    alert('شكراً لتقييمك!');
+  }catch(e){
+    console.error(e);
+    alert('تعذر حفظ التقييم. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.');
+    btn.disabled = false;
+  }
+}
+
+function renderEditions(p){
+  document.getElementById('pmodalEditions').innerHTML = p.editions.map(e=>`
+    <button type="button" class="edition-pill ${e.id===editionId?'active':''}" onclick="selectEdition('${e.id}')">
+      ${escapeHtml(e.name)}<span class="p">${fmt(effPrice(e.price,p))}</span>
+    </button>`).join('');
+  const sel = p.editions.find(e=>e.id===editionId) || p.editions[0];
+  const eff = effPrice(sel.price, p);
+  document.getElementById('pmodalPrice').innerHTML = isDiscountActive(p)
+    ? `<span>${fmt(eff)}</span><span class="old-price">${fmt(sel.price)}</span><span class="discount-badge">خصم ${p.discountPercent}%</span>`
+    : `<span>${fmt(eff)}</span>`;
+}
+function selectEdition(id){ editionId = id; renderEditions(current); }
+
+function renderRelated(p){
+  let list = products.filter(x=>x.id!==p.id && x.platform===p.platform);
+  if(list.length < 4) list = list.concat(products.filter(x=>x.id!==p.id && x.platform!==p.platform));
+  list = list.slice(0,4);
+  if(!list.length) return;
+  document.getElementById('relatedGrid').innerHTML = list.map(x=>`
+    <a class="tcard ${isSoldOut(x)?'is-soldout':''}" href="game.html?id=${encodeURIComponent(x.id)}">
+      <div class="thumb">${thumbHtml(x)}${ageBadgeHtml(x)}</div>
+      <div class="tcard-info">
+        <div><span class="plat">${escapeHtml(x.platform||'')}</span><h3>${escapeHtml(x.name)}</h3></div>
+        <span class="rel-price">${fmt(minPrice(x))}</span>
+      </div>
+    </a>`).join('');
+  document.getElementById('relatedSection').style.display = '';
+}
+
+function renderGame(p){
+  current = p; editionId = p.editions[0].id;
+  document.title = p.name + ' | ' + (settings.storeName || 'المتجر');
+  const md = document.querySelector('meta[name="description"]');
+  if(md) md.setAttribute('content', (p.desc || p.name).slice(0,150));
+
+  document.getElementById('crumbPlat').textContent = p.platform || 'الألعاب';
+  document.getElementById('crumbName').textContent = p.name;
+  document.getElementById('crumbs').style.display = '';
+
+  const img = document.getElementById('pmodalImg');
+  img.innerHTML = thumbHtml(p) + ageBadgeHtml(p);
+  img.classList.toggle('is-soldout', isSoldOut(p));
+  document.getElementById('pmodalPlat').textContent = p.platform || '';
+  const ageEl = document.getElementById('pmodalAge');
+  ageEl.style.display = p.age ? 'inline-flex' : 'none';
+  ageEl.className = 'age-chip' + (p.age ? ' age-' + p.age : '');
+  ageEl.textContent = p.age ? ('تصنيف عمري \u200E' + p.age + '+') : '';
+  document.getElementById('pmodalName').textContent = p.name;
+  const stockEl = document.getElementById('pmodalStock');
+  stockEl.textContent = isSoldOut(p) ? 'نفدت الكمية' : 'متوفرة ✓';
+  stockEl.classList.toggle('out', isSoldOut(p));
+  document.getElementById('pmodalEditionsWrap').style.display = p.editions.length>1 ? '' : 'none';
+  renderEditions(p);
+  renderRatingSummary(p);
+  renderDescPanel(p); renderSpecsPanel(p); renderReviewsPanel(p);
+  const addBtn = document.getElementById('pmodalAddBtn');
+  addBtn.disabled = isSoldOut(p);
+  addBtn.textContent = isSoldOut(p) ? 'نفدت الكمية' : 'أضف إلى السلة';
+  pmShowTab('desc');
+  document.getElementById('gameBox').style.display = '';
+  renderRelated(p);
+}
+
+// لو السلة اتغيرت من تاب تاني (صفحة المتجر مثلاً) حدّث العداد
+window.addEventListener('storage', e=>{ if(e.key===LS_CART) updateCartBadge(); });
+
+(async function init(){
+  await loadData();
+  const parts = (settings.storeName || '').split(' ');
+  document.getElementById('logo').innerHTML = `🎮 ${escapeHtml(parts[0]||'')}<span>${escapeHtml(parts.slice(1).join(' ')||'')}</span>`;
+  document.getElementById('siteFooter').textContent = `© 2026 ${settings.storeName || 'المتجر'} — متجر الألعاب الإلكترونية. جميع الحقوق محفوظة.`;
+  updateCartBadge();
+  const id = new URLSearchParams(location.search).get('id');
+  const p = products.find(x=>x.id===id);
+  if(p) renderGame(p);
+  else { document.title = 'اللعبة غير موجودة | ' + (settings.storeName || 'المتجر'); document.getElementById('notFound').style.display = ''; }
+  document.getElementById('globalLoader').style.display = 'none';
+})();
+</script>
+</body>
+</html>

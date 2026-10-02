@@ -400,6 +400,8 @@ textarea{resize:vertical;min-height:70px;}
   .pm-rv-top{grid-template-columns:1fr;gap:18px;padding:18px;}
   .pm-spec-row .k{flex-basis:42%;}
 }
+.game-link{cursor:pointer;}
+.game-link:hover{color:var(--accent2);}
 </style>
 </head>
 <body>
@@ -1118,8 +1120,13 @@ function priceRangeText(p){
 function quickAdd(id){
   const p = products.find(p=>p.id===id); if(!p) return;
   if(isSoldOut(p)){ alert('نأسف، نفدت الكمية من هذه اللعبة حالياً'); return; }
-  if(p.editions.length>1){ openProductModal(id); }
+  if(p.editions.length>1){ openGamePage(id); }
   else { addToCart(id, p.editions[0].id); }
+}
+
+/* ---------- صفحة اللعبة (game.html) بتتفتح في نفس التاب ---------- */
+function openGamePage(id){
+  location.href = 'game.html?id=' + encodeURIComponent(id);
 }
 
 /* ---------- نافذة عرض تفاصيل اللعبة واختيار النسخة ---------- */
@@ -1289,9 +1296,9 @@ function renderTrending(){
   const list = (featured.length ? featured : products).slice(0,4);
   document.getElementById('trendRow').innerHTML = list.map(p=>`
     <div class="tcard ${isSoldOut(p)?'is-soldout':''}">
-      <div class="thumb" onclick="openProductModal('${p.id}')">${thumbHtml(p)}${ageBadgeHtml(p)}</div>
+      <div class="thumb" onclick="openGamePage('${p.id}')">${thumbHtml(p)}${ageBadgeHtml(p)}</div>
       <div class="tcard-info">
-        <div><span class="plat">${p.platform}</span><h3>${escapeHtml(p.name)}</h3></div>
+        <div><span class="plat">${p.platform}</span><h3 class="game-link" onclick="openGamePage('${p.id}')">${escapeHtml(p.name)}</h3></div>
         <button class="icon-round" ${isSoldOut(p)?'disabled':''} onclick="quickAdd('${p.id}')">${isSoldOut(p)?'⛔':'🛒'}</button>
       </div>
     </div>`).join('');
@@ -1301,10 +1308,10 @@ function renderMostPlayed(){
   const list = products.slice(0,6);
   document.getElementById('mpGrid').innerHTML = list.map(p=>`
     <div class="mp-card ${isSoldOut(p)?'is-soldout':''}">
-      <div class="mp-img" onclick="openProductModal('${p.id}')">${thumbHtml(p)}${ageBadgeHtml(p)}</div>
+      <div class="mp-img" onclick="openGamePage('${p.id}')">${thumbHtml(p)}${ageBadgeHtml(p)}</div>
       <div class="mp-body">
         <p class="genre">${p.platform}</p>
-        <h3>${escapeHtml(p.name)}</h3>
+        <h3 class="game-link" onclick="openGamePage('${p.id}')">${escapeHtml(p.name)}</h3>
         <div class="mp-foot">
           <span class="price-tag">${priceRangeText(p)}</span>
           <button class="btn small" ${isSoldOut(p)?'disabled':''} onclick="quickAdd('${p.id}')">${isSoldOut(p)?'نفدت الكمية':'استكشف'}</button>
@@ -1403,10 +1410,10 @@ function renderGrid(){
   const visibleList = (!showAllGames && totalCount > GAMES_PREVIEW_COUNT) ? list.slice(0, GAMES_PREVIEW_COUNT) : list;
   grid.innerHTML = visibleList.map(p=>`
     <div class="card ${isSoldOut(p)?'is-soldout':''}">
-      <div class="thumb" onclick="openProductModal('${p.id}')">${thumbHtml(p)}${ageBadgeHtml(p)}</div>
+      <div class="thumb" onclick="openGamePage('${p.id}')">${thumbHtml(p)}${ageBadgeHtml(p)}</div>
       <div class="card-body">
         <span class="plat">${p.platform}</span>
-        <h4>${escapeHtml(p.name)}</h4>
+        <h4 class="game-link" onclick="openGamePage('${p.id}')">${escapeHtml(p.name)}</h4>
         <div class="card-foot">
           <span class="price-tag" style="font-size:17px;">${priceRangeText(p)}</span>
           <button class="btn small" ${isSoldOut(p)?'disabled':''} onclick="quickAdd('${p.id}')">${isSoldOut(p)?'نفدت الكمية':'أضف'}</button>
@@ -2106,7 +2113,39 @@ function renderAll(){
   renderAll();
   const loader = document.getElementById('globalLoader');
   if(loader) loader.style.display = 'none';
+  if(new URLSearchParams(location.search).get('cart') === '1'){
+    toggleCart(true);
+    history.replaceState(null, '', location.pathname + location.hash);
+  }
 })();
+
+/* ---------- مزامنة مع صفحات الألعاب المفتوحة في تابات تانية ---------- */
+// السلة: لو اتضافت لعبة من صفحة اللعبة، تظهر هنا فوراً
+window.addEventListener('storage', e=>{
+  if(e.key === LS_CART){
+    try{ cart = JSON.parse(e.newValue || '[]') || []; }catch(err){ cart = []; }
+    renderCart();
+  }
+});
+// التقييمات: التقييم الجديد بيتحفظ من صفحة اللعبة، فنسحبه هنا عشان أي حفظ تاني من هذه الصفحة ما يمسحوش
+async function syncReviewsFromRemote(){
+  try{
+    const { data } = await sb.from('store_state').select('products').eq('id', 1).maybeSingle();
+    if(!data) return;
+    (data.products || []).forEach(rp=>{
+      const lp = products.find(p=>p.id===rp.id);
+      if(lp && Array.isArray(rp.reviews)) lp.reviews = rp.reviews;
+    });
+  }catch(err){}
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') syncReviewsFromRemote(); });
+window.addEventListener('focus', syncReviewsFromRemote);
+window.addEventListener('pageshow', e=>{
+  if(e.persisted){
+    try{ cart = JSON.parse(localStorage.getItem(LS_CART) || '[]') || []; }catch(err){ cart = []; }
+    renderCart(); syncReviewsFromRemote();
+  }
+});
 </script>
 </body>
 </html>

@@ -146,6 +146,7 @@ footer{border-top:1px solid var(--line);padding:26px 0;color:var(--muted);font-s
 .pmodal-body{display:grid;grid-template-columns:1fr 1fr;gap:0;}
 .pmodal-img{background:linear-gradient(150deg,var(--card),var(--bg2));min-height:320px;display:flex;align-items:center;justify-content:center;font-size:90px;border-left:1px solid var(--line);overflow:hidden;border-radius:22px 0 0 22px;}
 .pmodal-img img{width:100%;height:100%;object-fit:cover;}
+img.fit-full{object-fit:fill !important;} /* الصورة كاملة وبالظبط على قد المكان (يتحدد من لوحة التحكم لكل لعبة) */
 .pmodal-info{padding:28px 26px;display:flex;flex-direction:column;gap:16px;}
 .pmodal-plat{color:var(--accent2);font-size:12px;font-weight:800;letter-spacing:.3px;}
 .pmodal-info h2{margin:0;font-size:23px;font-weight:800;}
@@ -592,7 +593,9 @@ function migrateProducts(list){
   });
 }
 function ageBadgeHtml(p){ return p && p.age ? `<span class="age-badge age-${p.age}" title="التصنيف العمري: ${p.age}+"><span class="n">${p.age}<i>+</i></span></span>` : ''; }
-function thumbHtml(p){ return p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}">` : (p.icon||'🎮'); }
+/* ctx: 'card' (كروت الألعاب) أو 'detail' (صفحة/نافذة اللعبة) — imgFit: detail | card | both | none */
+function imgFitOn(p, ctx){ const m = (p && p.imgFit) || 'detail'; return m==='both' || m===ctx; }
+function thumbHtml(p, ctx){ return p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}"${imgFitOn(p,ctx)?' class="fit-full"':''}>` : (p.icon||'🎮'); }
 function isSoldOut(p){ return !!(p && p.soldOut); }
 function isDiscountActive(p){
   if(!p.discountPercent || p.discountPercent<=0) return false;
@@ -821,7 +824,7 @@ function renderRelated(p){
   if(!list.length) return;
   document.getElementById('relatedGrid').innerHTML = list.map(x=>`
     <a class="tcard ${isSoldOut(x)?'is-soldout':''}" href="game.html?id=${encodeURIComponent(x.id)}">
-      <div class="thumb">${thumbHtml(x)}${ageBadgeHtml(x)}</div>
+      <div class="thumb">${thumbHtml(x,'card')}${ageBadgeHtml(x)}</div>
       <div class="tcard-info">
         <div><span class="plat">${escapeHtml(x.platform||'')}</span><h3>${escapeHtml(x.name)}</h3></div>
         <span class="rel-price">${fmt(minPrice(x))}</span>
@@ -841,7 +844,7 @@ function renderGame(p){
   document.getElementById('crumbs').style.display = '';
 
   const img = document.getElementById('pmodalImg');
-  img.innerHTML = thumbHtml(p) + ageBadgeHtml(p);
+  img.innerHTML = thumbHtml(p,'detail') + ageBadgeHtml(p);
   img.classList.toggle('is-soldout', isSoldOut(p));
   document.getElementById('pmodalPlat').textContent = p.platform || '';
   const ageEl = document.getElementById('pmodalAge');

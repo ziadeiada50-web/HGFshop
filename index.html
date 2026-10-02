@@ -144,6 +144,7 @@ footer{border-top:1px solid var(--line);padding:26px 0;color:var(--muted);font-s
 .pmodal-body{display:grid;grid-template-columns:1fr 1fr;gap:0;}
 .pmodal-img{background:linear-gradient(150deg,var(--card),var(--bg2));min-height:320px;display:flex;align-items:center;justify-content:center;font-size:90px;border-left:1px solid var(--line);overflow:hidden;border-radius:22px 0 0 22px;}
 .pmodal-img img{width:100%;height:100%;object-fit:cover;}
+img.fit-full{object-fit:fill !important;} /* الصورة كاملة وبالظبط على قد المكان (يتحدد من لوحة التحكم لكل لعبة) */
 .pmodal-info{padding:28px 26px;display:flex;flex-direction:column;gap:16px;}
 .pmodal-plat{color:var(--accent2);font-size:12px;font-weight:800;letter-spacing:.3px;}
 .pmodal-info h2{margin:0;font-size:23px;font-weight:800;}
@@ -765,6 +766,14 @@ textarea{resize:vertical;min-height:70px;}
                 <option value="18">+18 (للبالغين فقط)</option>
               </select>
             </div>
+            <div class="field"><label>عرض الصورة كاملة (بالظبط على قد المكان)</label>
+              <select id="pfImgFit">
+                <option value="detail">في صفحة اللعبة فقط</option>
+                <option value="card">في كروت الألعاب فقط</option>
+                <option value="both">الاتنين مع بعض</option>
+                <option value="none">بدون (عرض عادي بقص الأطراف)</option>
+              </select>
+            </div>
             <div class="field"><label>الكمية بالمخزون</label><input id="pfStock" type="number" value="20"></div>
             <div class="field"><label>نسبة الخصم % (اتركها صفر لعدم وجود خصم)</label><input id="pfDiscount" type="number" min="0" max="90" value="0"></div>
             <div class="field"><label>بداية الخصم (اختياري)</label><input id="pfDiscountStart" type="date"></div>
@@ -1206,7 +1215,9 @@ function loadImageResized(file, maxDim, quality){
   });
 }
 function ageBadgeHtml(p){ return p && p.age ? `<span class="age-badge age-${p.age}" title="التصنيف العمري: ${p.age}+"><span class="n">${p.age}<i>+</i></span></span>` : ''; }
-function thumbHtml(p){ return p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}">` : p.icon; }
+/* ctx: 'card' (كروت الألعاب) أو 'detail' (صفحة/نافذة اللعبة) — imgFit: detail | card | both | none */
+function imgFitOn(p, ctx){ const m = (p && p.imgFit) || 'detail'; return m==='both' || m===ctx; }
+function thumbHtml(p, ctx){ return p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}"${imgFitOn(p,ctx)?' class="fit-full"':''}>` : p.icon; }
 function isSoldOut(p){ return !!(p && p.soldOut); }
 function minPrice(p){ return Math.min(...p.editions.map(e=>effPrice(e.price,p))); }
 function isDiscountActive(p){
@@ -1354,7 +1365,7 @@ function openProductModal(id){
   const p = products.find(p=>p.id===id); if(!p) return;
   modalProductId = id;
   modalEditionId = p.editions[0].id;
-  document.getElementById('pmodalImg').innerHTML = thumbHtml(p) + ageBadgeHtml(p);
+  document.getElementById('pmodalImg').innerHTML = thumbHtml(p,'detail') + ageBadgeHtml(p);
   document.getElementById('pmodalImg').classList.toggle('is-soldout', isSoldOut(p));
   document.getElementById('pmodalPlat').textContent = p.platform;
   const ageEl = document.getElementById('pmodalAge');
@@ -1410,7 +1421,7 @@ function renderTrending(){
   const list = (featured.length ? featured : products).slice(0,4);
   document.getElementById('trendRow').innerHTML = list.map(p=>`
     <div class="tcard ${isSoldOut(p)?'is-soldout':''}">
-      <div class="thumb" onclick="openGamePage('${p.id}')">${thumbHtml(p)}${ageBadgeHtml(p)}</div>
+      <div class="thumb" onclick="openGamePage('${p.id}')">${thumbHtml(p,'card')}${ageBadgeHtml(p)}</div>
       <div class="tcard-info">
         <div><span class="plat">${p.platform}</span><h3 class="game-link" onclick="openGamePage('${p.id}')">${escapeHtml(p.name)}</h3></div>
         <button class="icon-round" ${isSoldOut(p)?'disabled':''} onclick="quickAdd('${p.id}')">${isSoldOut(p)?'⛔':'🛒'}</button>
@@ -1422,7 +1433,7 @@ function renderMostPlayed(){
   const list = products.slice(0,6);
   document.getElementById('mpGrid').innerHTML = list.map(p=>`
     <div class="mp-card ${isSoldOut(p)?'is-soldout':''}">
-      <div class="mp-img" onclick="openGamePage('${p.id}')">${thumbHtml(p)}${ageBadgeHtml(p)}</div>
+      <div class="mp-img" onclick="openGamePage('${p.id}')">${thumbHtml(p,'card')}${ageBadgeHtml(p)}</div>
       <div class="mp-body">
         <p class="genre">${p.platform}</p>
         <h3 class="game-link" onclick="openGamePage('${p.id}')">${escapeHtml(p.name)}</h3>
@@ -1524,7 +1535,7 @@ function renderGrid(){
   const visibleList = (!showAllGames && totalCount > GAMES_PREVIEW_COUNT) ? list.slice(0, GAMES_PREVIEW_COUNT) : list;
   grid.innerHTML = visibleList.map(p=>`
     <div class="card ${isSoldOut(p)?'is-soldout':''}">
-      <div class="thumb" onclick="openGamePage('${p.id}')">${thumbHtml(p)}${ageBadgeHtml(p)}</div>
+      <div class="thumb" onclick="openGamePage('${p.id}')">${thumbHtml(p,'card')}${ageBadgeHtml(p)}</div>
       <div class="card-body">
         <span class="plat">${p.platform}</span>
         <h4 class="game-link" onclick="openGamePage('${p.id}')">${escapeHtml(p.name)}</h4>
@@ -2234,6 +2245,7 @@ function openProductForm(id){
     document.getElementById('pfName').value = p.name;
     renderPlatformSelectOptions(p.platform);
     document.getElementById('pfAge').value = p.age || '';
+    document.getElementById('pfImgFit').value = p.imgFit || 'detail';
     document.getElementById('pfSysMin').value = p.sysMin || '';
     document.getElementById('pfSysRec').value = p.sysRec || '';
     renderAdminReviews(p);
@@ -2260,6 +2272,7 @@ function openProductForm(id){
     document.getElementById('pfSoldOut').checked = false;
     renderPlatformSelectOptions(platforms[0] ? platforms[0].name : '');
     document.getElementById('pfAge').value = '';
+    document.getElementById('pfImgFit').value = 'detail';
     document.getElementById('pfSysMin').value = '';
     document.getElementById('pfSysRec').value = '';
     document.getElementById('pfReviewsWrap').style.display = 'none';
@@ -2293,6 +2306,7 @@ function saveProduct(){
     name,
     platform: document.getElementById('pfPlatform').value,
     age: document.getElementById('pfAge').value || '',
+    imgFit: document.getElementById('pfImgFit').value || 'detail',
     sysMin: document.getElementById('pfSysMin').value.trim(),
     sysRec: document.getElementById('pfSysRec').value.trim(),
     stock: parseFloat(document.getElementById('pfStock').value) || 0,

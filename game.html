@@ -625,13 +625,21 @@ function normalizeSocialUrl(raw){
     return parsed.href;
   }catch(e){ return null; }
 }
+const CUSTOM_LINK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg>';
 function socialLinksHtml(s){
   const soc = (s && s.socials) || {};
-  return SOCIAL_DEFS.map(d=>{
+  const main = SOCIAL_DEFS.map(d=>{
     const url = normalizeSocialUrl(soc[d.key]);
     if(!url) return '';
     return `<a class="soc-btn" style="--soc:${d.color}" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" aria-label="${d.label}">${d.svg}<span>${d.label}</span></a>`;
   }).join('');
+  const custom = ((s && s.customLinks) || []).map(l=>{
+    const url = normalizeSocialUrl(l && l.url);
+    const label = String((l && l.label) || '').trim();
+    if(!url || !label) return '';
+    return `<a class="soc-btn" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${CUSTOM_LINK_ICON}<span>${escapeHtml(label)}</span></a>`;
+  }).join('');
+  return main + custom;
 }
 function renderSocials(){
   const el = document.getElementById('socialLinks');

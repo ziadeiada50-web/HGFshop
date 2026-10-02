@@ -318,6 +318,88 @@ textarea{resize:vertical;min-height:70px;}
   color:var(--atx,#fff);background:linear-gradient(135deg,var(--a1),var(--a2));border:1.5px solid rgba(255,255,255,.7);
   box-shadow:0 3px 10px rgba(0,0,0,.35);vertical-align:middle;}
 .age-chip::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.85;}
+
+/* ===== نافذة تفاصيل اللعبة الكبيرة ===== */
+.pmodal.pm-big{max-width:1080px;max-height:92vh;}
+.pm-big .pmodal-body{grid-template-columns:1.05fr 1fr;}
+.pm-big .pmodal-img{min-height:460px;font-size:140px;border-radius:0;}
+.pm-big .pmodal-info{padding:36px 34px 30px;gap:16px;}
+.pm-big .pmodal-info h2{font-size:30px;line-height:1.3;}
+.pm-big .pmodal-img .age-badge{top:16px;left:auto;right:16px;}
+.pm-rating-sum{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:700;color:var(--muted);}
+.pm-rating-sum b{color:var(--text);font-size:15px;}
+.pm-rating-sum:hover{color:var(--text);}
+.stars{--v:0;display:inline-block;position:relative;font-size:17px;line-height:1;letter-spacing:2px;color:#323868;direction:ltr;white-space:nowrap;}
+.stars::after{content:"★★★★★";position:absolute;top:0;left:0;width:calc(var(--v) / 5 * 100%);overflow:hidden;color:#FFC24B;white-space:nowrap;}
+.pm-price-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+.pm-price{font-size:34px;font-weight:800;color:var(--accent2);display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;line-height:1.1;}
+.pm-price .old-price{font-size:17px;}
+.pm-price .discount-badge{font-size:12px;padding:3px 9px;}
+.pm-stock{font-size:12.5px;font-weight:800;padding:5px 12px;border-radius:20px;background:rgba(61,220,151,.12);color:var(--ok);}
+.pm-stock.out{background:rgba(255,93,122,.12);color:var(--danger);}
+.pm-big .pmodal-actions .btn{padding:15px 22px;font-size:15px;border-radius:12px;}
+.pm-tabs{display:flex;gap:4px;padding:0 24px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(0,0,0,.14);overflow-x:auto;position:sticky;top:0;z-index:3;backdrop-filter:blur(8px);}
+.pm-tab{background:transparent;color:var(--muted);padding:16px 20px;font-weight:700;font-size:14.5px;border-bottom:3px solid transparent;white-space:nowrap;margin-bottom:-1px;}
+.pm-tab:hover{color:var(--text);}
+.pm-tab.active{color:var(--text);border-bottom-color:var(--accent);}
+.pm-tab .cnt{font-size:11px;background:var(--line);color:var(--text);padding:1px 7px;border-radius:20px;margin-inline-start:6px;}
+.pm-panels{padding:30px 34px 36px;}
+.pm-panel{display:none;}
+.pm-panel.active{display:block;}
+.pm-panel h3{margin:0 0 14px;font-size:18px;font-weight:800;}
+.pm-desc{color:#C8CCEC;font-size:15px;line-height:2;margin:0 0 26px;white-space:pre-line;}
+.pm-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.pm-fact{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+.pm-fact span{display:block;font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:6px;}
+.pm-fact b{font-size:15px;font-weight:800;}
+.pm-specs-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.pm-spec-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;}
+.pm-spec-card h4{margin:0 0 12px;font-size:15px;font-weight:800;color:var(--accent2);}
+.pm-spec-card.rec h4{color:var(--accent);}
+.pm-spec-row{display:flex;gap:14px;padding:10px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.7;}
+.pm-spec-row:first-of-type{border-top:none;}
+.pm-spec-row .k{flex:0 0 38%;color:var(--muted);font-weight:700;}
+.pm-spec-row .v{flex:1;font-weight:600;unicode-bidi:plaintext;text-align:right;}
+.pm-empty{color:var(--muted);font-size:14px;padding:18px;text-align:center;background:var(--card);border:1px dashed var(--line);border-radius:14px;}
+.pm-rv-top{display:grid;grid-template-columns:200px 1fr;gap:30px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 26px;margin-bottom:22px;}
+.pm-rv-avg{text-align:center;}
+.pm-rv-avg .big{font-size:52px;font-weight:800;line-height:1;margin-bottom:8px;}
+.pm-rv-avg .stars{font-size:19px;}
+.pm-rv-avg small{display:block;margin-top:8px;color:var(--muted);font-weight:700;font-size:12.5px;}
+.pm-bar{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:700;color:var(--muted);margin:6px 0;}
+.pm-bar .track{flex:1;height:8px;border-radius:8px;background:var(--bg2);overflow:hidden;}
+.pm-bar .track div{height:100%;background:linear-gradient(90deg,#FFC24B,#FF9650);border-radius:8px;}
+.pm-bar span:first-child{width:26px;direction:ltr;text-align:left;}
+.pm-bar .c{width:22px;text-align:left;}
+.pm-rv-list{display:flex;flex-direction:column;gap:12px;margin-bottom:26px;}
+.pm-rv{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;}
+.pm-rv-head{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+.pm-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#FF9650);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pm-rv-head .nm{font-weight:800;font-size:14px;}
+.pm-rv-head .dt{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.pm-rv-head .stars{margin-right:auto;font-size:15px;}
+.pm-rv p{margin:0;color:#C8CCEC;font-size:14px;line-height:1.8;white-space:pre-line;}
+.pm-rv-form{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px;display:flex;flex-direction:column;gap:12px;}
+.pm-rv-form h4{margin:0;font-size:16px;font-weight:800;}
+.pm-star-input{display:flex;gap:4px;direction:ltr;justify-content:flex-end;}
+.pm-star-input button{background:transparent;font-size:30px;line-height:1;color:#323868;padding:0 2px;transition:transform .12s ease,color .12s ease;}
+.pm-star-input button.on{color:#FFC24B;}
+.pm-star-input button:hover{transform:scale(1.15);}
+.pm-rv-form .btn{align-self:flex-start;}
+@media (max-width:760px){
+  .pm-big .pmodal-body{grid-template-columns:1fr;}
+  .pm-big .pmodal-img{min-height:250px;font-size:100px;}
+  .pm-big .pmodal-info{padding:24px 20px;}
+  .pm-big .pmodal-info h2{font-size:24px;}
+  .pm-price{font-size:28px;}
+  .pm-tabs{padding:0 10px;}
+  .pm-tab{padding:14px 14px;font-size:13.5px;}
+  .pm-panels{padding:22px 18px 28px;}
+  .pm-facts{grid-template-columns:1fr 1fr;}
+  .pm-specs-grid{grid-template-columns:1fr;}
+  .pm-rv-top{grid-template-columns:1fr;gap:18px;padding:18px;}
+  .pm-spec-row .k{flex-basis:42%;}
+}
 </style>
 </head>
 <body>
@@ -431,7 +513,7 @@ textarea{resize:vertical;min-height:70px;}
 
 <!-- Product quick-view modal -->
 <div class="pmodal-overlay" id="pmodalOverlay" onclick="if(event.target===this) closeProductModal()">
-  <div class="pmodal">
+  <div class="pmodal pm-big">
     <button class="pmodal-close" onclick="closeProductModal()">✕</button>
     <div class="pmodal-body">
       <div class="pmodal-img" id="pmodalImg"></div>
@@ -440,9 +522,12 @@ textarea{resize:vertical;min-height:70px;}
           <span class="pmodal-plat" id="pmodalPlat"></span><span class="age-chip" id="pmodalAge" style="display:none;"></span>
           <h2 id="pmodalName"></h2>
         </div>
-        <p class="pmodal-desc" id="pmodalDesc"></p>
-        <div class="pmodal-price"><span>السعر</span><span id="pmodalPrice"></span></div>
-        <div>
+        <a class="pm-rating-sum" id="pmodalRatingSum" onclick="pmShowTab('reviews')"></a>
+        <div class="pm-price-row">
+          <div class="pm-price" id="pmodalPrice"></div>
+          <span class="pm-stock" id="pmodalStock"></span>
+        </div>
+        <div id="pmodalEditionsWrap">
           <p class="pmodal-edition-label">اختر النسخة</p>
           <div class="edition-pill-group" id="pmodalEditions"></div>
         </div>
@@ -450,6 +535,16 @@ textarea{resize:vertical;min-height:70px;}
           <button class="btn" id="pmodalAddBtn" onclick="handleModalAdd()">أضف إلى السلة</button>
         </div>
       </div>
+    </div>
+    <div class="pm-tabs" id="pmTabs">
+      <button type="button" class="pm-tab active" data-tab="desc" onclick="pmShowTab('desc')">الوصف</button>
+      <button type="button" class="pm-tab" data-tab="specs" id="pmTabSpecs" onclick="pmShowTab('specs')">مواصفات التشغيل</button>
+      <button type="button" class="pm-tab" data-tab="reviews" id="pmTabReviews" onclick="pmShowTab('reviews')">التقييمات</button>
+    </div>
+    <div class="pm-panels">
+      <div class="pm-panel active" id="pmPanel-desc"></div>
+      <div class="pm-panel" id="pmPanel-specs"></div>
+      <div class="pm-panel" id="pmPanel-reviews"></div>
     </div>
   </div>
 </div>
@@ -643,7 +738,12 @@ textarea{resize:vertical;min-height:70px;}
                 <button type="button" class="file-btn" onclick="clearImage()">إزالة الصورة</button>
               </div>
             </div>
-            <div class="field full"><label>الوصف</label><textarea id="pfDesc"></textarea></div>
+            <div class="field full"><label>الوصف</label><textarea id="pfDesc" rows="5" style="min-height:120px;"></textarea></div>
+            <div class="field full"><label>مواصفات التشغيل — الحد الأدنى (سطر لكل مواصفة بالشكل: الاسم: القيمة)</label>
+              <textarea id="pfSysMin" rows="6" placeholder="نظام التشغيل: Windows 10 64-bit&#10;المعالج: Intel Core i5-4460&#10;الذاكرة: 8 GB RAM&#10;كرت الشاشة: GTX 960&#10;المساحة: 60 GB"></textarea></div>
+            <div class="field full"><label>مواصفات التشغيل — الموصى بها (اختياري، نفس الشكل)</label>
+              <textarea id="pfSysRec" rows="6" placeholder="نظام التشغيل: Windows 11 64-bit&#10;المعالج: Intel Core i7-8700&#10;الذاكرة: 16 GB RAM&#10;كرت الشاشة: RTX 2060&#10;المساحة: 60 GB SSD"></textarea></div>
+            <div class="field full" id="pfReviewsWrap" style="display:none;"><label>تقييمات العملاء (يمكنك حذف أي تقييم غير مناسب)</label><div id="pfReviewsList"></div></div>
           </div>
           <div style="display:flex;gap:10px;margin-top:16px;">
             <button class="btn ok" onclick="saveProduct()">حفظ</button>
@@ -851,7 +951,7 @@ function platformIconHtml(name, size){
 // يحوّل بيانات المنتجات القديمة (سعر ونسخة واحدة) إلى الصيغة الجديدة (قائمة نسخ متعددة) حتى لا تفقد بيانات محفوظة سابقاً
 function migrateProducts(list){
   return (list||[]).map(p=>{
-    const withFeatured = {age:'', featured:false, soldOut:false, discountPercent:0, discountStart:null, discountEnd:null, ...p};
+    const withFeatured = {age:'', sysMin:'', sysRec:'', reviews:[], featured:false, soldOut:false, discountPercent:0, discountStart:null, discountEnd:null, ...p};
     if(Array.isArray(withFeatured.editions) && withFeatured.editions.length) return withFeatured;
     return {...withFeatured, editions:[{id:uid(), name:'نسخة قياسية', price:withFeatured.price ?? 0}]};
   });
@@ -1024,6 +1124,111 @@ function quickAdd(id){
 
 /* ---------- نافذة عرض تفاصيل اللعبة واختيار النسخة ---------- */
 let modalProductId = null, modalEditionId = null;
+function avgRating(p){ const r=(p&&p.reviews)||[]; return r.length ? r.reduce((s,x)=>s+(x.stars||0),0)/r.length : 0; }
+function starsHtml(v){ return `<span class="stars" style="--v:${(+v||0).toFixed(2)}">★★★★★</span>`; }
+function parseSpecLines(txt){
+  return (txt||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{
+    const m = l.match(/^([^:：]+)[:：]\s*(.+)$/);
+    return m ? {k:m[1].trim(), v:m[2].trim()} : {k:'', v:l};
+  });
+}
+function specCardHtml(title, txt, cls){
+  const rows = parseSpecLines(txt); if(!rows.length) return '';
+  return `<div class="pm-spec-card ${cls||''}"><h4>${title}</h4>${rows.map(r=>`<div class="pm-spec-row">${r.k?`<span class="k">${escapeHtml(r.k)}</span>`:''}<span class="v">${escapeHtml(r.v)}</span></div>`).join('')}</div>`;
+}
+function pmShowTab(name){
+  document.querySelectorAll('#pmTabs .pm-tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  document.querySelectorAll('.pm-panel').forEach(p=>p.classList.toggle('active', p.id==='pmPanel-'+name));
+  const box = document.querySelector('#pmodalOverlay .pmodal');
+  const tabs = document.getElementById('pmTabs');
+  if(box && tabs && box.scrollTop < tabs.offsetTop) box.scrollTo({top:tabs.offsetTop-4, behavior:'smooth'});
+}
+function renderRatingSummary(p){
+  const n = (p.reviews||[]).length, avg = avgRating(p);
+  document.getElementById('pmodalRatingSum').innerHTML = n
+    ? `${starsHtml(avg)} <b>${avg.toFixed(1)}</b> <span>(${n} ${n===1?'تقييم':'تقييمات'})</span>`
+    : `${starsHtml(0)} <span>لا توجد تقييمات بعد — كن أول من يقيّم</span>`;
+  document.getElementById('pmTabReviews').innerHTML = 'التقييمات' + (n ? `<span class="cnt">${n}</span>` : '');
+}
+function renderDescPanel(p){
+  const ageTxt = p.age ? (p.age + '+') : 'غير مصنفة';
+  document.getElementById('pmPanel-desc').innerHTML = `
+    <h3>عن اللعبة</h3>
+    <p class="pm-desc">${escapeHtml(p.desc || 'لا يوجد وصف بعد.')}</p>
+    <h3>تفاصيل</h3>
+    <div class="pm-facts">
+      <div class="pm-fact"><span>المنصة</span><b>${escapeHtml(p.platform||'-')}</b></div>
+      <div class="pm-fact"><span>التصنيف العمري</span><b style="unicode-bidi:plaintext;display:block;text-align:right;">${ageTxt}</b></div>
+      <div class="pm-fact"><span>النسخ المتاحة</span><b>${p.editions.length}</b></div>
+      <div class="pm-fact"><span>الحالة</span><b>${isSoldOut(p)?'نفدت الكمية':'متوفرة'}</b></div>
+    </div>`;
+}
+function renderSpecsPanel(p){
+  const min = specCardHtml('الحد الأدنى للتشغيل', p.sysMin, '');
+  const rec = specCardHtml('المواصفات الموصى بها', p.sysRec, 'rec');
+  const hasSpecs = !!(min || rec);
+  document.getElementById('pmTabSpecs').style.display = hasSpecs ? '' : 'none';
+  document.getElementById('pmPanel-specs').innerHTML = hasSpecs
+    ? `<h3>مواصفات التشغيل</h3><div class="pm-specs-grid">${min}${rec}</div>`
+    : '<div class="pm-empty">لم تتم إضافة مواصفات التشغيل لهذه اللعبة بعد.</div>';
+}
+let rvStars = 0;
+function setRvStars(n){
+  rvStars = n;
+  document.querySelectorAll('#pmStarInput button').forEach(b=>b.classList.toggle('on', +b.dataset.s <= n));
+}
+function renderReviewsPanel(p){
+  const list = (p.reviews||[]).slice().sort((a,b)=>(b.date||0)-(a.date||0));
+  const n = list.length, avg = avgRating(p);
+  const counts = [5,4,3,2,1].map(s=>list.filter(r=>r.stars===s).length);
+  const bars = [5,4,3,2,1].map((s,i)=>`<div class="pm-bar"><span>${s} ★</span><div class="track"><div style="width:${n?(counts[i]/n*100):0}%"></div></div><span class="c">${counts[i]}</span></div>`).join('');
+  const top = n ? `
+    <div class="pm-rv-top">
+      <div class="pm-rv-avg"><div class="big">${avg.toFixed(1)}</div>${starsHtml(avg)}<small>من ${n} ${n===1?'تقييم':'تقييمات'}</small></div>
+      <div>${bars}</div>
+    </div>` : '';
+  const items = n ? `<div class="pm-rv-list">${list.map(r=>`
+      <div class="pm-rv">
+        <div class="pm-rv-head">
+          <div class="pm-av">${escapeHtml((r.name||'?').trim().charAt(0).toUpperCase())}</div>
+          <div><div class="nm">${escapeHtml(r.name||'عميل')}</div><div class="dt">${r.date ? new Date(r.date).toLocaleDateString('ar-EG') : ''}</div></div>
+          ${starsHtml(r.stars)}
+        </div>
+        ${r.text ? `<p>${escapeHtml(r.text)}</p>` : ''}
+      </div>`).join('')}</div>` : '<div class="pm-empty" style="margin-bottom:22px;">لا توجد تقييمات لهذه اللعبة بعد. شاركنا رأيك!</div>';
+  document.getElementById('pmPanel-reviews').innerHTML = `
+    <h3>تقييمات العملاء</h3>
+    ${top}${items}
+    <div class="pm-rv-form">
+      <h4>أضف تقييمك</h4>
+      <div class="pm-star-input" id="pmStarInput">${[1,2,3,4,5].map(s=>`<button type="button" data-s="${s}" onclick="setRvStars(${s})" title="${s} من 5">★</button>`).join('')}</div>
+      <input id="rvName" placeholder="اسمك" maxlength="40">
+      <textarea id="rvText" placeholder="اكتب رأيك في اللعبة (اختياري)" maxlength="500"></textarea>
+      <button class="btn" type="button" onclick="submitReview()">إرسال التقييم</button>
+    </div>`;
+  const cust = getCurrentCustomer();
+  const nameEl = document.getElementById('rvName');
+  if(cust) nameEl.value = cust.name || '';
+  const mine = cust ? (p.reviews||[]).find(r=>r.customerId===cust.id) : null;
+  if(mine){ document.getElementById('rvText').value = mine.text || ''; setRvStars(mine.stars); }
+  else setRvStars(0);
+}
+function submitReview(){
+  const p = products.find(x=>x.id===modalProductId); if(!p) return;
+  const name = (document.getElementById('rvName').value||'').trim().slice(0,40);
+  const text = (document.getElementById('rvText').value||'').trim().slice(0,500);
+  if(!rvStars){ alert('اختار عدد النجوم الأول'); return; }
+  if(!name){ alert('اكتب اسمك من فضلك'); return; }
+  p.reviews = p.reviews || [];
+  const cust = getCurrentCustomer();
+  const mine = cust ? p.reviews.find(r=>r.customerId===cust.id) : null;
+  if(mine){ Object.assign(mine, {name, stars:rvStars, text, date:Date.now()}); }
+  else p.reviews.push({id:uid(), customerId:cust?cust.id:null, name, stars:rvStars, text, date:Date.now()});
+  persist();
+  renderRatingSummary(p); renderReviewsPanel(p);
+  if(document.getElementById('productFormPanel').style.display==='block' && editingId===p.id) renderAdminReviews(p);
+  alert('شكراً لتقييمك!');
+}
 function openProductModal(id){
   const p = products.find(p=>p.id===id); if(!p) return;
   modalProductId = id;
@@ -1034,16 +1239,24 @@ function openProductModal(id){
   const ageEl = document.getElementById('pmodalAge');
   ageEl.style.display = p.age ? 'inline-flex' : 'none';
   ageEl.className = 'age-chip' + (p.age ? ' age-' + p.age : '');
-  ageEl.textContent = p.age ? ('تصنيف عمري ' + p.age + '+') : '';
+  ageEl.textContent = p.age ? ('تصنيف عمري \u200E' + p.age + '+') : '';
   document.getElementById('pmodalName').textContent = p.name;
-  document.getElementById('pmodalDesc').textContent = p.desc;
+  const stockEl = document.getElementById('pmodalStock');
+  stockEl.textContent = isSoldOut(p) ? 'نفدت الكمية' : 'متوفرة ✓';
+  stockEl.classList.toggle('out', isSoldOut(p));
+  document.getElementById('pmodalEditionsWrap').style.display = p.editions.length>1 ? '' : 'none';
   renderModalEditions(p);
+  renderRatingSummary(p);
+  renderDescPanel(p); renderSpecsPanel(p); renderReviewsPanel(p);
   const addBtn = document.getElementById('pmodalAddBtn');
   if(addBtn){
     addBtn.disabled = isSoldOut(p);
     addBtn.textContent = isSoldOut(p) ? 'نفدت الكمية' : 'أضف إلى السلة';
   }
-  document.getElementById('pmodalOverlay').classList.add('show');
+  pmShowTab('desc');
+  const overlay = document.getElementById('pmodalOverlay');
+  overlay.classList.add('show');
+  const box = overlay.querySelector('.pmodal'); if(box) box.scrollTop = 0;
 }
 function renderModalEditions(p){
   document.getElementById('pmodalEditions').innerHTML = p.editions.map((e,i)=>`
@@ -1053,8 +1266,8 @@ function renderModalEditions(p){
   const selected = p.editions.find(e=>e.id===modalEditionId) || p.editions[0];
   const eff = effPrice(selected.price, p);
   document.getElementById('pmodalPrice').innerHTML = isDiscountActive(p)
-    ? `<span class="old-price">${fmt(selected.price)}</span> ${fmt(eff)} <span class="discount-badge">خصم ${p.discountPercent}%</span>`
-    : fmt(eff);
+    ? `<span>${fmt(eff)}</span><span class="old-price">${fmt(selected.price)}</span><span class="discount-badge">خصم ${p.discountPercent}%</span>`
+    : `<span>${fmt(eff)}</span>`;
 }
 function selectModalEdition(editionId){
   modalEditionId = editionId;
@@ -1727,6 +1940,23 @@ function renderPlatformSelectOptions(selected){
   sel.innerHTML = platforms.map(pl=>`<option value="${escapeHtml(pl.name)}">${escapeHtml(pl.name)}</option>`).join('');
   if(selected) sel.value = selected;
 }
+function renderAdminReviews(p){
+  const wrap = document.getElementById('pfReviewsWrap'), box = document.getElementById('pfReviewsList');
+  const list = (p.reviews||[]);
+  wrap.style.display = 'flex';
+  box.innerHTML = list.length ? list.map(r=>`
+    <div style="display:flex;align-items:center;gap:10px;justify-content:space-between;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;background:var(--bg2);">
+      <div style="font-size:13px;line-height:1.6;"><b>${escapeHtml(r.name||'عميل')}</b> <span style="color:#FFC24B;">${'★'.repeat(r.stars||0)}</span>${r.text?`<div style="color:var(--muted);">${escapeHtml(r.text)}</div>`:''}</div>
+      <button type="button" class="btn danger small" onclick="deleteReview('${p.id}','${r.id}')">حذف</button>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:13px;">لا توجد تقييمات بعد.</div>';
+}
+function deleteReview(pid, rid){
+  const p = products.find(x=>x.id===pid); if(!p) return;
+  if(!confirm('حذف هذا التقييم؟')) return;
+  p.reviews = (p.reviews||[]).filter(r=>r.id!==rid);
+  persist(); renderAdminReviews(p);
+  if(modalProductId===pid && document.getElementById('pmodalOverlay').classList.contains('show')){ renderRatingSummary(p); renderReviewsPanel(p); }
+}
 function openProductForm(id){
   editingId = id || null;
   const panel = document.getElementById('productFormPanel');
@@ -1738,6 +1968,9 @@ function openProductForm(id){
     document.getElementById('pfName').value = p.name;
     renderPlatformSelectOptions(p.platform);
     document.getElementById('pfAge').value = p.age || '';
+    document.getElementById('pfSysMin').value = p.sysMin || '';
+    document.getElementById('pfSysRec').value = p.sysRec || '';
+    renderAdminReviews(p);
     document.getElementById('pfStock').value = p.stock ?? 20;
     document.getElementById('pfDiscount').value = p.discountPercent || 0;
     document.getElementById('pfDiscountStart').value = p.discountStart || '';
@@ -1761,6 +1994,9 @@ function openProductForm(id){
     document.getElementById('pfSoldOut').checked = false;
     renderPlatformSelectOptions(platforms[0] ? platforms[0].name : '');
     document.getElementById('pfAge').value = '';
+    document.getElementById('pfSysMin').value = '';
+    document.getElementById('pfSysRec').value = '';
+    document.getElementById('pfReviewsWrap').style.display = 'none';
     pfEditions = [{id:uid(), name:'نسخة قياسية', price:''}];
     pfImage = null;
     document.getElementById('pfImgPreview').innerHTML = '🎮';
@@ -1791,6 +2027,8 @@ function saveProduct(){
     name,
     platform: document.getElementById('pfPlatform').value,
     age: document.getElementById('pfAge').value || '',
+    sysMin: document.getElementById('pfSysMin').value.trim(),
+    sysRec: document.getElementById('pfSysRec').value.trim(),
     stock: parseFloat(document.getElementById('pfStock').value) || 0,
     discountPercent: Math.min(90, Math.max(0, parseFloat(document.getElementById('pfDiscount').value) || 0)),
     discountStart: document.getElementById('pfDiscountStart').value || null,

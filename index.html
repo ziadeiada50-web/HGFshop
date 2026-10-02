@@ -202,6 +202,21 @@ footer{border-top:1px solid var(--line);padding:26px 0;color:var(--muted);font-s
 .support-note{background:var(--bg2);border:1px solid var(--line);padding:12px 14px;border-radius:12px;font-size:13px;color:var(--muted);margin-top:12px;line-height:1.7;}
 .support-note b{color:var(--accent2);}
 
+/* Receipt upload button with hover / click effects */
+.upload-btn{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px 14px;border:2px dashed var(--accent2);border-radius:14px;background:rgba(34,211,238,.06);color:var(--accent2);font-weight:800;font-size:14px;cursor:pointer;transition:transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease, color .2s ease;user-select:none;}
+.upload-btn .u-ico{font-size:22px;display:inline-block;transition:transform .25s ease;}
+.upload-btn:hover{transform:translateY(-3px);background:rgba(34,211,238,.16);border-style:solid;box-shadow:0 10px 26px rgba(34,211,238,.28);color:#fff;}
+.upload-btn:hover .u-ico{transform:scale(1.25) rotate(-8deg);animation:upBounce .7s ease infinite;}
+.upload-btn:active{transform:translateY(0) scale(.96);box-shadow:0 2px 8px rgba(34,211,238,.35);}
+.upload-btn.done{border-color:var(--ok);background:rgba(61,220,151,.14);color:var(--ok);border-style:solid;}
+.upload-btn.done:hover{box-shadow:0 10px 26px rgba(61,220,151,.28);color:#fff;}
+.upload-btn .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.45);transform:scale(0);animation:upRipple .6s ease-out forwards;pointer-events:none;}
+.upload-btn input[type=file]{display:none;}
+@keyframes upRipple{to{transform:scale(4);opacity:0;}}
+@keyframes upBounce{0%,100%{transform:translateY(0) scale(1.25) rotate(-8deg);}50%{transform:translateY(-4px) scale(1.25) rotate(-8deg);}}
+#coProofPreview{animation:upPop .35s ease;}
+@keyframes upPop{from{opacity:0;transform:scale(.9);}to{opacity:1;transform:scale(1);}}
+
 /* Checkout summary */
 .checkout-summary{margin-top:16px;border-top:1px solid var(--line);padding-top:12px;}
 .checkout-summary .row{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);padding:5px 0;}
@@ -636,12 +651,30 @@ textarea{resize:vertical;min-height:70px;}
     <div class="support-note" id="paySupportNote" style="display:none;">
       حوّل قيمة الطلب على الرقم <b id="supportNumberInline"></b> عبر المحفظة، ثم اضغط تأكيد الطلب وسيتواصل معك فريق الدعم للتأكيد.
     </div>
+    <div id="payProofBox" style="display:none;margin-top:12px;">
+      <div class="support-note" style="margin-top:0;margin-bottom:12px;">
+        بعد التحويل لازم ترفع صورة الإيصال وتكتب رقم العملية أو اسم صاحب الحساب <b>(مطلوبين)</b> علشان نقدر نأكد طلبك.
+      </div>
+      <div class="field"><label>صورة إيصال / تحويل الدفع <b style="color:var(--danger)">*</b></label>
+        <label class="upload-btn" id="coUploadBtn" onclick="uploadRipple(event,this)">
+          <span class="u-ico" id="coUploadIco">📤</span>
+          <span id="coUploadText">اضغط هنا لرفع صورة الإيصال</span>
+          <input id="coProofImg" type="file" accept="image/*" onchange="onProofSelected(this)">
+        </label>
+        <img id="coProofPreview" alt="" style="display:none;max-height:160px;object-fit:contain;border:1px solid var(--line);border-radius:10px;margin-top:8px;">
+      </div>
+      <div class="field"><label>رقم العملية أو اسم صاحب الحساب <b style="color:var(--danger)">*</b></label>
+        <input id="coTxnId" placeholder="اكتب رقم العملية أو اسم صاحب الحساب اللي حوّلت منه"></div>
+    </div>
     <div class="checkout-summary">
       <div class="row"><span>الإجمالي قبل الخصم</span><span id="coSubtotal"></span></div>
       <div class="row" id="coDiscountRow" style="display:none;"><span>الخصم</span><span id="coDiscount"></span></div>
       <div class="row total"><span>الإجمالي النهائي</span><span id="coTotal"></span></div>
     </div>
     <p class="hint">للدعم والاستفسار: <b>01042018241</b></p>
+    <a id="coWhatsappBtn" href="#" target="_blank" rel="noopener" class="btn" style="width:100%;margin-top:10px;background:#25D366;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+      <span style="font-size:18px;">💬</span> تواصل مع خدمة العملاء على واتساب
+    </a>
     <button class="btn" style="width:100%;margin-top:10px;" onclick="confirmCheckout()">تأكيد الطلب</button>
   </div>
 </div>
@@ -983,6 +1016,8 @@ const SUPPORT_NUMBER = '01042018241';
 const PAYMENT_METHODS = [
   {id:'vodafone', name:'فودافون كاش', icon:'📱', needsTransfer:true, number:SUPPORT_NUMBER},
   {id:'instapay', name:'InstaPay', icon:'🏦', needsTransfer:true, number:'01140861144'},
+  /* needsTransfer:false = بدون رفع إيصال / رقم عملية (التعديلات الجديدة مقفولة على هذا الخيار) */
+  {id:'postpay', name:'الدفع بعد استلام اللعبة', icon:'🎮', needsTransfer:false},
 ];
 
 function uid(){return Math.random().toString(36).slice(2,9);}
@@ -1625,6 +1660,41 @@ function saveAccountEmail(){
 /* ---------- إتمام الطلب (بيانات العميل + كوبون + طريقة الدفع) ---------- */
 let selectedPayment = PAYMENT_METHODS[0].id;
 let appliedCoupon = null;
+let proofImageData = null;
+function uploadRipple(e, btn){
+  const r = btn.getBoundingClientRect();
+  const size = Math.max(r.width, r.height);
+  const d = document.createElement('span');
+  d.className = 'ripple';
+  d.style.width = d.style.height = size + 'px';
+  d.style.left = (e.clientX - r.left - size/2) + 'px';
+  d.style.top = (e.clientY - r.top - size/2) + 'px';
+  btn.appendChild(d);
+  setTimeout(()=>d.remove(), 650);
+}
+function setUploadState(done){
+  const b = document.getElementById('coUploadBtn'); if(!b) return;
+  b.classList.toggle('done', done);
+  document.getElementById('coUploadIco').textContent = done ? '✅' : '📤';
+  document.getElementById('coUploadText').textContent = done ? 'تم رفع الإيصال — اضغط لتغييره' : 'اضغط هنا لرفع صورة الإيصال';
+}
+function onProofSelected(input){
+  const prev = document.getElementById('coProofPreview');
+  const f = input.files && input.files[0];
+  if(!f){ proofImageData = null; prev.style.display='none'; setUploadState(false); return; }
+  loadImageResized(f, 900, 0.7).then(data=>{
+    proofImageData = data; prev.src = data; prev.style.display='block'; setUploadState(true);
+  }).catch(err=>{
+    proofImageData = null; input.value=''; prev.style.display='none'; setUploadState(false);
+    alert(err.message || 'تعذر قراءة الصورة');
+  });
+}
+function resetProofFields(){
+  proofImageData = null;
+  ['coProofImg','coTxnId'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  setUploadState(false);
+  const prev = document.getElementById('coProofPreview'); if(prev){ prev.style.display='none'; prev.removeAttribute('src'); }
+}
 function openCheckout(){
   if(!cart.length){ alert('السلة فارغة'); return; }
   const c = getCurrentCustomer();
@@ -1635,8 +1705,10 @@ function openCheckout(){
   document.getElementById('couponMsg').textContent = '';
   appliedCoupon = null;
   selectedPayment = PAYMENT_METHODS[0].id;
+  resetProofFields();
   renderPaymentMethods();
   updateCheckoutTotals();
+  document.getElementById('coWhatsappBtn').href = 'https://wa.me/20' + SUPPORT_NUMBER.replace(/^0/, '') + '?text=' + encodeURIComponent('مرحباً، أحتاج مساعدة بخصوص إتمام طلبي.');
   toggleCart(false);
   document.getElementById('checkoutOverlay').classList.add('show');
 }
@@ -1649,6 +1721,7 @@ function renderPaymentMethods(){
   const pm = PAYMENT_METHODS.find(m=>m.id===selectedPayment);
   document.getElementById('supportNumberInline').textContent = (pm && pm.number) ? pm.number : SUPPORT_NUMBER;
   document.getElementById('paySupportNote').style.display = (pm && pm.needsTransfer) ? 'block' : 'none';
+  document.getElementById('payProofBox').style.display = (pm && pm.needsTransfer) ? 'block' : 'none';
 }
 function selectPayment(id){ selectedPayment = id; renderPaymentMethods(); }
 function applyCoupon(){
@@ -1693,6 +1766,14 @@ function confirmCheckout(){
   const email = document.getElementById('coEmail').value.trim();
   if(!name || !phone || !email){ alert('يرجى إدخال الاسم ورقم الموبايل والبريد الإلكتروني'); return; }
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ alert('يرجى إدخال بريد إلكتروني صحيح'); return; }
+  const pmCheck = PAYMENT_METHODS.find(m=>m.id===selectedPayment);
+  let txnId = '', proofImg = null;
+  if(pmCheck && pmCheck.needsTransfer){
+    txnId = document.getElementById('coTxnId').value.trim();
+    if(!proofImageData){ alert('لازم ترفع صورة إيصال أو تحويل الدفع قبل تأكيد الطلب'); return; }
+    if(!txnId){ alert('لازم تكتب رقم العملية أو اسم صاحب الحساب'); return; }
+    proofImg = proofImageData;
+  }
   const subtotal = cartSubtotal();
   const discount = appliedCoupon ? Math.round(subtotal * appliedCoupon.percent / 100) : 0;
   const total = subtotal - discount;
@@ -1705,11 +1786,13 @@ function confirmCheckout(){
   const newOrder = {
     id:uid(), code: genOrderCode(), customer:name, phone, email,
     payment: pm ? pm.name : '', coupon: appliedCoupon ? appliedCoupon.code : null, discount,
-    item:names, amount:total, status:'جديد'
+    item:names, amount:total, status:'جديد',
+    txnId, proofImage: proofImg
   };
   orders.unshift(newOrder);
   cart = [];
   persist(); renderCart(); closeCheckout(); renderAdminData();
+  resetProofFields();
   openThankYou(name, pm, newOrder.code);
 }
 function openThankYou(name, pm, orderCode){
@@ -1723,6 +1806,12 @@ function openThankYou(name, pm, orderCode){
   const waMsg = encodeURIComponent(`مرحباً، أنا ${name}، كود طلبي هو ${orderCode}، لدي استفسار بخصوص طلبي.`);
   document.getElementById('tyWhatsappBtn').href = `https://wa.me/${waNumber}?text=${waMsg}`;
   document.getElementById('thankyouOverlay').classList.add('show');
+}
+function viewProof(orderId){
+  const o = orders.find(x=>x.id===orderId);
+  if(!o || !o.proofImage) return;
+  const w = window.open('', '_blank');
+  if(w){ w.document.write('<title>إيصال الدفع</title><body style="margin:0;background:#111;display:flex;justify-content:center;"><img src="'+o.proofImage+'" style="max-width:100%;height:auto;">'); w.document.close(); }
 }
 function closeThankYou(){ document.getElementById('thankyouOverlay').classList.remove('show'); }
 
@@ -1789,7 +1878,7 @@ function renderAdminData(){
   const filteredOrders = orderSearch ? orders.filter(o=>(o.code||'').toUpperCase().includes(orderSearch)) : orders;
   document.getElementById('ordersBody').innerHTML = filteredOrders.map(o=>{
     const statusClass = o.status==='مكتمل' ? 'done' : (o.status==='ملغي' ? 'cancelled' : 'new');
-    return `<tr><td><b>${o.code || o.id.slice(0,5).toUpperCase()}</b></td><td>${escapeHtml(o.customer)}</td><td>${escapeHtml(o.phone||'-')}</td><td style="max-width:180px;white-space:normal;">${escapeHtml(o.email||'-')}</td><td>${escapeHtml(o.item)}</td><td>${escapeHtml(o.payment||'-')}${o.coupon?`<br><span style="color:var(--ok);font-size:11px;">كوبون: ${escapeHtml(o.coupon)}</span>`:''}</td><td>${fmt(o.amount)}</td>
+    return `<tr><td><b>${o.code || o.id.slice(0,5).toUpperCase()}</b></td><td>${escapeHtml(o.customer)}</td><td>${escapeHtml(o.phone||'-')}</td><td style="max-width:180px;white-space:normal;">${escapeHtml(o.email||'-')}</td><td>${escapeHtml(o.item)}</td><td>${escapeHtml(o.payment||'-')}${o.coupon?`<br><span style="color:var(--ok);font-size:11px;">كوبون: ${escapeHtml(o.coupon)}</span>`:''}${(o.txnId||o.accountName||o.proofImage)?`<br><span style="font-size:11px;color:var(--muted);white-space:normal;display:block;">${o.txnId?'رقم العملية / اسم صاحب الحساب: '+escapeHtml(o.txnId)+'<br>':''}${o.accountName?'صاحب الحساب: '+escapeHtml(o.accountName)+'<br>':''}</span>${o.proofImage?`<a href="#" onclick="viewProof('${o.id}');return false;" style="color:var(--accent2);font-size:12px;font-weight:700;">عرض الإيصال</a>`:''}`:''}</td><td>${fmt(o.amount)}</td>
     <td><span class="pill ${statusClass}">${o.status}</span></td>
     <td class="row-actions">
       <button onclick="approveOrder('${o.id}')" title="الموافقة على الطلب" ${o.status==='مكتمل'?'disabled':''}>✓</button>

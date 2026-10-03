@@ -595,7 +595,8 @@ function migrateProducts(list){
 function ageBadgeHtml(p){ return p && p.age ? `<span class="age-badge age-${p.age}" title="التصنيف العمري: ${p.age}+"><span class="n">${p.age}<i>+</i></span></span>` : ''; }
 /* ctx: 'card' (كروت الألعاب) أو 'detail' (صفحة/نافذة اللعبة) — imgFit: detail | card | both | none */
 function imgFitOn(p, ctx){ const m = (p && p.imgFit) || 'detail'; return m==='both' || m===ctx; }
-function thumbHtml(p, ctx){ return p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}"${imgFitOn(p,ctx)?' class="fit-full"':''}>` : (p.icon||'🎮'); }
+function thumbSrc(p, ctx){ return (ctx!=='detail' && p.sameImage===false && p.cardImage) ? p.cardImage : p.image; }
+function thumbHtml(p, ctx){ const src = thumbSrc(p, ctx); return src ? `<img src="${src}" alt="${escapeHtml(p.name)}"${imgFitOn(p,ctx)?' class="fit-full"':''}>` : (p.icon||'🎮'); }
 function isSoldOut(p){ return !!(p && p.soldOut); }
 function isDiscountActive(p){
   if(!p.discountPercent || p.discountPercent<=0) return false;

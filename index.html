@@ -800,6 +800,19 @@ textarea{resize:vertical;min-height:70px;}
                 <input type="file" id="pfImageFile" accept="image/*" style="display:none;" onchange="onImageSelected(event)">
                 <button type="button" class="file-btn" onclick="clearImage()">إزالة الصورة</button>
               </div>
+              <label style="display:flex;align-items:center;gap:8px;margin-top:12px;cursor:pointer;font-weight:600;">
+                <input type="checkbox" id="pfSameImage" checked onchange="toggleSameImage()" style="width:auto;margin:0;">
+                استخدم نفس الصورة للصورة الخارجية (كارت اللعبة) وصفحة اللعبة
+              </label>
+              <div id="pfCardImgWrap" style="display:none;margin-top:12px;">
+                <label style="display:block;margin-bottom:8px;">الصورة الخارجية (اللي بتظهر في كروت الألعاب والسلة)</label>
+                <div class="img-upload">
+                  <div class="img-preview" id="pfCardImgPreview">🎮</div>
+                  <label class="file-btn" for="pfCardImageFile">اختر صورة خارجية</label>
+                  <input type="file" id="pfCardImageFile" accept="image/*" style="display:none;" onchange="onCardImageSelected(event)">
+                  <button type="button" class="file-btn" onclick="clearCardImage()">إزالة الصورة الخارجية</button>
+                </div>
+              </div>
             </div>
             <div class="field full"><label>الوصف</label><textarea id="pfDesc" rows="5" style="min-height:120px;"></textarea></div>
             <div class="field full"><label>مواصفات التشغيل — الحد الأدنى (سطر لكل مواصفة بالشكل: الاسم: القيمة)</label>
@@ -1217,7 +1230,9 @@ function loadImageResized(file, maxDim, quality){
 function ageBadgeHtml(p){ return p && p.age ? `<span class="age-badge age-${p.age}" title="التصنيف العمري: ${p.age}+"><span class="n">${p.age}<i>+</i></span></span>` : ''; }
 /* ctx: 'card' (كروت الألعاب) أو 'detail' (صفحة/نافذة اللعبة) — imgFit: detail | card | both | none */
 function imgFitOn(p, ctx){ const m = (p && p.imgFit) || 'detail'; return m==='both' || m===ctx; }
-function thumbHtml(p, ctx){ return p.image ? `<img src="${p.image}" alt="${escapeHtml(p.name)}"${imgFitOn(p,ctx)?' class="fit-full"':''}>` : p.icon; }
+/* الصورة الخارجية: لو sameImage=false وفيه cardImage تظهر في الكروت والسلة، وصفحة اللعبة تفضل بالصورة الأساسية */
+function thumbSrc(p, ctx){ return (ctx!=='detail' && p.sameImage===false && p.cardImage) ? p.cardImage : p.image; }
+function thumbHtml(p, ctx){ const src = thumbSrc(p, ctx); return src ? `<img src="${src}" alt="${escapeHtml(p.name)}"${imgFitOn(p,ctx)?' class="fit-full"':''}>` : p.icon; }
 function isSoldOut(p){ return !!(p && p.soldOut); }
 function minPrice(p){ return Math.min(...p.editions.map(e=>effPrice(e.price,p))); }
 function isDiscountActive(p){
@@ -1874,7 +1889,7 @@ function renderAdminData(){
       <button onclick="moveProduct(${idx},-1)" ${idx===0?'disabled':''} title="نقل لأعلى">▲</button>
       <button onclick="moveProduct(${idx},1)" ${idx===products.length-1?'disabled':''} title="نقل لأسفل">▼</button>
     </td>
-    <td>${p.image ? `<img src="${p.image}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;">` : `<span style="font-size:20px;">${p.icon}</span>`}</td><td>${escapeHtml(p.name)}${p.featured?' <span title="مروّجة" style="color:var(--accent);">⭐</span>':''}</td><td>${p.platform}</td><td>${p.age ? `<span class="age-chip age-${p.age}" style="margin:0;">${p.age}+</span>` : '<span style="color:var(--muted)">—</span>'}</td><td style="display:flex;flex-wrap:wrap;gap:5px;">${editionBadges}</td><td>${priceRangeText(p)}</td>
+    <td>${thumbSrc(p,'card') ? `<img src="${thumbSrc(p,'card')}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;">` : `<span style="font-size:20px;">${p.icon}</span>`}</td><td>${escapeHtml(p.name)}${p.featured?' <span title="مروّجة" style="color:var(--accent);">⭐</span>':''}</td><td>${p.platform}</td><td>${p.age ? `<span class="age-chip age-${p.age}" style="margin:0;">${p.age}+</span>` : '<span style="color:var(--muted)">—</span>'}</td><td style="display:flex;flex-wrap:wrap;gap:5px;">${editionBadges}</td><td>${priceRangeText(p)}</td>
     <td class="${low?'stock-low':'stock-ok'}">${stock}${low?' ⚠':''}${p.soldOut?' <span class="soldout-badge">نفدت</span>':''}</td>
     <td class="row-actions">
       <button onclick="toggleSoldOut('${p.id}')" title="${p.soldOut?'إعادة التوفر':'تحديد كنفدت الكمية'}">${p.soldOut?'✅':'🚫'}</button>
@@ -2187,7 +2202,7 @@ function cancelOrder(id){
   persist(); renderAdminData();
 }
 
-let editingId = null, pfImage = null;
+let editingId = null, pfImage = null, pfCardImage = null;
 let pfEditions = []; // النسخ اللي بيتعامل معها فورم الإضافة/التعديل حالياً
 
 function renderEditionsManager(){
@@ -2260,6 +2275,9 @@ function openProductForm(id){
     pfEditions = p.editions.map(e=>({...e}));
     pfImage = p.image || null;
     document.getElementById('pfImgPreview').innerHTML = pfImage ? `<img src="${pfImage}">` : p.icon;
+    pfCardImage = p.cardImage || null;
+    document.getElementById('pfSameImage').checked = p.sameImage !== false;
+    document.getElementById('pfCardImgPreview').innerHTML = pfCardImage ? `<img src="${pfCardImage}">` : p.icon;
   } else {
     document.getElementById('pfTitle').textContent = 'إضافة لعبة جديدة';
     ['pfName','pfDesc'].forEach(id=>document.getElementById(id).value='');
@@ -2279,10 +2297,32 @@ function openProductForm(id){
     pfEditions = [{id:uid(), name:'نسخة قياسية', price:''}];
     pfImage = null;
     document.getElementById('pfImgPreview').innerHTML = '🎮';
+    pfCardImage = null;
+    document.getElementById('pfSameImage').checked = true;
+    document.getElementById('pfCardImgPreview').innerHTML = '🎮';
   }
+  document.getElementById('pfCardImageFile').value = '';
+  toggleSameImage();
   renderEditionsManager();
 }
-function closeProductForm(){ document.getElementById('productFormPanel').style.display='none'; editingId=null; pfImage=null; pfEditions=[]; }
+function closeProductForm(){ document.getElementById('productFormPanel').style.display='none'; editingId=null; pfImage=null; pfCardImage=null; pfEditions=[]; }
+function toggleSameImage(){
+  const same = document.getElementById('pfSameImage').checked;
+  document.getElementById('pfCardImgWrap').style.display = same ? 'none' : 'block';
+}
+function onCardImageSelected(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  loadImageResized(file, 900, 0.85).then(dataUrl=>{
+    pfCardImage = dataUrl;
+    document.getElementById('pfCardImgPreview').innerHTML = `<img src="${pfCardImage}">`;
+  }).catch(err=> alert(err.message || 'تعذر قراءة الصورة'));
+}
+function clearCardImage(){
+  pfCardImage = null;
+  document.getElementById('pfCardImgPreview').innerHTML = document.getElementById('pfIcon').value || '🎮';
+  document.getElementById('pfCardImageFile').value = '';
+}
 function onImageSelected(e){
   const file = e.target.files[0];
   if(!file) return;
@@ -2317,6 +2357,8 @@ function saveProduct(){
     featured: document.getElementById('pfFeatured').checked,
     soldOut: document.getElementById('pfSoldOut').checked,
     image: pfImage,
+    sameImage: document.getElementById('pfSameImage').checked,
+    cardImage: document.getElementById('pfSameImage').checked ? null : pfCardImage,
     desc: document.getElementById('pfDesc').value.trim() || 'لا يوجد وصف بعد.',
     editions: cleanEditions
   };

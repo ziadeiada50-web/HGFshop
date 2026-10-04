@@ -176,6 +176,7 @@ img.fit-full{object-fit:fill !important;} /* الصورة كاملة وبالظ�
 .plat-tab:hover{color:var(--text);background:rgba(255,255,255,.05);}
 .plat-tab.active{color:#fff;border-color:var(--accent2);background:linear-gradient(180deg,rgba(34,211,238,.22),rgba(34,211,238,.06));box-shadow:0 0 0 3px rgba(34,211,238,.1),0 8px 22px rgba(34,211,238,.18);}
 .plat-tab.active svg{color:var(--accent2);filter:drop-shadow(0 0 6px rgba(34,211,238,.6));}
+.var-tabs .plat-tab{padding:10px 18px;font-size:14px;}
 .pmodal-edition-label{display:flex;align-items:center;gap:8px;}
 .pmodal-edition-label::before{content:"";width:4px;height:14px;border-radius:3px;background:var(--accent);}
 #pmodalPrice span:first-child{font-size:30px;font-weight:800;}
@@ -495,6 +496,8 @@ footer{padding:30px 20px;text-align:center;color:var(--muted);font-size:13px;bor
         <div id="pmodalEditionsWrap">
           <p class="pmodal-edition-label" id="platLabel" style="display:none;">اختر القسم</p>
           <div class="plat-tabs" id="pmodalPlats" style="display:none;"></div>
+          <p class="pmodal-edition-label" id="varLabel" style="display:none;"></p>
+          <div class="plat-tabs var-tabs" id="pmodalVars" style="display:none;"></div>
           <p class="pmodal-edition-label">اختر النسخة</p>
           <div class="edition-pill-group" id="pmodalEditions"></div>
         </div>
@@ -634,19 +637,32 @@ function edPlat(e,p){ return (e && e.platform) || (p && p.platform) || ''; }
 function prodPlats(p){ const a=[]; (p.editions||[]).forEach(e=>{ const x=edPlat(e,p); if(x && !a.includes(x)) a.push(x); }); if(!a.length && p.platform) a.push(p.platform); return a; }
 function edsFor(p, sec){ if(!sec || sec==='الكل') return p.editions; const l=p.editions.filter(e=>edPlat(e,p)===sec); return l.length ? l : p.editions; }
 const SECTION = new URLSearchParams(location.search).get('section') || '';
-let curPlat = '';
-function platsOrdered(p){
-  const all = prodPlats(p);
-  let first = (SECTION && all.includes(SECTION)) ? SECTION : (all.find(x=>/^\s*(pc|بي ?سي|كمبيوتر)\s*$/i.test(x)) || all[0]);
-  return [first, ...all.filter(x=>x!==first)];
+let curPlat = '', curGroup = '';
+function groupOf(n){
+  if(/playstation|بلاي ?ستيشن|بلايستيشن|\bps ?\d/i.test(n)) return 'PlayStation';
+  if(/xbox|اكس ?بوكس|إكس ?بوكس/i.test(n)) return 'Xbox';
+  return n;
+}
+function groupsOrdered(p){
+  const all = prodPlats(p), gs = [];
+  all.forEach(n=>{ const x = groupOf(n); if(!gs.includes(x)) gs.push(x); });
+  const want = SECTION ? groupOf(SECTION) : (gs.find(x=>/^\s*(pc|بي ?سي|كمبيوتر)\s*$/i.test(x)) || gs[0]);
+  return [want, ...gs.filter(x=>x!==want)];
+}
+function edVar(e,p){ return ((e && e.variant)||'').trim() || edPlat(e,p); }
+function variantsOf(p, grp){
+  const out=[]; p.editions.forEach(e=>{ if(groupOf(edPlat(e,p))!==grp) return; const v=edVar(e,p); if(v && !out.includes(v)) out.push(v); });
+  return out;
 }
 function platIcon(n){
   const pc='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12.5" rx="2"/><path d="M8 20.5h8M12 16.5v4"/></svg>';
   const pad='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 8h11a4 4 0 0 1 3.9 4.9l-.9 4a2.4 2.4 0 0 1-4 1.2L14.6 16H9.4l-1.9 2.1a2.4 2.4 0 0 1-4-1.2l-.9-4A4 4 0 0 1 6.5 8z"/><path d="M8 10.8v3M6.5 12.3h3M15.5 11.3h.01M17.5 13.3h.01"/></svg>';
   return /pc|بي ?سي|كمبيوتر|steam|epic/i.test(n) ? pc : pad;
 }
-function curEds(p){ const l=p.editions.filter(e=>edPlat(e,p)===curPlat); return l.length ? l : p.editions; }
-function selectPlat(name){ curPlat = name; editionId = curEds(current)[0].id; renderEditions(current); }
+function curEds(p){ const l=p.editions.filter(e=>groupOf(edPlat(e,p))===curGroup && edVar(e,p)===curPlat); return l.length ? l : p.editions; }
+function pickVariant(p, grp){ const v = variantsOf(p, grp); return (SECTION && v.includes(SECTION)) ? SECTION : v[0]; }
+function selectPlat(name){ curGroup = name; curPlat = pickVariant(current, name); editionId = curEds(current)[0].id; renderEditions(current); }
+function selectVariant(name){ curPlat = name; editionId = curEds(current)[0].id; renderEditions(current); }
 function effPrice(price, p){ return isDiscountActive(p) ? Math.round(price - price*p.discountPercent/100) : price; }
 function minPrice(p){ return Math.min(...p.editions.map(e=>effPrice(e.price,p))); }
 function avgRating(p){ const r=(p&&p.reviews)||[]; return r.length ? r.reduce((s,x)=>s+(x.stars||0),0)/r.length : 0; }
@@ -848,12 +864,18 @@ async function submitReview(){
 }
 
 function renderEditions(p){
-  const order = platsOrdered(p), eds = curEds(p);
+  const order = groupsOrdered(p), eds = curEds(p), vars = variantsOf(p, curGroup);
   const tabs = document.getElementById('pmodalPlats');
   if(order.length>1){
     tabs.style.display = ''; document.getElementById('platLabel').style.display = '';
-    tabs.innerHTML = order.map(n=>`<button type="button" class="plat-tab ${n===curPlat?'active':''}" onclick="selectPlat(this.dataset.n)" data-n="${escapeHtml(n)}">${platIcon(n)}<span>${escapeHtml(n)}</span></button>`).join('');
+    tabs.innerHTML = order.map(n=>`<button type="button" class="plat-tab ${n===curGroup?'active':''}" onclick="selectPlat(this.dataset.n)" data-n="${escapeHtml(n)}">${platIcon(n)}<span>${escapeHtml(n)}</span></button>`).join('');
   } else { tabs.style.display = 'none'; document.getElementById('platLabel').style.display = 'none'; }
+  const vt = document.getElementById('pmodalVars'), vl = document.getElementById('varLabel');
+  if(vars.length>1){
+    vt.style.display = ''; vl.style.display = '';
+    vl.textContent = curGroup==='PlayStation' ? 'اختر الجهاز (PS4 أو PS5)' : 'اختر الإصدار';
+    vt.innerHTML = vars.map(n=>`<button type="button" class="plat-tab ${n===curPlat?'active':''}" onclick="selectVariant(this.dataset.n)" data-n="${escapeHtml(n)}"><span>${escapeHtml(n)}</span></button>`).join('');
+  } else { vt.style.display = 'none'; vl.style.display = 'none'; }
   document.getElementById('pmodalEditions').innerHTML = eds.map(e=>`
     <button type="button" class="edition-pill ${e.id===editionId?'active':''}" onclick="selectEdition('${e.id}')">
       ${escapeHtml(e.name)}<span class="p">${fmt(effPrice(e.price,p))}</span>
@@ -896,7 +918,7 @@ function setBackdrop(p){
 
 function renderGame(p){
   setBackdrop(p);
-  current = p; curPlat = platsOrdered(p)[0]; editionId = curEds(p)[0].id;
+  current = p; curGroup = groupsOrdered(p)[0]; curPlat = pickVariant(p, curGroup); editionId = curEds(p)[0].id;
   document.title = p.name + ' | ' + (settings.storeName || 'المتجر');
   const md = document.querySelector('meta[name="description"]');
   if(md) md.setAttribute('content', (p.desc || p.name).slice(0,150));

@@ -168,7 +168,9 @@ img.fit-full{object-fit:fill !important;} /* الصورة كاملة وبالظ�
 
 /* Admin: dynamic editions manager — add as many editions as needed, each with its own name & price */
 .editions-manager{display:flex;flex-direction:column;gap:10px;margin-bottom:10px;}
-.edition-row{display:flex;gap:8px;align-items:center;}
+.edition-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.edition-row .ed-device{flex:1;min-width:110px;}
+.edition-row input[type="text"]:first-child{min-width:160px;}
 .edition-row input[type="text"]{flex:2;}
 .edition-row input[type="number"]{flex:1;min-width:0;}
 .edition-row select{flex:1.3;min-width:0;}
@@ -790,6 +792,7 @@ textarea{resize:vertical;min-height:70px;}
             </div>
             <div class="field full">
               <label>النسخ المتاحة والأسعار</label>
+              <datalist id="deviceList"><option value="PS5"><option value="PS4"><option value="Xbox Series X|S"><option value="Xbox One"></datalist>
               <div class="editions-manager" id="pfEditionsList"></div>
               <button type="button" class="add-edition-btn" onclick="addEditionRow()">+ إضافة نسخة جديدة</button>
             </div>
@@ -1094,7 +1097,7 @@ function defaultProducts(){
 
 function defaultPlatforms(){
   return [
-    {id:uid(), name:'PS5', icon:'🛡️', image:null, subtitle:'بلايستيشن', tags:['ألعاب','أجهزة','إكسسوارات','كروت PSN']},
+    {id:uid(), name:'PlayStation', icon:'🛡️', image:null, subtitle:'PS4 · PS5', tags:['ألعاب','أجهزة','إكسسوارات','كروت PSN']},
     {id:uid(), name:'Xbox', icon:'🏎️', image:null, subtitle:'مايكروسوفت', tags:['ألعاب','إكسسوارات']},
     {id:uid(), name:'PC', icon:'🚀', image:null, subtitle:'STEAM · EPIC', tags:['مفاتيح ألعاب','كروت Steam']},
     {id:uid(), name:'Nintendo', icon:'🌲', image:null, subtitle:'نينتندو', tags:['ألعاب','أجهزة','إكسسوارات','كروت eShop']},
@@ -2062,7 +2065,7 @@ function savePlatform(){
     const oldName = pl.name;
     Object.assign(pl, {name, icon, image:plfImage, subtitle, tags});
     if(oldName !== name){
-      products.forEach(p=>{ if(p.platform===oldName) p.platform = name; (p.editions||[]).forEach(e=>{ if(e.platform===oldName) e.platform = name; }); });
+      products.forEach(p=>{ if(p.platform===oldName) p.platform = name; (p.editions||[]).forEach(e=>{ if((e.platform||p.platform)===oldName){ if(!(e.variant||'').trim() && /^(ps ?\d|xbox)/i.test(oldName)) e.variant = oldName; e.platform = name; } }); });
     }
   } else {
     if(platforms.find(pl=>pl.name===name)){ alert('يوجد بالفعل منصة بهذا الاسم'); return; }
@@ -2243,6 +2246,7 @@ function renderEditionsManager(){
     <div class="edition-row">
       <input type="text" placeholder="اسم النسخة (مثال: نسخة المؤسسين)" value="${escapeHtml(e.name)}" oninput="updateEditionField(${i},'name',this.value)">
       <input type="number" placeholder="السعر" value="${e.price}" oninput="updateEditionField(${i},'price',this.value)">
+      <input type="text" list="deviceList" class="ed-device" placeholder="الجهاز (PS4 / PS5)" title="الجهاز اللي العميل يختاره جوه القسم (اختياري)" value="${escapeHtml(e.variant||'')}" oninput="updateEditionField(${i},'variant',this.value)">
       <select title="القسم اللي بتظهر فيه النسخة دي" onchange="updateEditionField(${i},'platform',this.value)">${platforms.map(pl=>`<option value="${escapeHtml(pl.name)}" ${(e.platform||document.getElementById('pfPlatform').value)===pl.name?'selected':''}>${escapeHtml(pl.name)}</option>`).join('')}</select>
       <button type="button" class="row-del-btn" onclick="removeEditionRow(${i})" ${pfEditions.length<=1?'disabled':''} title="حذف النسخة">🗑</button>
     </div>`).join('');
@@ -2400,7 +2404,7 @@ function clearImage(){
 function saveProduct(){
   const name = document.getElementById('pfName').value.trim();
   const cleanEditions = pfEditions
-    .map(e=>({id:e.id||uid(), name:(e.name||'').trim(), price:parseFloat(e.price), platform:e.platform||document.getElementById('pfPlatform').value}))
+    .map(e=>({id:e.id||uid(), name:(e.name||'').trim(), price:parseFloat(e.price), platform:e.platform||document.getElementById('pfPlatform').value, variant:(e.variant||'').trim()}))
     .filter(e=>e.name && !isNaN(e.price) && e.price>0);
   if(!name || !cleanEditions.length){ alert('يرجى إدخال اسم اللعبة، ونسخة واحدة على الأقل باسم وسعر صحيحين'); return; }
   const data = {

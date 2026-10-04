@@ -171,6 +171,7 @@ img.fit-full{object-fit:fill !important;} /* الصورة كاملة وبالظ�
 .edition-row{display:flex;gap:8px;align-items:center;}
 .edition-row input[type="text"]{flex:2;}
 .edition-row input[type="number"]{flex:1;min-width:0;}
+.edition-row select{flex:1.3;min-width:0;}
 .row-del-btn{background:var(--bg2);border:1px solid var(--line);color:var(--danger);width:38px;height:38px;flex-shrink:0;border-radius:10px;font-size:14px;}
 .row-del-btn:disabled{opacity:.35;cursor:not-allowed;}
 .add-edition-btn{background:transparent;border:1.5px dashed var(--line);color:var(--accent2);width:100%;padding:10px;border-radius:10px;font-weight:700;font-size:13px;}
@@ -753,8 +754,8 @@ textarea{resize:vertical;min-height:70px;}
           <h3 id="pfTitle">إضافة لعبة جديدة</h3>
           <div class="form-grid">
             <div class="field"><label>اسم اللعبة</label><input id="pfName"></div>
-            <div class="field"><label>المنصة</label>
-              <select id="pfPlatform"></select>
+            <div class="field"><label>القسم الافتراضي (كل نسخة تقدر تختار قسمها من صف النسخ تحت)</label>
+              <select id="pfPlatform" onchange="renderEditionsManager()"></select>
             </div>
             <div class="field"><label>التصنيف العمري</label>
               <select id="pfAge">
@@ -1267,11 +1268,15 @@ function isDiscountActive(p){
   if(p.discountEnd){ const end = new Date(p.discountEnd); end.setHours(23,59,59,999); if(now > end) return false; }
   return true;
 }
+/* ---------- الأقسام: كل نسخة ممكن تتبع قسم (منصة) مختلف ---------- */
+function edPlat(e,p){ return (e && e.platform) || (p && p.platform) || ''; }
+function prodPlats(p){ const a=[]; (p.editions||[]).forEach(e=>{ const x=edPlat(e,p); if(x && !a.includes(x)) a.push(x); }); if(!a.length && p.platform) a.push(p.platform); return a; }
+function edsFor(p, sec){ if(!sec || sec==='الكل') return p.editions; const l=p.editions.filter(e=>edPlat(e,p)===sec); return l.length ? l : p.editions; }
 function effPrice(price, p){
   return isDiscountActive(p) ? Math.round(price - price*p.discountPercent/100) : price;
 }
-function priceRangeText(p){
-  const prices = p.editions.map(e=>e.price);
+function priceRangeText(p, sec){
+  const prices = edsFor(p, sec).map(e=>e.price);
   const min = Math.min(...prices), max = Math.max(...prices);
   const original = min===max ? fmt(min) : `${fmt(min)} - ${fmt(max)}`;
   if(isDiscountActive(p)){
@@ -1282,16 +1287,17 @@ function priceRangeText(p){
   return original;
 }
 // إضافة سريعة: لو في نسخة واحدة تُضاف مباشرة، ولو في أكتر من نسخة تفتح نافذة الاختيار
-function quickAdd(id){
+function quickAdd(id, sec){
   const p = products.find(p=>p.id===id); if(!p) return;
   if(isSoldOut(p)){ alert('نأسف، نفدت الكمية من هذه اللعبة حالياً'); return; }
-  if(p.editions.length>1){ openGamePage(id); }
-  else { addToCart(id, p.editions[0].id); }
+  const eds = edsFor(p, sec);
+  if(eds.length>1 || (!sec || sec==='الكل') && prodPlats(p).length>1){ openGamePage(id, sec); }
+  else { addToCart(id, eds[0].id); }
 }
 
 /* ---------- صفحة اللعبة (game.html) بتتفتح في نفس التاب ---------- */
-function openGamePage(id){
-  location.href = 'game.html?id=' + encodeURIComponent(id);
+function openGamePage(id, sec){
+  location.href = 'game.html?id=' + encodeURIComponent(id) + ((sec && sec!=='الكل') ? '&section=' + encodeURIComponent(sec) : '');
 }
 
 /* ---------- نافذة عرض تفاصيل اللعبة واختيار النسخة ---------- */
@@ -1329,7 +1335,7 @@ function renderDescPanel(p){
     <p class="pm-desc">${escapeHtml(p.desc || 'لا يوجد وصف بعد.')}</p>
     <h3>تفاصيل</h3>
     <div class="pm-facts">
-      <div class="pm-fact"><span>المنصة</span><b>${escapeHtml(p.platform||'-')}</b></div>
+      <div class="pm-fact"><span>المنصة</span><b>${escapeHtml(prodPlats(p).join(' · ')||'-')}</b></div>
       <div class="pm-fact"><span>التصنيف العمري</span><b style="unicode-bidi:plaintext;display:block;text-align:right;">${ageTxt}</b></div>
       <div class="pm-fact"><span>النسخ المتاحة</span><b>${p.editions.length}</b></div>
       <div class="pm-fact"><span>الحالة</span><b>${isSoldOut(p)?'نفدت الكمية':'متوفرة'}</b></div>
@@ -1407,7 +1413,7 @@ function openProductModal(id){
   modalEditionId = p.editions[0].id;
   document.getElementById('pmodalImg').innerHTML = thumbHtml(p,'detail') + ageBadgeHtml(p);
   document.getElementById('pmodalImg').classList.toggle('is-soldout', isSoldOut(p));
-  document.getElementById('pmodalPlat').textContent = p.platform;
+  document.getElementById('pmodalPlat').textContent = prodPlats(p).join(' · ');
   const ageEl = document.getElementById('pmodalAge');
   ageEl.style.display = p.age ? 'inline-flex' : 'none';
   ageEl.className = 'age-chip' + (p.age ? ' age-' + p.age : '');
@@ -1463,7 +1469,7 @@ function renderTrending(){
     <div class="tcard ${isSoldOut(p)?'is-soldout':''}">
       <div class="thumb" onclick="openGamePage('${p.id}')">${thumbHtml(p,'card')}${ageBadgeHtml(p)}</div>
       <div class="tcard-info">
-        <div><span class="plat">${p.platform}</span><h3 class="game-link" onclick="openGamePage('${p.id}')">${escapeHtml(p.name)}</h3></div>
+        <div><span class="plat">${prodPlats(p).join(' · ')}</span><h3 class="game-link" onclick="openGamePage('${p.id}')">${escapeHtml(p.name)}</h3></div>
         <button class="icon-round" ${isSoldOut(p)?'disabled':''} onclick="quickAdd('${p.id}')">${isSoldOut(p)?'⛔':'🛒'}</button>
       </div>
     </div>`).join('');
@@ -1475,7 +1481,7 @@ function renderMostPlayed(){
     <div class="mp-card ${isSoldOut(p)?'is-soldout':''}">
       <div class="mp-img" onclick="openGamePage('${p.id}')">${thumbHtml(p,'card')}${ageBadgeHtml(p)}</div>
       <div class="mp-body">
-        <p class="genre">${p.platform}</p>
+        <p class="genre">${prodPlats(p).join(' · ')}</p>
         <h3 class="game-link" onclick="openGamePage('${p.id}')">${escapeHtml(p.name)}</h3>
         <div class="mp-foot">
           <span class="price-tag">${priceRangeText(p)}</span>
@@ -1511,7 +1517,7 @@ function renderCategories(){
 }
 
 function renderFilters(){
-  const plats = ['الكل', ...new Set(products.map(p=>p.platform))];
+  const plats = ['الكل', ...new Set(products.flatMap(p=>prodPlats(p)))];
   document.getElementById('filters').innerHTML = plats.map(p=>
     `<button class="chip ${p===activeFilter?'active':''}" onclick="setFilter('${p}')">${p}</button>`).join('');
 }
@@ -1556,10 +1562,10 @@ function fuzzyScore(name, term){
 }
 
 function renderGrid(){
-  let list = activeFilter==='الكل' ? products : products.filter(p=>p.platform===activeFilter);
+  let list = activeFilter==='الكل' ? products : products.filter(p=>prodPlats(p).includes(activeFilter));
   if(searchTerm){
     const threshold = Math.max(2, Math.ceil(searchTerm.trim().length/2));
-    list = list.map(p=>({p, score:Math.min(fuzzyScore(p.name, searchTerm), fuzzyScore(p.platform, searchTerm))}))
+    list = list.map(p=>({p, score:Math.min(fuzzyScore(p.name, searchTerm), fuzzyScore(prodPlats(p).join(' '), searchTerm))}))
                .filter(x=>x.score<=threshold)
                .sort((a,b)=>a.score-b.score)
                .map(x=>x.p);
@@ -1575,13 +1581,13 @@ function renderGrid(){
   const visibleList = (!showAllGames && totalCount > GAMES_PREVIEW_COUNT) ? list.slice(0, GAMES_PREVIEW_COUNT) : list;
   grid.innerHTML = visibleList.map(p=>`
     <div class="card ${isSoldOut(p)?'is-soldout':''}">
-      <div class="thumb" onclick="openGamePage('${p.id}')">${thumbHtml(p,'card')}${ageBadgeHtml(p)}</div>
+      <div class="thumb" onclick="openGamePage('${p.id}','${activeFilter}')">${thumbHtml(p,'card')}${ageBadgeHtml(p)}</div>
       <div class="card-body">
-        <span class="plat">${p.platform}</span>
-        <h4 class="game-link" onclick="openGamePage('${p.id}')">${escapeHtml(p.name)}</h4>
+        <span class="plat">${activeFilter==='الكل' ? prodPlats(p).join(' · ') : activeFilter}</span>
+        <h4 class="game-link" onclick="openGamePage('${p.id}','${activeFilter}')">${escapeHtml(p.name)}</h4>
         <div class="card-foot">
-          <span class="price-tag" style="font-size:17px;">${priceRangeText(p)}</span>
-          <button class="btn small" ${isSoldOut(p)?'disabled':''} onclick="quickAdd('${p.id}')">${isSoldOut(p)?'نفدت الكمية':'أضف'}</button>
+          <span class="price-tag" style="font-size:17px;">${priceRangeText(p, activeFilter)}</span>
+          <button class="btn small" ${isSoldOut(p)?'disabled':''} onclick="quickAdd('${p.id}','${activeFilter}')">${isSoldOut(p)?'نفدت الكمية':'أضف'}</button>
         </div>
       </div>
     </div>`).join('');
@@ -1914,7 +1920,7 @@ function renderAdminData(){
       <button onclick="moveProduct(${idx},-1)" ${idx===0?'disabled':''} title="نقل لأعلى">▲</button>
       <button onclick="moveProduct(${idx},1)" ${idx===products.length-1?'disabled':''} title="نقل لأسفل">▼</button>
     </td>
-    <td>${thumbSrc(p,'card') ? `<img src="${thumbSrc(p,'card')}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;">` : `<span style="font-size:20px;">${p.icon}</span>`}</td><td>${escapeHtml(p.name)}${p.featured?' <span title="مروّجة" style="color:var(--accent);">⭐</span>':''}</td><td>${p.platform}</td><td>${p.age ? `<span class="age-chip age-${p.age}" style="margin:0;">${p.age}+</span>` : '<span style="color:var(--muted)">—</span>'}</td><td style="display:flex;flex-wrap:wrap;gap:5px;">${editionBadges}</td><td>${priceRangeText(p)}</td>
+    <td>${thumbSrc(p,'card') ? `<img src="${thumbSrc(p,'card')}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;">` : `<span style="font-size:20px;">${p.icon}</span>`}</td><td>${escapeHtml(p.name)}${p.featured?' <span title="مروّجة" style="color:var(--accent);">⭐</span>':''}</td><td>${prodPlats(p).join(' · ')}</td><td>${p.age ? `<span class="age-chip age-${p.age}" style="margin:0;">${p.age}+</span>` : '<span style="color:var(--muted)">—</span>'}</td><td style="display:flex;flex-wrap:wrap;gap:5px;">${editionBadges}</td><td>${priceRangeText(p)}</td>
     <td class="${low?'stock-low':'stock-ok'}">${stock}${low?' ⚠':''}${p.soldOut?' <span class="soldout-badge">نفدت</span>':''}</td>
     <td class="row-actions">
       <button onclick="toggleSoldOut('${p.id}')" title="${p.soldOut?'إعادة التوفر':'تحديد كنفدت الكمية'}">${p.soldOut?'✅':'🚫'}</button>
@@ -2056,7 +2062,7 @@ function savePlatform(){
     const oldName = pl.name;
     Object.assign(pl, {name, icon, image:plfImage, subtitle, tags});
     if(oldName !== name){
-      products.forEach(p=>{ if(p.platform===oldName) p.platform = name; });
+      products.forEach(p=>{ if(p.platform===oldName) p.platform = name; (p.editions||[]).forEach(e=>{ if(e.platform===oldName) e.platform = name; }); });
     }
   } else {
     if(platforms.find(pl=>pl.name===name)){ alert('يوجد بالفعل منصة بهذا الاسم'); return; }
@@ -2066,14 +2072,14 @@ function savePlatform(){
 }
 function deletePlatform(id){
   const pl = platforms.find(pl=>pl.id===id); if(!pl) return;
-  if(products.some(p=>p.platform===pl.name)){ alert('لا يمكن حذف منصة مستخدمة في منتجات حالياً، قم بتغيير منصة هذه الألعاب أولاً.'); return; }
+  if(products.some(p=>prodPlats(p).includes(pl.name))){ alert('لا يمكن حذف منصة مستخدمة في منتجات حالياً، قم بتغيير منصة هذه الألعاب أولاً.'); return; }
   if(!confirm('هل تريد حذف هذه المنصة؟')) return;
   platforms = platforms.filter(pl=>pl.id!==id);
   persist(); renderAdminData();
 }
 function renderPlatformsAdmin(){
   document.getElementById('platformsBody').innerHTML = platforms.map(pl=>{
-    const count = products.filter(p=>p.platform===pl.name).length;
+    const count = products.filter(p=>prodPlats(p).includes(pl.name)).length;
     const thumb = pl.image ? `<img src="${pl.image}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;">` : `<span style="font-size:20px;">${pl.icon||'🎮'}</span>`;
     return `<tr><td>${thumb}</td><td>${escapeHtml(pl.name)}</td><td>${count}</td>
     <td class="row-actions">
@@ -2237,11 +2243,12 @@ function renderEditionsManager(){
     <div class="edition-row">
       <input type="text" placeholder="اسم النسخة (مثال: نسخة المؤسسين)" value="${escapeHtml(e.name)}" oninput="updateEditionField(${i},'name',this.value)">
       <input type="number" placeholder="السعر" value="${e.price}" oninput="updateEditionField(${i},'price',this.value)">
+      <select title="القسم اللي بتظهر فيه النسخة دي" onchange="updateEditionField(${i},'platform',this.value)">${platforms.map(pl=>`<option value="${escapeHtml(pl.name)}" ${(e.platform||document.getElementById('pfPlatform').value)===pl.name?'selected':''}>${escapeHtml(pl.name)}</option>`).join('')}</select>
       <button type="button" class="row-del-btn" onclick="removeEditionRow(${i})" ${pfEditions.length<=1?'disabled':''} title="حذف النسخة">🗑</button>
     </div>`).join('');
 }
 function addEditionRow(){
-  pfEditions.push({id:uid(), name:'', price:''});
+  pfEditions.push({id:uid(), name:'', price:'', platform:document.getElementById('pfPlatform').value});
   renderEditionsManager();
 }
 function removeEditionRow(i){
@@ -2325,7 +2332,7 @@ function openProductForm(id){
     document.getElementById('pfSysMin').value = '';
     document.getElementById('pfSysRec').value = '';
     document.getElementById('pfReviewsWrap').style.display = 'none';
-    pfEditions = [{id:uid(), name:'نسخة قياسية', price:''}];
+    pfEditions = [{id:uid(), name:'نسخة قياسية', price:'', platform:document.getElementById('pfPlatform').value}];
     pfImage = null;
     document.getElementById('pfImgPreview').innerHTML = '🎮';
     pfCardImage = null;
@@ -2393,12 +2400,12 @@ function clearImage(){
 function saveProduct(){
   const name = document.getElementById('pfName').value.trim();
   const cleanEditions = pfEditions
-    .map(e=>({id:e.id||uid(), name:(e.name||'').trim(), price:parseFloat(e.price)}))
+    .map(e=>({id:e.id||uid(), name:(e.name||'').trim(), price:parseFloat(e.price), platform:e.platform||document.getElementById('pfPlatform').value}))
     .filter(e=>e.name && !isNaN(e.price) && e.price>0);
   if(!name || !cleanEditions.length){ alert('يرجى إدخال اسم اللعبة، ونسخة واحدة على الأقل باسم وسعر صحيحين'); return; }
   const data = {
     name,
-    platform: document.getElementById('pfPlatform').value,
+    platform: cleanEditions[0].platform,
     age: document.getElementById('pfAge').value || '',
     imgFit: document.getElementById('pfImgFit').value || 'detail',
     sysMin: document.getElementById('pfSysMin').value.trim(),

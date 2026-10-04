@@ -167,6 +167,10 @@ img.fit-full{object-fit:fill !important;} /* الصورة كاملة وبالظ�
 .edition-pill span.p{font-size:11px;font-weight:700;opacity:.85;color:var(--accent2);}
 .edition-pill.active{border-color:var(--accent);color:var(--text);background:rgba(255,93,59,.1);}
 .edition-pill.active span.p{color:var(--accent);}
+.plat-tabs{display:flex;flex-wrap:wrap;gap:10px;padding:8px;border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.18);margin-bottom:12px;}
+.plat-tab{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1.5px solid var(--line);border-radius:12px;padding:11px 18px;color:var(--muted);font-weight:800;font-size:14px;transition:all .15s ease;}
+.plat-tab:hover{color:var(--text);}
+.plat-tab.active{border-color:var(--accent2);color:var(--text);background:rgba(34,211,238,.1);box-shadow:0 0 0 3px rgba(34,211,238,.12);}
 
 /* Admin: dynamic editions manager — add as many editions as needed, each with its own name & price */
 .editions-manager{display:flex;flex-direction:column;gap:10px;margin-bottom:10px;}
@@ -479,6 +483,7 @@ footer{padding:30px 20px;text-align:center;color:var(--muted);font-size:13px;bor
           <span class="pm-stock" id="pmodalStock"></span>
         </div>
         <div id="pmodalEditionsWrap">
+          <div class="plat-tabs" id="pmodalPlats" style="display:none;"></div>
           <p class="pmodal-edition-label">اختر النسخة</p>
           <div class="edition-pill-group" id="pmodalEditions"></div>
         </div>
@@ -613,6 +618,20 @@ function isDiscountActive(p){
   if(p.discountEnd){ const end = new Date(p.discountEnd); end.setHours(23,59,59,999); if(now > end) return false; }
   return true;
 }
+/* ---------- الأقسام: كل نسخة ممكن تتبع قسم (منصة) مختلف ---------- */
+function edPlat(e,p){ return (e && e.platform) || (p && p.platform) || ''; }
+function prodPlats(p){ const a=[]; (p.editions||[]).forEach(e=>{ const x=edPlat(e,p); if(x && !a.includes(x)) a.push(x); }); if(!a.length && p.platform) a.push(p.platform); return a; }
+function edsFor(p, sec){ if(!sec || sec==='الكل') return p.editions; const l=p.editions.filter(e=>edPlat(e,p)===sec); return l.length ? l : p.editions; }
+const SECTION = new URLSearchParams(location.search).get('section') || '';
+let curPlat = '';
+function platsOrdered(p){
+  const all = prodPlats(p);
+  let first = (SECTION && all.includes(SECTION)) ? SECTION : (all.find(x=>/^\s*(pc|بي ?سي|كمبيوتر)\s*$/i.test(x)) || all[0]);
+  return [first, ...all.filter(x=>x!==first)];
+}
+function platIcon(n){ return /pc|بي ?سي|كمبيوتر|steam|epic/i.test(n) ? '🖥️' : '🎮'; }
+function curEds(p){ const l=p.editions.filter(e=>edPlat(e,p)===curPlat); return l.length ? l : p.editions; }
+function selectPlat(name){ curPlat = name; editionId = curEds(current)[0].id; renderEditions(current); }
 function effPrice(price, p){ return isDiscountActive(p) ? Math.round(price - price*p.discountPercent/100) : price; }
 function minPrice(p){ return Math.min(...p.editions.map(e=>effPrice(e.price,p))); }
 function avgRating(p){ const r=(p&&p.reviews)||[]; return r.length ? r.reduce((s,x)=>s+(x.stars||0),0)/r.length : 0; }
@@ -728,7 +747,7 @@ function renderDescPanel(p){
     <p class="pm-desc">${escapeHtml(p.desc || 'لا يوجد وصف بعد.')}</p>
     <h3>تفاصيل</h3>
     <div class="pm-facts">
-      <div class="pm-fact"><span>المنصة</span><b>${escapeHtml(p.platform||'-')}</b></div>
+      <div class="pm-fact"><span>المنصة</span><b>${escapeHtml(prodPlats(p).join(' · ') || '-')}</b></div>
       <div class="pm-fact"><span>التصنيف العمري</span><b style="unicode-bidi:plaintext;display:block;text-align:right;">${ageTxt}</b></div>
       <div class="pm-fact"><span>النسخ المتاحة</span><b>${p.editions.length}</b></div>
       <div class="pm-fact"><span>الحالة</span><b>${isSoldOut(p)?'نفدت الكمية':'متوفرة'}</b></div>
@@ -814,11 +833,18 @@ async function submitReview(){
 }
 
 function renderEditions(p){
-  document.getElementById('pmodalEditions').innerHTML = p.editions.map(e=>`
+  const order = platsOrdered(p), eds = curEds(p);
+  const tabs = document.getElementById('pmodalPlats');
+  if(order.length>1){
+    tabs.style.display = '';
+    tabs.innerHTML = order.map(n=>`<button type="button" class="plat-tab ${n===curPlat?'active':''}" onclick="selectPlat(this.dataset.n)" data-n="${escapeHtml(n)}"><span>${platIcon(n)}</span>${escapeHtml(n)}</button>`).join('');
+  } else tabs.style.display = 'none';
+  document.getElementById('pmodalEditions').innerHTML = eds.map(e=>`
     <button type="button" class="edition-pill ${e.id===editionId?'active':''}" onclick="selectEdition('${e.id}')">
       ${escapeHtml(e.name)}<span class="p">${fmt(effPrice(e.price,p))}</span>
     </button>`).join('');
-  const sel = p.editions.find(e=>e.id===editionId) || p.editions[0];
+  document.getElementById('pmodalEditionsWrap').style.display = (order.length>1 || eds.length>1) ? '' : 'none';
+  const sel = eds.find(e=>e.id===editionId) || eds[0];
   const eff = effPrice(sel.price, p);
   document.getElementById('pmodalPrice').innerHTML = isDiscountActive(p)
     ? `<span>${fmt(eff)}</span><span class="old-price">${fmt(sel.price)}</span><span class="discount-badge">خصم ${p.discountPercent}%</span>`
@@ -827,15 +853,16 @@ function renderEditions(p){
 function selectEdition(id){ editionId = id; renderEditions(current); }
 
 function renderRelated(p){
-  let list = products.filter(x=>x.id!==p.id && x.platform===p.platform);
-  if(list.length < 4) list = list.concat(products.filter(x=>x.id!==p.id && x.platform!==p.platform));
+  const mine = prodPlats(p);
+  let list = products.filter(x=>x.id!==p.id && prodPlats(x).some(q=>mine.includes(q)));
+  if(list.length < 4) list = list.concat(products.filter(x=>x.id!==p.id && !list.includes(x)));
   list = list.slice(0,4);
   if(!list.length) return;
   document.getElementById('relatedGrid').innerHTML = list.map(x=>`
     <a class="tcard ${isSoldOut(x)?'is-soldout':''}" href="game.html?id=${encodeURIComponent(x.id)}">
       <div class="thumb">${thumbHtml(x,'card')}${ageBadgeHtml(x)}</div>
       <div class="tcard-info">
-        <div><span class="plat">${escapeHtml(x.platform||'')}</span><h3>${escapeHtml(x.name)}</h3></div>
+        <div><span class="plat">${escapeHtml(prodPlats(x).join(' · '))}</span><h3>${escapeHtml(x.name)}</h3></div>
         <span class="rel-price">${fmt(minPrice(x))}</span>
       </div>
     </a>`).join('');
@@ -854,19 +881,19 @@ function setBackdrop(p){
 
 function renderGame(p){
   setBackdrop(p);
-  current = p; editionId = p.editions[0].id;
+  current = p; curPlat = platsOrdered(p)[0]; editionId = curEds(p)[0].id;
   document.title = p.name + ' | ' + (settings.storeName || 'المتجر');
   const md = document.querySelector('meta[name="description"]');
   if(md) md.setAttribute('content', (p.desc || p.name).slice(0,150));
 
-  document.getElementById('crumbPlat').textContent = p.platform || 'الألعاب';
+  document.getElementById('crumbPlat').textContent = curPlat || 'الألعاب';
   document.getElementById('crumbName').textContent = p.name;
   document.getElementById('crumbs').style.display = '';
 
   const img = document.getElementById('pmodalImg');
   img.innerHTML = thumbHtml(p,'detail') + ageBadgeHtml(p);
   img.classList.toggle('is-soldout', isSoldOut(p));
-  document.getElementById('pmodalPlat').textContent = p.platform || '';
+  document.getElementById('pmodalPlat').textContent = prodPlats(p).join(' · ');
   const ageEl = document.getElementById('pmodalAge');
   ageEl.style.display = p.age ? 'inline-flex' : 'none';
   ageEl.className = 'age-chip' + (p.age ? ' age-' + p.age : '');
@@ -875,8 +902,7 @@ function renderGame(p){
   const stockEl = document.getElementById('pmodalStock');
   stockEl.textContent = isSoldOut(p) ? 'نفدت الكمية' : 'متوفرة ✓';
   stockEl.classList.toggle('out', isSoldOut(p));
-  document.getElementById('pmodalEditionsWrap').style.display = p.editions.length>1 ? '' : 'none';
-  renderEditions(p);
+    renderEditions(p);
   renderRatingSummary(p);
   renderDescPanel(p); renderSpecsPanel(p); renderReviewsPanel(p);
   const addBtn = document.getElementById('pmodalAddBtn');

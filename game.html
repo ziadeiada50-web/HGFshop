@@ -436,9 +436,17 @@ footer{padding:30px 20px;text-align:center;color:var(--muted);font-size:13px;bor
 .soc-btn svg{width:18px;height:18px;flex-shrink:0;}
 .soc-btn:hover{transform:translateY(-2px);border-color:var(--soc,var(--accent));background:color-mix(in srgb,var(--soc,var(--accent)) 14%,var(--card));}
 .soc-btn:hover svg{color:var(--soc,var(--accent));}
+
+/* ===== خلفية شفافة بصورة اللعبة ===== */
+.game-backdrop{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;opacity:0;transition:opacity .8s ease;}
+.game-backdrop.show{opacity:1;}
+.game-backdrop .bd-img{position:absolute;inset:0;background-size:cover;background-position:center top;opacity:.7;filter:saturate(1.1);}
+.game-backdrop::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,15,30,.1) 0%,rgba(13,15,30,.35) 55%,var(--bg) 100%);}
 </style>
 </head>
 <body>
+
+<div class="game-backdrop" id="gameBackdrop"><div class="bd-img" id="gameBackdropImg"></div></div>
 
 <header>
   <div class="wrap navbar">
@@ -834,7 +842,18 @@ function renderRelated(p){
   document.getElementById('relatedSection').style.display = '';
 }
 
+function setBackdrop(p){
+  const mode = settings.backdropMode || 'all';
+  const on = mode === 'all' || (mode === 'selected' && p.bgEnabled === true);
+  const src = !on ? null : ((p.sameBg === false && p.bgImage) ? p.bgImage : p.image);
+  const box = document.getElementById('gameBackdrop'), el = document.getElementById('gameBackdropImg');
+  if(!src){ box.classList.remove('show'); return; }
+  el.style.backgroundImage = 'url("' + String(src).replace(/"/g,'%22') + '")';
+  requestAnimationFrame(()=> box.classList.add('show'));
+}
+
 function renderGame(p){
+  setBackdrop(p);
   current = p; editionId = p.editions[0].id;
   document.title = p.name + ' | ' + (settings.storeName || 'المتجر');
   const md = document.querySelector('meta[name="description"]');

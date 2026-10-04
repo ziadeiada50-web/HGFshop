@@ -162,15 +162,25 @@ img.fit-full{object-fit:fill !important;} /* الصورة كاملة وبالظ�
 }
 
 /* Edition pills — customer picks one inside the modal */
-.edition-pill-group{display:flex;flex-wrap:wrap;gap:8px;}
-.edition-pill{background:var(--bg2);border:1.5px solid var(--line);border-radius:12px;padding:9px 14px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-weight:700;font-size:13px;transition:all .15s ease;}
-.edition-pill span.p{font-size:11px;font-weight:700;opacity:.85;color:var(--accent2);}
-.edition-pill.active{border-color:var(--accent);color:var(--text);background:rgba(255,93,59,.1);}
-.edition-pill.active span.p{color:var(--accent);}
-.plat-tabs{display:flex;flex-wrap:wrap;gap:10px;padding:8px;border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.18);margin-bottom:12px;}
-.plat-tab{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1.5px solid var(--line);border-radius:12px;padding:11px 18px;color:var(--muted);font-weight:800;font-size:14px;transition:all .15s ease;}
-.plat-tab:hover{color:var(--text);}
-.plat-tab.active{border-color:var(--accent2);color:var(--text);background:rgba(34,211,238,.1);box-shadow:0 0 0 3px rgba(34,211,238,.12);}
+.edition-pill-group{display:flex;flex-wrap:wrap;gap:10px;}
+.edition-pill{position:relative;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015)),var(--bg2);border:1.5px solid var(--line);border-radius:14px;padding:12px 20px;min-width:118px;display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--muted);font-weight:800;font-size:14px;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease,color .18s ease;}
+.edition-pill span.p{font-size:12.5px;font-weight:800;color:var(--accent2);opacity:.9;}
+.edition-pill:hover{transform:translateY(-2px);border-color:rgba(255,93,59,.55);color:var(--text);}
+.edition-pill.active{border-color:var(--accent);color:#fff;background:linear-gradient(180deg,rgba(255,93,59,.26),rgba(255,93,59,.08)),var(--bg2);box-shadow:0 8px 22px rgba(255,93,59,.28),inset 0 0 0 1px rgba(255,93,59,.35);}
+.edition-pill.active span.p{color:#fff;opacity:1;}
+.edition-pill.active::after{content:"✓";position:absolute;top:-8px;left:-8px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:12px;line-height:20px;text-align:center;box-shadow:0 3px 8px rgba(0,0,0,.35);}
+.plat-tabs{display:flex;gap:10px;padding:8px;border:1px solid var(--line);border-radius:18px;background:rgba(0,0,0,.22);margin-bottom:14px;overflow-x:auto;scrollbar-width:none;}
+.plat-tabs::-webkit-scrollbar{display:none;}
+.plat-tab{flex:1 1 0;min-width:max-content;display:flex;align-items:center;justify-content:center;gap:10px;background:transparent;border:1.5px solid transparent;border-radius:13px;padding:12px 20px;color:var(--muted);font-weight:800;font-size:14.5px;cursor:pointer;transition:all .18s ease;}
+.plat-tab svg{width:20px;height:20px;flex-shrink:0;}
+.plat-tab:hover{color:var(--text);background:rgba(255,255,255,.05);}
+.plat-tab.active{color:#fff;border-color:var(--accent2);background:linear-gradient(180deg,rgba(34,211,238,.22),rgba(34,211,238,.06));box-shadow:0 0 0 3px rgba(34,211,238,.1),0 8px 22px rgba(34,211,238,.18);}
+.plat-tab.active svg{color:var(--accent2);filter:drop-shadow(0 0 6px rgba(34,211,238,.6));}
+.pmodal-edition-label{display:flex;align-items:center;gap:8px;}
+.pmodal-edition-label::before{content:"";width:4px;height:14px;border-radius:3px;background:var(--accent);}
+#pmodalPrice span:first-child{font-size:30px;font-weight:800;}
+@media (max-width:600px){.plat-tab{padding:11px 14px;font-size:13.5px;}.edition-pill{min-width:100px;padding:11px 14px;}}
+
 
 /* Admin: dynamic editions manager — add as many editions as needed, each with its own name & price */
 .editions-manager{display:flex;flex-direction:column;gap:10px;margin-bottom:10px;}
@@ -483,6 +493,7 @@ footer{padding:30px 20px;text-align:center;color:var(--muted);font-size:13px;bor
           <span class="pm-stock" id="pmodalStock"></span>
         </div>
         <div id="pmodalEditionsWrap">
+          <p class="pmodal-edition-label" id="platLabel" style="display:none;">اختر القسم</p>
           <div class="plat-tabs" id="pmodalPlats" style="display:none;"></div>
           <p class="pmodal-edition-label">اختر النسخة</p>
           <div class="edition-pill-group" id="pmodalEditions"></div>
@@ -629,7 +640,11 @@ function platsOrdered(p){
   let first = (SECTION && all.includes(SECTION)) ? SECTION : (all.find(x=>/^\s*(pc|بي ?سي|كمبيوتر)\s*$/i.test(x)) || all[0]);
   return [first, ...all.filter(x=>x!==first)];
 }
-function platIcon(n){ return /pc|بي ?سي|كمبيوتر|steam|epic/i.test(n) ? '🖥️' : '🎮'; }
+function platIcon(n){
+  const pc='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="12.5" rx="2"/><path d="M8 20.5h8M12 16.5v4"/></svg>';
+  const pad='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 8h11a4 4 0 0 1 3.9 4.9l-.9 4a2.4 2.4 0 0 1-4 1.2L14.6 16H9.4l-1.9 2.1a2.4 2.4 0 0 1-4-1.2l-.9-4A4 4 0 0 1 6.5 8z"/><path d="M8 10.8v3M6.5 12.3h3M15.5 11.3h.01M17.5 13.3h.01"/></svg>';
+  return /pc|بي ?سي|كمبيوتر|steam|epic/i.test(n) ? pc : pad;
+}
 function curEds(p){ const l=p.editions.filter(e=>edPlat(e,p)===curPlat); return l.length ? l : p.editions; }
 function selectPlat(name){ curPlat = name; editionId = curEds(current)[0].id; renderEditions(current); }
 function effPrice(price, p){ return isDiscountActive(p) ? Math.round(price - price*p.discountPercent/100) : price; }
@@ -836,9 +851,9 @@ function renderEditions(p){
   const order = platsOrdered(p), eds = curEds(p);
   const tabs = document.getElementById('pmodalPlats');
   if(order.length>1){
-    tabs.style.display = '';
-    tabs.innerHTML = order.map(n=>`<button type="button" class="plat-tab ${n===curPlat?'active':''}" onclick="selectPlat(this.dataset.n)" data-n="${escapeHtml(n)}"><span>${platIcon(n)}</span>${escapeHtml(n)}</button>`).join('');
-  } else tabs.style.display = 'none';
+    tabs.style.display = ''; document.getElementById('platLabel').style.display = '';
+    tabs.innerHTML = order.map(n=>`<button type="button" class="plat-tab ${n===curPlat?'active':''}" onclick="selectPlat(this.dataset.n)" data-n="${escapeHtml(n)}">${platIcon(n)}<span>${escapeHtml(n)}</span></button>`).join('');
+  } else { tabs.style.display = 'none'; document.getElementById('platLabel').style.display = 'none'; }
   document.getElementById('pmodalEditions').innerHTML = eds.map(e=>`
     <button type="button" class="edition-pill ${e.id===editionId?'active':''}" onclick="selectEdition('${e.id}')">
       ${escapeHtml(e.name)}<span class="p">${fmt(effPrice(e.price,p))}</span>

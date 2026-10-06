@@ -851,14 +851,15 @@ async function submitReview(){
     const mine = cust ? rp.reviews.find(r=>r.customerId===cust.id) : null;
     if(mine) Object.assign(mine, {name, stars:rvStars, text, date:Date.now()});
     else rp.reviews.push({id:uid(), customerId:cust?cust.id:null, name, stars:rvStars, text, date:Date.now()});
-    const { error: upErr } = await sb.from('store_state').update({products: all, updated_at: new Date().toISOString()}).eq('id', 1);
+    const { data: upData, error: upErr } = await sb.from('store_state').update({products: all, updated_at: new Date().toISOString()}).eq('id', 1).select('id');
     if(upErr) throw upErr;
+    if(!upData || !upData.length) throw new Error('الخادم ما عدّلش أي صف — غالباً صلاحيات (RLS) في Supabase');
     p.reviews = rp.reviews;
     renderRatingSummary(p); renderReviewsPanel(p);
     alert('شكراً لتقييمك!');
   }catch(e){
     console.error(e);
-    alert('تعذر حفظ التقييم. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.');
+    alert('تعذر حفظ التقييم.\n' + (e && e.message ? e.message : 'تأكد من اتصالك بالإنترنت وحاول مرة أخرى.'));
     btn.disabled = false;
   }
 }

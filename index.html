@@ -750,7 +750,10 @@ textarea{resize:vertical;min-height:70px;}
       <div class="page" id="page-products" style="display:none;">
         <div class="admin-top">
           <h2>إدارة المنتجات</h2>
-          <button class="btn" onclick="openProductForm()">+ إضافة لعبة</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn outline" id="compressBtn" onclick="compressAllImages()" title="يصغّر الصور القديمة الثقيلة عشان الحفظ يبقى سريع">🗜 ضغط الصور الحالية</button>
+            <button class="btn" onclick="openProductForm()">+ إضافة لعبة</button>
+          </div>
         </div>
         <div class="panel" id="productFormPanel" style="display:none;">
           <h3 id="pfTitle">إضافة لعبة جديدة</h3>
@@ -843,7 +846,7 @@ textarea{resize:vertical;min-height:70px;}
             <div class="field full" id="pfReviewsWrap" style="display:none;"><label>تقييمات العملاء (يمكنك حذف أي تقييم غير مناسب)</label><div id="pfReviewsList"></div></div>
           </div>
           <div style="display:flex;gap:10px;margin-top:16px;">
-            <button class="btn ok" onclick="saveProduct()">حفظ</button>
+            <button class="btn ok" id="pfSaveBtn" onclick="saveProduct()">حفظ</button>
             <button class="btn outline" onclick="closeProductForm()">إلغاء</button>
           </div>
         </div>
@@ -1155,9 +1158,19 @@ let searchTerm = '';
 /* تحمّل بيانات المتجر المشتركة من Supabase. لو الصف مش موجود (أول مرة)
    بننشئه ببيانات افتراضية. لو الاتصال فشل بالكامل، بنرجع لآخر نسخة
    محفوظة محلياً كخطة طوارئ عشان الموقع يفضل شغال. */
+let remoteLoaded = false; // لو false معناه إننا مش متأكدين إن البيانات الحالية هي نسخة الخادم، فنمنع الحفظ عشان منمسحش بيانات حقيقية
+function timeoutSignal(ms){
+  if(window.AbortSignal && AbortSignal.timeout) return AbortSignal.timeout(ms);
+  const c = new AbortController(); setTimeout(()=>c.abort(), ms); return c.signal;
+}
+function errText(e){
+  if(!e) return 'خطأ غير معروف';
+  if(e.name==='AbortError' || /abort/i.test(e.message||'')) return 'انتهت مهلة الاتصال (حجم البيانات كبير أو الإنترنت ضعيف)';
+  return e.message || e.details || String(e);
+}
 async function loadRemoteState(){
   try{
-    const { data, error } = await sb.from('store_state').select('*').eq('id', 1).maybeSingle();
+    const { data, error } = await sb.from('store_state').select('*').eq('id', 1).abortSignal(timeoutSignal(45000)).maybeSingle();
     if(error) throw error;
     if(data){
       products = migrateProducts(data.products); if(!products.length) products = defaultProducts();
@@ -1181,6 +1194,7 @@ async function loadRemoteState(){
       });
       if(insErr) throw insErr;
     }
+    remoteLoaded = true;
     persistLocalCache();
   }catch(e){
     console.error('تعذر تحميل بيانات المتجر من الخادم، سيتم استخدام آخر نسخة محفوظة محلياً كخطة طوارئ', e);
@@ -1195,63 +1209,91 @@ async function loadRemoteState(){
   }
 }
 
-/* نسخة احتياطية محلية فقط (طوارئ عند انقطاع الاتصال) — المصدر الحقيقي للبيانات هو Supabase */
+/* نسخة احتياطية محلية فقط (طوارئ عند انقطاع الاتصال) — المصدر الحقيقي للبيانات هو Supabase.
+   الصور الكبيرة (base64) بقت مش بتتخزن هنا: كانت بتبطّئ الصفحة وبتملّا مساحة المتصفح وبتعمل التهنيج. */
 function persistLocalCache(){
   try{
-    localStorage.setItem(LS_PRODUCTS, JSON.stringify(products));
+    const light = products.map(p=>({...p, image:null, cardImage:null, bgImage:null}));
+    localStorage.setItem(LS_PRODUCTS, JSON.stringify(light));
     localStorage.setItem(LS_ORDERS, JSON.stringify(orders));
     localStorage.setItem(LS_CART, JSON.stringify(cart));
-    localStorage.setItem(LS_SETTINGS, JSON.stringify(settings));
+    localStorage.setItem(LS_SETTINGS, JSON.stringify({...settings, heroImage:null, logoImage:null}));
     localStorage.setItem(LS_COUPONS, JSON.stringify(coupons));
     localStorage.setItem(LS_CUSTOMERS, JSON.stringify(customers));
     localStorage.setItem(LS_CURRENT_CUSTOMER, currentCustomerId || '');
-    localStorage.setItem(LS_PLATFORMS, JSON.stringify(platforms));
+    localStorage.setItem(LS_PLATFORMS, JSON.stringify(platforms.map(pl=>({...pl, image:null}))));
     localStorage.setItem(LS_ADMIN_AUTH, JSON.stringify(adminAuth));
   }catch(e){console.warn('تعذر الحفظ محلياً',e);}
 }
 
+/* الحفظ على الخادم: بيرجّع Promise بـ true/false. الحفظات بتتنفذ واحدة ورا التانية (مفيش حفظتين بيتصادموا)،
+   وبيتأكد فعلاً إن صف قاعدة البيانات اتعدّل (لو الصلاحيات منعت التعديل Supabase ما بيرجّعش خطأ، بيعدّل 0 صفوف بصمت). */
+let saveChain = Promise.resolve(true);
 function persist(){
   persistLocalCache();
-  sb.from('store_state').update({
-    products, orders, settings, platforms, coupons, customers,
-    admin_auth: adminAuth, updated_at: new Date().toISOString()
-  }).eq('id', 1).then(({error})=>{
-    if(error){
-      console.error('تعذر حفظ التعديلات على الخادم', error);
-      alert('تعذر حفظ التعديلات على الخادم! تأكد من اتصالك بالإنترنت وحاول مرة أخرى.');
-    }
+  if(!remoteLoaded){
+    alert('الموقع مش متصل بقاعدة البيانات حالياً، فالتعديل ما اتحفظش على الخادم. حدّث الصفحة وتأكد من الإنترنت وحاول تاني.');
+    return Promise.resolve(false);
+  }
+  saveChain = saveChain.then(async ()=>{
+    const { data, error } = await sb.from('store_state').update({
+      products, orders, settings, platforms, coupons, customers,
+      admin_auth: adminAuth, updated_at: new Date().toISOString()
+    }).eq('id', 1).select('id').abortSignal(timeoutSignal(90000));
+    if(error) throw error;
+    if(!data || !data.length) throw new Error('الخادم ما عدّلش أي صف — غالباً صلاحيات (RLS) في Supabase بتمنع التعديل على جدول store_state');
+    return true;
+  }).catch(err=>{
+    console.error('تعذر حفظ التعديلات على الخادم', err);
+    alert('تعذر حفظ التعديلات على الخادم!\n' + errText(err));
+    return false;
   });
+  return saveChain;
 }
 function fmt(n){ return `${n} ${settings.currency}`; }
 function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
-/* يقرأ صورة مرفوعة، يصغّرها لو أكبر من الحجم المطلوب، ويضغطها بجودة عالية ثابتة
-   قبل تحويلها لـ base64 — يحل مشاكل الجودة والحجم الكبير جداً عند الرفع. */
-function loadImageResized(file, maxDim, quality){
+/* بيصغّر الصورة ويضغطها لحد ما حجمها (تقريباً بالبايت) يبقى أقل من maxBytes لو اتحدد.
+   ده اللي بيمنع إن صف قاعدة البيانات يتضخم ويبقى الحفظ بطيء أو يفشل. */
+function compressDataUrl(src, maxDim, quality, maxBytes){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    img.onload = ()=>{
+      let width = img.naturalWidth, height = img.naturalHeight;
+      if(width > maxDim || height > maxDim){
+        if(width >= height){ height = Math.round(height * maxDim / width); width = maxDim; }
+        else { width = Math.round(width * maxDim / height); height = maxDim; }
+      }
+      const canvas = document.createElement('canvas');
+      const encode = (w, h, q)=>{
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, w, h);
+        let o;
+        try{ o = canvas.toDataURL('image/webp', q); }catch(err){ o = null; }
+        if(!o || o.indexOf('data:image/webp') !== 0) o = canvas.toDataURL('image/jpeg', q);
+        return o;
+      };
+      let q = quality, out = encode(width, height, q);
+      if(maxBytes){
+        let guard = 0;
+        while(out.length * 0.75 > maxBytes && guard++ < 14){
+          if(q > 0.5) q = Math.max(0.5, q - 0.1);
+          else { width = Math.max(200, Math.round(width * 0.85)); height = Math.max(200, Math.round(height * 0.85)); }
+          out = encode(width, height, q);
+        }
+      }
+      resolve(out);
+    };
+    img.onerror = ()=> reject(new Error('تعذر تحميل الصورة'));
+    img.src = src;
+  });
+}
+function loadImageResized(file, maxDim, quality, maxBytes){
   return new Promise((resolve, reject)=>{
     if(!file.type || !file.type.startsWith('image/')){ reject(new Error('الملف المختار ليس صورة')); return; }
     const reader = new FileReader();
-    reader.onload = ()=>{
-      const img = new Image();
-      img.onload = ()=>{
-        let width = img.naturalWidth, height = img.naturalHeight;
-        if(width > maxDim || height > maxDim){
-          if(width >= height){ height = Math.round(height * maxDim / width); width = maxDim; }
-          else { width = Math.round(width * maxDim / height); height = maxDim; }
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width; canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(img, 0, 0, width, height);
-        let out;
-        try{ out = canvas.toDataURL('image/webp', quality); }catch(err){ out = null; }
-        if(!out || out.indexOf('data:image/webp') !== 0) out = canvas.toDataURL('image/jpeg', quality);
-        resolve(out);
-      };
-      img.onerror = ()=> reject(new Error('تعذر تحميل الصورة'));
-      img.src = reader.result;
-    };
+    reader.onload = ()=> compressDataUrl(reader.result, maxDim, quality, maxBytes).then(resolve, reject);
     reader.onerror = ()=> reject(new Error('تعذر قراءة الصورة'));
     reader.readAsDataURL(file);
   });
@@ -2365,7 +2407,7 @@ function toggleSameBg(){
 function onBgImageSelected(e){
   const file = e.target.files[0];
   if(!file) return;
-  loadImageResized(file, 1400, 0.8).then(dataUrl=>{
+  loadImageResized(file, 1200, 0.8, 180000).then(dataUrl=>{
     pfBgImage = dataUrl;
     document.getElementById('pfBgImgPreview').innerHTML = `<img src="${pfBgImage}">`;
   }).catch(err=> alert(err.message || 'تعذر قراءة الصورة'));
@@ -2378,7 +2420,7 @@ function clearBgImage(){
 function onCardImageSelected(e){
   const file = e.target.files[0];
   if(!file) return;
-  loadImageResized(file, 900, 0.85).then(dataUrl=>{
+  loadImageResized(file, 700, 0.85, 90000).then(dataUrl=>{
     pfCardImage = dataUrl;
     document.getElementById('pfCardImgPreview').innerHTML = `<img src="${pfCardImage}">`;
   }).catch(err=> alert(err.message || 'تعذر قراءة الصورة'));
@@ -2391,7 +2433,7 @@ function clearCardImage(){
 function onImageSelected(e){
   const file = e.target.files[0];
   if(!file) return;
-  loadImageResized(file, 900, 0.85).then(dataUrl=>{
+  loadImageResized(file, 900, 0.85, 160000).then(dataUrl=>{
     pfImage = dataUrl;
     document.getElementById('pfImgPreview').innerHTML = `<img src="${pfImage}">`;
   }).catch(err=> alert(err.message || 'تعذر قراءة الصورة'));
@@ -2401,7 +2443,7 @@ function clearImage(){
   document.getElementById('pfImgPreview').innerHTML = document.getElementById('pfIcon').value || '🎮';
   document.getElementById('pfImageFile').value = '';
 }
-function saveProduct(){
+async function saveProduct(){
   const name = document.getElementById('pfName').value.trim();
   const cleanEditions = pfEditions
     .map(e=>({id:e.id||uid(), name:(e.name||'').trim(), price:parseFloat(e.price), platform:e.platform||document.getElementById('pfPlatform').value, variant:(e.variant||'').trim()}))
@@ -2430,13 +2472,50 @@ function saveProduct(){
     desc: document.getElementById('pfDesc').value.trim() || 'لا يوجد وصف بعد.',
     editions: cleanEditions
   };
+  const btn = document.getElementById('pfSaveBtn');
+  if(btn){ if(btn.disabled) return; btn.disabled = true; btn.textContent = 'جاري الحفظ...'; }
+  let rollback;
   if(editingId){
     const p = products.find(p=>p.id===editingId);
+    const before = {...p};
+    rollback = ()=>{ Object.keys(p).forEach(k=>delete p[k]); Object.assign(p, before); };
     Object.assign(p, data);
   } else {
-    products.unshift({id:uid(), ...data});
+    const np = {id:uid(), ...data};
+    products.unshift(np);
+    rollback = ()=>{ products = products.filter(x=>x.id!==np.id); };
   }
-  persist(); closeProductForm(); renderAdminData(); renderAll();
+  const ok = await persist();
+  if(btn){ btn.disabled = false; btn.textContent = 'حفظ'; }
+  if(!ok){ rollback(); persistLocalCache(); return; } // الفورم يفضل مفتوح ببياناتك عشان تحاول تاني
+  closeProductForm(); renderAdminData(); renderAll();
+}
+
+/* بيضغط كل الصور المحفوظة بالفعل (ألعاب + الغلاف + أيقونات الأقسام) عشان صف قاعدة البيانات يخف ويرجع الحفظ سريع */
+async function compressAllImages(){
+  if(!remoteLoaded){ alert('لازم الموقع يكون متصل بقاعدة البيانات الأول. حدّث الصفحة.'); return; }
+  const sizeKB = ()=> Math.round(JSON.stringify({products, settings, platforms}).length/1024);
+  const beforeKB = sizeKB();
+  if(!confirm(`حجم بيانات المتجر الحالي حوالي ${beforeKB} KB.\nهيتم ضغط الصور الكبيرة فقط. تكمل؟`)) return;
+  const btn = document.getElementById('compressBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'جاري الضغط...'; }
+  const big = (v, max)=> typeof v==='string' && v.startsWith('data:') && v.length*0.75 > max;
+  try{
+    for(const p of products){
+      for(const [f,dim,max] of [['image',900,160000],['cardImage',700,90000],['bgImage',1200,180000]]){
+        if(big(p[f], max)){ try{ p[f] = await compressDataUrl(p[f], dim, 0.82, max); }catch(e){} }
+      }
+    }
+    if(big(settings.heroImage, 250000)){ try{ settings.heroImage = await compressDataUrl(settings.heroImage, 1600, 0.82, 250000); }catch(e){} }
+    for(const pl of platforms){
+      if(big(pl.image, 40000)){ try{ pl.image = await compressDataUrl(pl.image, 300, 0.85, 40000); }catch(e){} }
+    }
+    const ok = await persist();
+    renderAdminData(); renderAll();
+    if(ok) alert(`تم! الحجم بقى حوالي ${sizeKB()} KB بدل ${beforeKB} KB.`);
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = '🗜 ضغط الصور الحالية'; }
+  }
 }
 function toggleSoldOut(id){
   const p = products.find(p=>p.id===id); if(!p) return;
@@ -2512,7 +2591,7 @@ window.addEventListener('storage', e=>{
 // التقييمات: التقييم الجديد بيتحفظ من صفحة اللعبة، فنسحبه هنا عشان أي حفظ تاني من هذه الصفحة ما يمسحوش
 async function syncReviewsFromRemote(){
   try{
-    const { data } = await sb.from('store_state').select('products').eq('id', 1).maybeSingle();
+    const { data } = await sb.from('store_state').select('products').eq('id', 1).abortSignal(timeoutSignal(30000)).maybeSingle();
     if(!data) return;
     (data.products || []).forEach(rp=>{
       const lp = products.find(p=>p.id===rp.id);

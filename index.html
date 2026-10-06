@@ -2533,19 +2533,39 @@ function deleteProduct(id){
   persist(); renderAdminData(); renderAll();
 }
 
+/* حفظ ترتيب الألعاب: بنستنى نتيجة الحفظ على الخادم، ولو فشل بنرجّع الترتيب القديم
+   عشان الشاشة ما تبينش ترتيب "متحفظ" وهو في الحقيقة ما اتحفظش. */
+let orderSaving = false;
+async function saveProductOrder(prevOrder){
+  if(orderSaving) return;
+  orderSaving = true;
+  try{
+    renderAdminData(); renderAll();
+    const ok = await persist();
+    if(!ok){
+      const byId = new Map(products.map(p=>[p.id,p]));
+      products = prevOrder.map(id=>byId.get(id)).filter(Boolean);
+      persistLocalCache(); renderAdminData(); renderAll();
+    }
+  } finally { orderSaving = false; }
+}
+
 function moveProduct(idx, dir){
+  if(orderSaving) return;
   const newIdx = idx + dir;
   if(newIdx < 0 || newIdx >= products.length) return;
+  const prev = products.map(p=>p.id);
   const tmp = products[idx];
   products[idx] = products[newIdx];
   products[newIdx] = tmp;
-  persist(); renderAdminData(); renderAll();
+  saveProductOrder(prev);
 }
 
 let dragProductIdx = null;
 function dragProductStart(e, idx){
   dragProductIdx = idx;
   e.dataTransfer.effectAllowed = 'move';
+  try{ e.dataTransfer.setData('text/plain', String(idx)); }catch(err){} // لازم لـ Firefox
   e.currentTarget.style.opacity = '.5';
 }
 function dragProductOver(e){
@@ -2554,11 +2574,12 @@ function dragProductOver(e){
 }
 function dropProduct(e, idx){
   e.preventDefault();
-  if(dragProductIdx===null || dragProductIdx===idx) return;
+  if(orderSaving || dragProductIdx===null || dragProductIdx===idx) return;
+  const prev = products.map(p=>p.id);
   const [moved] = products.splice(dragProductIdx, 1);
   products.splice(idx, 0, moved);
   dragProductIdx = null;
-  persist(); renderAdminData(); renderAll();
+  saveProductOrder(prev);
 }
 function dragProductEnd(e){
   e.currentTarget.style.opacity = '';

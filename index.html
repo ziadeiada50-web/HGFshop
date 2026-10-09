@@ -367,6 +367,7 @@ textarea{resize:vertical;min-height:70px;}
 .pm-panel.active{display:block;}
 .pm-panel h3{margin:0 0 14px;font-size:18px;font-weight:800;}
 .pm-desc{color:#C8CCEC;font-size:15px;line-height:2;margin:0 0 26px;white-space:pre-line;}
+.pm-warranty{display:inline-flex;align-items:center;gap:8px;margin:-8px 0 26px;padding:9px 18px;border-radius:30px;background:rgba(61,220,151,.12);border:1px solid rgba(61,220,151,.4);color:var(--ok);font-weight:800;font-size:14.5px;}
 .pm-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
 .pm-fact{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
 .pm-fact span{display:block;font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:6px;}
@@ -1378,6 +1379,7 @@ function renderDescPanel(p){
   document.getElementById('pmPanel-desc').innerHTML = `
     <h3>عن اللعبة</h3>
     <p class="pm-desc">${escapeHtml(p.desc || 'لا يوجد وصف بعد.')}</p>
+    <p class="pm-warranty">🛡️ ضمان مدى الحياة</p>
     <h3>تفاصيل</h3>
     <div class="pm-facts">
       <div class="pm-fact"><span>المنصة</span><b>${escapeHtml(prodPlats(p).join(' · ')||'-')}</b></div>

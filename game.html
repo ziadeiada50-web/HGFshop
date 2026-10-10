@@ -709,22 +709,20 @@ function renderSocials(){
   if(el) el.innerHTML = socialLinksHtml(settings);
 }
 
-function getCurrentCustomer(){ return customers.find(c=>c.id===currentCustomerId) || null; }
+function getCurrentCustomer(){ const s = readJSON('ns_session', null); return (s && s.id===currentCustomerId) ? s : null; }
 
 /* ---------- تحميل البيانات ---------- */
 async function loadData(){
   try{
-    const { data, error } = await sb.from('store_state').select('products,settings,customers').eq('id', 1).maybeSingle();
+    const { data, error } = await sb.from('store_state').select('products,settings').eq('id', 1).maybeSingle();
     if(error) throw error;
     if(!data) throw new Error('no store data');
     products = migrateProducts(data.products);
     settings = {...settings, ...(data.settings||{})};
-    customers = data.customers || [];
   }catch(e){
     console.error('تعذر تحميل البيانات من الخادم، هنستخدم آخر نسخة محفوظة على الجهاز', e);
     products = migrateProducts(readJSON(LS_PRODUCTS, []));
     settings = {...settings, ...readJSON(LS_SETTINGS, {})};
-    customers = readJSON(LS_CUSTOMERS, []);
   }
 }
 

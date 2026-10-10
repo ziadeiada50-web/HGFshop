@@ -1319,7 +1319,7 @@ async function loadRemoteState(){
       if(settings.logoImage === undefined) settings.logoImage = DEFAULT_LOGO_IMAGE;
       platforms = migratePlatforms(data.platforms); if(!platforms.length) platforms = defaultPlatforms();
       coupons = data.coupons || defaultCoupons();
-      customers = data.customers || [];
+      customers = []; // الحسابات بقت في جدول accounts المستقل
       adminAuth = data.admin_auth || defaultAdminAuth();
     } else {
       // أول مرة يُفتح فيها الموقع: أنشئ الصف الافتراضي في قاعدة البيانات
@@ -1343,7 +1343,7 @@ async function loadRemoteState(){
     settings = {...settings, ...(JSON.parse(localStorage.getItem(LS_SETTINGS) || 'null')||{})};
     platforms = migratePlatforms(JSON.parse(localStorage.getItem(LS_PLATFORMS) || 'null')); if(!platforms.length) platforms = defaultPlatforms();
     coupons = JSON.parse(localStorage.getItem(LS_COUPONS) || 'null') || defaultCoupons();
-    customers = JSON.parse(localStorage.getItem(LS_CUSTOMERS) || 'null') || [];
+    customers = [];
     adminAuth = JSON.parse(localStorage.getItem(LS_ADMIN_AUTH) || 'null') || defaultAdminAuth();
     alert('تعذر الاتصال بقاعدة بيانات المتجر، جاري عرض آخر نسخة محفوظة على هذا الجهاز فقط.');
   }
@@ -1903,15 +1903,27 @@ function persistPart(cols){
   });
   return saveChain;
 }
-async function refreshAccountsFromRemote(cols){
-  cols = cols || 'orders,customers';
+async function refreshAccountsFromRemote(){
   try{
-    const { data, error } = await sb.from('store_state').select(cols).eq('id',1).abortSignal(timeoutSignal(20000)).maybeSingle();
+    const { data, error } = await sb.from('store_state').select('orders').eq('id',1).abortSignal(timeoutSignal(20000)).maybeSingle();
     if(error || !data) return false;
-    if(cols.includes('orders') && Array.isArray(data.orders)) orders = data.orders;
-    if(cols.includes('customers') && Array.isArray(data.customers)) customers = data.customers;
+    if(Array.isArray(data.orders)) orders = data.orders;
     return true;
   }catch(e){ return false; }
+}
+/* استدعاء دوال قاعدة البيانات (الحسابات في جدول accounts) */
+async function callRpc(name, args){
+  const { data, error } = await sb.rpc(name, args).abortSignal(timeoutSignal(30000));
+  if(error) throw error;
+  return data;
+}
+function rpcFail(e){ alert('تعذر الاتصال بالخادم، جرّب تاني.\n' + errText(e)); }
+const BLOCKED_MSG = 'تم حظر هذا الحساب. للاستفسار تواصل مع خدمة العملاء على ';
+let sessionCustomer = (()=>{ try{ return JSON.parse(localStorage.getItem('ns_session')||'null'); }catch(e){ return null; } })();
+function setSession(c){
+  sessionCustomer = c; currentCustomerId = c ? c.id : null;
+  try{ if(c) localStorage.setItem('ns_session', JSON.stringify(c)); else localStorage.removeItem('ns_session'); }catch(e){}
+  persistLocalCache();
 }
 
 function showToastMsg(msg){
@@ -1924,15 +1936,29 @@ function showToastMsg(msg){
   t.textContent = msg; t.style.opacity = '1';
   clearTimeout(t._h); t._h = setTimeout(()=>{ t.style.opacity = '0'; }, 3500);
 }
-function enforceBlockedSession(showMsg){
+async function verifyAccount(){
   const c = getCurrentCustomer();
-  if(!c || !c.blocked) return false;
-  currentCustomerId = null; persistLocalCache(); renderAccountUI(); closeAuthModal();
-  if(showMsg) alert('تم حظر حسابك ولا يمكنك إتمام الطلبات. للاستفسار تواصل مع خدمة العملاء على ' + CUSTOMER_SERVICE_NUMBER);
+  if(!c) return {ok:false, reason:'none'};
+  try{
+    const r = await callRpc('check_account', {p_id:c.id});
+    if(!r || !r.exists) return {ok:false, reason:'missing'};
+    if(r.blocked) return {ok:false, reason:'blocked'};
+    return {ok:true};
+  }catch(e){ return {ok:true, offline:true}; }
+}
+async function enforceBlockedSession(showMsg){
+  const c = getCurrentCustomer(); if(!c) return false;
+  const v = await verifyAccount();
+  if(v.ok) return false;
+  setSession(null); renderAccountUI(); closeAuthModal();
+  if(showMsg) alert(v.reason==='blocked' ? BLOCKED_MSG + CUSTOMER_SERVICE_NUMBER : 'الحساب ده مش موجود، سجّل دخول من جديد');
   return true;
 }
 let pendingCheckout = false;
-function getCurrentCustomer(){ return customers.find(c=>c.id===currentCustomerId) || null; }
+function getCurrentCustomer(){
+  if(sessionCustomer && sessionCustomer.id === currentCustomerId) return sessionCustomer;
+  return null;
+}
 function openMyOrders(){
   if(!getCurrentCustomer()){
     openAuthModal({notice:'سجّل دخول الأول علشان تشوف طلباتك وتقدر تلغي أي طلب 📦'});
@@ -1993,7 +2019,7 @@ function finishAuthSuccess(){
 async function registerCustomer(){
   const name = document.getElementById('regName').value.trim();
   const phone = normalizePhone(document.getElementById('regPhone').value);
-  const email = document.getElementById('regEmail').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
   const pw = document.getElementById('regPasswordC').value;
   const pw2 = document.getElementById('regPasswordC2').value;
   if(!name || !phone || !email || !pw){ alert('يرجى إدخال الاسم ورقم الموبايل والبريد الإلكتروني وكلمة المرور'); return; }
@@ -2002,30 +2028,24 @@ async function registerCustomer(){
   if(!EMAIL_RE.test(email)){ alert('يرجى إدخال بريد إلكتروني صحيح'); return; }
   if(pw.length < 6){ alert('كلمة المرور لازم تكون 6 حروف أو أرقام على الأقل'); return; }
   if(pw !== pw2){ alert('كلمتا المرور مش متطابقتين'); return; }
-  const emailKey = email.toLowerCase();
-  const dupMsg = ()=>{
-    if(customers.find(c=>normalizePhone(c.phone)===phone)) return 'رقم الموبايل ده مسجل بالفعل، جرب تسجيل الدخول';
-    if(customers.find(c=>(c.email||'').trim().toLowerCase()===emailKey)) return 'البريد الإلكتروني ده مسجل بالفعل على حساب تاني';
-    return null;
-  };
-  let dm = dupMsg();
-  if(dm){ alert(dm); return; }
   const btn = document.querySelector('#auth-register .btn');
   setBusy(btn, true, '⏳ جاري إنشاء الحساب...');
   try{
-    const [pwHash] = await Promise.all([hashPassword(phone, pw), refreshAccountsFromRemote('customers')]);
-    dm = dupMsg();
-    if(dm){ alert(dm); return; }
-    const c = {id:uid(), name, phone, email: emailKey, pwHash, createdAt:new Date().toISOString()};
-    customers.push(c);
-    const ok = await persistPart(['customers']);
-    if(!ok){ customers = customers.filter(x=>x.id!==c.id); return; }
-    currentCustomerId = c.id;
-    persistLocalCache();
-    ['regName','regPhone','regEmail','regPasswordC','regPasswordC2'].forEach(id=>document.getElementById(id).value='');
+    const pwHash = await hashPassword(phone, pw);
+    const id = uid();
+    const r = await callRpc('register_account', {p_id:id, p_name:name, p_phone:phone, p_email:email, p_pw_hash:pwHash});
+    if(!r || !r.ok){
+      alert(r && r.error==='phone' ? 'رقم الموبايل ده مسجل بالفعل، جرب تسجيل الدخول'
+          : r && r.error==='email' ? 'البريد الإلكتروني ده مسجل بالفعل على حساب تاني'
+          : 'تعذر إنشاء الحساب، حاول تاني');
+      return;
+    }
+    setSession({id, name, phone, email, h:pwHash});
+    ['regName','regPhone','regEmail','regPasswordC','regPasswordC2'].forEach(x=>document.getElementById(x).value='');
     finishAuthSuccess();
     showToastMsg('تم إنشاء الحساب بنجاح، أهلاً بيك يا '+name+' 🎉');
-  } finally { setBusy(btn, false); }
+  }catch(e){ rpcFail(e); }
+  finally { setBusy(btn, false); }
 }
 async function loginCustomer(){
   const phone = normalizePhone(document.getElementById('loginPhone').value);
@@ -2034,37 +2054,34 @@ async function loginCustomer(){
   const btn = document.querySelector('#auth-login .btn');
   setBusy(btn, true, '⏳ جاري الدخول...');
   try{
-    const find = async ()=>{
-      const c = customers.find(x=>normalizePhone(x.phone)===phone);
-      return (c && await passwordMatches(c, pw)) ? c : null;
-    };
-    let c = await find();                       // الأول من البيانات المحمّلة (فوري)
-    if(!c){ await refreshAccountsFromRemote('customers'); c = await find(); } // لو مش لاقيه، نجيب آخر نسخة
-    if(!c){ alert('رقم الموبايل أو كلمة المرور غير صحيحة'); return; }
-    if(c.blocked){ alert('تم حظر هذا الحساب ولا يمكن تسجيل الدخول به. للاستفسار تواصل مع خدمة العملاء على ' + CUSTOMER_SERVICE_NUMBER); return; }
-    if(!c.pwHash){ c.pwHash = await hashPassword(c.phone, pw); delete c.password; persistPart(['customers']); }
-    currentCustomerId = c.id;
-    persistLocalCache();
+    const pwHash = await hashPassword(phone, pw);
+    const r = await callRpc('login_account', {p_phone:phone, p_pw_hash:pwHash});
+    if(!r || !r.ok){
+      alert(r && r.error==='blocked' ? BLOCKED_MSG + CUSTOMER_SERVICE_NUMBER : 'رقم الموبايل أو كلمة المرور غير صحيحة');
+      return;
+    }
+    setSession({id:r.id, name:r.name, phone:r.phone, email:r.email, h:pwHash});
     document.getElementById('loginPasswordC').value = '';
     finishAuthSuccess();
-  } finally { setBusy(btn, false); }
+  }catch(e){ rpcFail(e); }
+  finally { setBusy(btn, false); }
 }
 function logoutCustomer(){
-  currentCustomerId = null;
-  persistLocalCache();
+  setSession(null);
   closeAuthModal();
   renderAccountUI();
 }
 async function saveAccountEmail(){
   const c = getCurrentCustomer(); if(!c) return;
-  const email = document.getElementById('accEmail').value.trim();
+  const email = document.getElementById('accEmail').value.trim().toLowerCase();
   if(!email || !EMAIL_RE.test(email)){ alert('يرجى إدخال بريد إلكتروني صحيح'); return; }
-  await refreshAccountsFromRemote('customers');
-  const fresh = getCurrentCustomer(); if(!fresh) return;
-  const key = email.toLowerCase();
-  if(customers.find(x=>x.id!==fresh.id && (x.email||'').trim().toLowerCase()===key)){ alert('البريد ده مستخدم على حساب تاني'); return; }
-  fresh.email = key;
-  if(await persistPart(['customers'])) showToastMsg('تم تحديث البريد الإلكتروني ✓');
+  if(!c.h){ alert('سجّل دخول من جديد علشان تقدر تعدّل بياناتك'); logoutCustomer(); return; }
+  try{
+    const r = await callRpc('update_account_email', {p_id:c.id, p_pw_hash:c.h, p_email:email});
+    if(r && r.ok){ setSession({...c, email}); showToastMsg('تم تحديث البريد الإلكتروني ✓'); }
+    else if(r && r.error==='email') alert('البريد ده مستخدم على حساب تاني');
+    else { alert('انتهت الجلسة، سجّل دخول من جديد'); logoutCustomer(); }
+  }catch(e){ rpcFail(e); }
 }
 async function changePassword(){
   const c = getCurrentCustomer(); if(!c) return;
@@ -2074,15 +2091,16 @@ async function changePassword(){
   if(!oldPw || !pw){ alert('اكتب كلمة المرور الحالية والجديدة'); return; }
   if(pw.length < 6){ alert('كلمة المرور الجديدة لازم تكون 6 حروف أو أرقام على الأقل'); return; }
   if(pw !== pw2){ alert('كلمتا المرور الجديدتان مش متطابقتين'); return; }
-  await refreshAccountsFromRemote('customers');
-  const fresh = getCurrentCustomer(); if(!fresh) return;
-  if(!(await passwordMatches(fresh, oldPw))){ alert('كلمة المرور الحالية غير صحيحة'); return; }
-  fresh.pwHash = await hashPassword(fresh.phone, pw); delete fresh.password;
-  if(await persistPart(['customers'])){
-    ['pwOld','pwNew','pwNew2'].forEach(id=>document.getElementById(id).value='');
+  try{
+    const oldHash = await hashPassword(c.phone, oldPw);
+    const newHash = await hashPassword(c.phone, pw);
+    const r = await callRpc('change_password', {p_id:c.id, p_old_hash:oldHash, p_new_hash:newHash});
+    if(!r || !r.ok){ alert('كلمة المرور الحالية غير صحيحة'); return; }
+    setSession({...c, h:newHash});
+    ['pwOld','pwNew','pwNew2'].forEach(x=>document.getElementById(x).value='');
     showToastMsg('تم تغيير كلمة المرور ✓');
     showAuthView('account');
-  }
+  }catch(e){ rpcFail(e); }
 }
 
 /* ---------- طلباتي + إلغاء الطلب ---------- */
@@ -2112,7 +2130,7 @@ async function cancelMyOrder(id, btn){
   cancelling = true;
   setBusy(btn, true, '⏳ جاري الإلغاء...');
   try{
-    await refreshAccountsFromRemote('orders,customers');
+    await refreshAccountsFromRemote();
     const c = getCurrentCustomer() || c0;
     const o = orders.find(x=>x.id===id);
     if(!o || o.customerId !== c.id){ alert('الطلب ده مش تابع لحسابك'); renderMyOrders(); return; }
@@ -2182,7 +2200,6 @@ function resetProofFields(){
 }
 function openCheckout(){
   if(!cart.length){ alert('السلة فارغة'); return; }
-  if(enforceBlockedSession(true)) return;
   const c = getCurrentCustomer();
   if(!c){
     toggleCart(false);
@@ -2250,7 +2267,6 @@ async function confirmCheckout(){
   if(checkingOut) return;
   const cust = getCurrentCustomer();
   if(!cust){ closeCheckout(); openCheckout(); return; }
-  if(cust.blocked){ closeCheckout(); enforceBlockedSession(true); return; }
   const soldOutInCart = cart.filter(c=>isSoldOut(products.find(p=>p.id===c.id)));
   if(soldOutInCart.length){
     const names = soldOutInCart.map(c=>products.find(p=>p.id===c.id).name).join('، ');
@@ -2291,13 +2307,9 @@ async function confirmCheckout(){
   const coBtn = document.querySelector('#checkoutOverlay button[onclick="confirmCheckout()"]');
   setBusy(coBtn, true, '⏳ جاري تأكيد الطلب...');
   try{
-    await refreshAccountsFromRemote('orders,customers'); // علشان منمسحش طلبات عملاء تانيين + نتأكد إن الحساب مش محظور
-    const live = customers.find(x=>x.id===cust.id);
-    if(!live || live.blocked){
-      closeCheckout();
-      if(!enforceBlockedSession(true)){ currentCustomerId = null; persistLocalCache(); renderAccountUI(); alert('الحساب ده مش موجود، سجّل دخول من جديد'); }
-      return;
-    }
+    const v = await verifyAccount(); // نتأكد إن الحساب لسه شغال وغير محظور
+    if(!v.ok){ closeCheckout(); await enforceBlockedSession(true); return; }
+    await refreshAccountsFromRemote(); // علشان منمسحش طلبات عملاء تانيين
     orders.unshift(newOrder);
     const ok = await persistPart(['orders']);
     if(!ok){ orders = orders.filter(o=>o.id!==newOrder.id); return; }
@@ -2339,13 +2351,23 @@ function closeAdmin(){
   document.getElementById('admin').style.display='none';
   document.getElementById('store').style.display='block';
 }
+let adminCreds = null, accountsList = [];
+async function loadAccountsList(){
+  if(!adminCreds) return;
+  try{
+    const r = await callRpc('admin_list_accounts', {p_user:adminCreds.u, p_pass:adminCreds.p});
+    if(r && r.ok){ accountsList = r.accounts || []; renderCustomers(); }
+  }catch(e){ console.error('تعذر تحميل الحسابات', e); }
+}
 function doLogin(){
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value.trim();
   if(u===adminAuth.username && p===adminAuth.password){
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('adminShell').style.display='grid';
+    adminCreds = {u, p};
     renderAdminData();
+    loadAccountsList();
   } else alert('بيانات الدخول غير صحيحة');
 }
 let adminPageNow = 'dash';
@@ -2362,6 +2384,7 @@ function cancelTagHtml(o){
   return `<br><span class="by-tag">${o.cancelledBy==='العميل' ? '🙋 ألغاه العميل' : 'ألغته الإدارة'}${d}</span>`;
 }
 function showPage(name){
+  if(name==='customers') loadAccountsList();
   if(adminPageNow==='orders' && name!=='orders') markCancelsSeen();
   adminPageNow = name;
   document.querySelectorAll('.page').forEach(el=>el.style.display='none');
@@ -2458,12 +2481,12 @@ function renderSalesChart(){
 
 function renderCustomers(){
   const rows = [];
-  customers.forEach(c=>{
+  accountsList.forEach(c=>{
     const mine = orders.filter(o=>o.customerId===c.id);
     const live = mine.filter(o=>o.status!=='ملغي');
     rows.push({id:c.id, name:c.name, phone:c.phone||'-', email:c.email||'-', count:mine.length, cancelled:mine.length-live.length,
-      total:live.reduce((a,o)=>a+o.amount,0), since:c.createdAt ? new Date(c.createdAt).toLocaleDateString('ar-EG') : '-',
-      guest:false, blocked:!!c.blocked, reason:c.blockReason||''});
+      total:live.reduce((a,o)=>a+o.amount,0), since:c.created_at ? new Date(c.created_at).toLocaleDateString('ar-EG') : '-',
+      guest:false, blocked:!!c.blocked, reason:c.reason||''});
   });
   const guests = {};
   orders.filter(o=>!o.customerId).forEach(o=>{
@@ -2479,7 +2502,7 @@ function renderCustomers(){
     <td>${r.guest ? '' : `<button class="btn small ${r.blocked?'ok':'danger'}" onclick="toggleBlockCustomer('${r.id}')">${r.blocked?'✅ فك الحظر':'🚫 حظر'}</button>`}</td></tr>`).join('') || '<tr><td colspan="9">لا يوجد عملاء بعد</td></tr>';
 }
 async function toggleBlockCustomer(id){
-  const c0 = customers.find(x=>x.id===id); if(!c0) return;
+  const c0 = accountsList.find(x=>x.id===id); if(!c0 || !adminCreds) return;
   const blocking = !c0.blocked;
   let reason = '';
   if(blocking){
@@ -2488,15 +2511,11 @@ async function toggleBlockCustomer(id){
     if(r === null) return;
     reason = r.trim();
   } else if(!confirm(`هل تريد فك الحظر عن حساب «${c0.name}»؟`)) return;
-  await refreshAccountsFromRemote('customers');
-  const c = customers.find(x=>x.id===id); if(!c) return;
-  const backup = {blocked:c.blocked, blockedAt:c.blockedAt, blockReason:c.blockReason};
-  if(blocking){ c.blocked = true; c.blockedAt = new Date().toISOString(); c.blockReason = reason; }
-  else { delete c.blocked; delete c.blockedAt; delete c.blockReason; }
-  const ok = await persistPart(['customers']);
-  if(!ok){ Object.keys(backup).forEach(k=>{ if(backup[k]===undefined) delete c[k]; else c[k]=backup[k]; }); renderAdminData(); return; }
-  if(blocking && currentCustomerId===id) enforceBlockedSession(false);
-  renderAdminData();
+  try{
+    const r = await callRpc('admin_set_block', {p_user:adminCreds.u, p_pass:adminCreds.p, p_id:id, p_blocked:blocking, p_reason:reason});
+    if(!r || !r.ok){ alert('تعذر تنفيذ العملية (تأكد من بيانات دخول الأدمن)'); return; }
+    await loadAccountsList();
+  }catch(e){ rpcFail(e); }
 }
 
 let editingCouponId = null;
@@ -2658,6 +2677,7 @@ function saveAdminAuth(){
     adminAuth.password = newPass;
   }
   adminAuth.username = newUser;
+  if(adminCreds) adminCreds = {u:newUser, p:adminAuth.password};
   persist();
   document.getElementById('stAdminPass').value = '';
   document.getElementById('stAdminPassConfirm').value = '';
@@ -3059,7 +3079,7 @@ function renderAll(){
 
 (async function init(){
   await loadRemoteState();
-  enforceBlockedSession(true);
+  enforceBlockedSession(true); // بدون انتظار
   applySettingsToStore();
   renderAll();
   hideGlobalLoader();

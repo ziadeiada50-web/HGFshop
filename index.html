@@ -31,7 +31,22 @@ header{position:sticky;top:0;z-index:50;background:rgba(13,15,30,.92);backdrop-f
 .logo span{color:var(--accent);}
 .navlinks{display:flex;gap:30px;font-weight:600;color:var(--muted);}
 .navlinks a:hover{color:var(--text);}
-.nav-actions{display:flex;align-items:center;gap:14px;}
+.nav-actions{display:flex;align-items:center;gap:10px;}
+.nav-btn{--c:var(--accent);position:relative;display:flex;align-items:center;gap:9px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015)),var(--card);border:1px solid var(--line);color:var(--text);padding:5px 14px 5px 6px;border-radius:14px;font-weight:700;font-size:13px;line-height:1.2;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;white-space:nowrap;}
+.nav-btn .nb-ico{position:relative;width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;background:color-mix(in srgb,var(--c) 22%,transparent);border:1px solid color-mix(in srgb,var(--c) 45%,transparent);flex-shrink:0;}
+.nav-btn .nb-txt{display:flex;flex-direction:column;align-items:flex-start;}
+.nav-btn .nb-txt small{font-size:10.5px;font-weight:600;color:var(--muted);}
+.nav-btn:hover{transform:translateY(-2px);border-color:var(--c);box-shadow:0 8px 22px color-mix(in srgb,var(--c) 28%,transparent);}
+.nav-btn.nb-orders{--c:var(--accent2);}
+.nav-btn.nb-account{--c:var(--accent);}
+.nav-btn.nb-cart{--c:var(--ok);}
+.nav-btn .badge{top:-7px;left:-7px;}
+@media (max-width:900px){
+  .nav-btn{flex-direction:column;gap:3px;padding:6px 9px 5px;border-radius:13px;font-size:10.5px;min-width:54px;}
+  .nav-btn .nb-txt small{display:none;}
+  .nav-btn .nb-ico{width:30px;height:30px;}
+}
+@media (max-width:520px){ .nav-actions{gap:6px;} .nav-btn{min-width:48px;padding:5px 6px;} .admin-link{padding:8px 10px;font-size:12px;} }
 .icon-btn{background:var(--card);border:1px solid var(--line);color:var(--text);width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;position:relative;font-size:17px;}
 .badge{position:absolute;top:-6px;left:-6px;background:var(--accent);color:#fff;font-size:11px;font-weight:800;border-radius:20px;padding:1px 6px;}
 .admin-link{font-size:13px;color:var(--muted);border:1px solid var(--line);padding:9px 16px;border-radius:8px;}
@@ -197,6 +212,25 @@ img.fit-full{object-fit:fill !important;} /* الصورة كاملة وبالظ�
 .account-view{display:flex;flex-direction:column;gap:4px;}
 .account-view .acc-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;}
 .account-view .acc-row span:first-child{color:var(--muted);}
+.btn.danger{background:var(--danger);}
+.auth-notice{display:none;background:rgba(255,93,59,.12);border:1px solid rgba(255,93,59,.45);border-radius:12px;padding:11px 14px;font-size:13px;line-height:1.7;margin-bottom:16px;}
+.auth-notice.show{display:block;}
+.back-link{background:transparent;color:var(--accent2);font-weight:700;font-size:13px;padding:0;margin-bottom:12px;}
+.myo-list{display:flex;flex-direction:column;gap:12px;max-height:55vh;overflow-y:auto;}
+.myo-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;}
+.myo-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;}
+.myo-code{font-weight:800;letter-spacing:.5px;}
+.myo-items{color:var(--muted);font-size:13px;line-height:1.7;}
+.myo-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;font-size:13px;}
+.myo-cancel{background:transparent;border:1px solid var(--danger);color:var(--danger);font-weight:700;font-size:12.5px;padding:7px 14px;border-radius:9px;}
+.myo-cancel:hover{background:var(--danger);color:#fff;}
+.by-tag{display:inline-block;margin-top:4px;font-size:11px;color:var(--danger);font-weight:700;}
+.cs-box{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;margin:0 auto 16px;padding:12px 18px;border:1px solid var(--line);border-radius:14px;background:var(--card);width:fit-content;max-width:100%;font-size:14px;}
+.cs-box .cs-tel{color:var(--accent2);font-weight:800;direction:ltr;}
+.cs-box .cs-wa{background:#25D366;color:#fff;font-weight:700;font-size:13px;padding:7px 14px;border-radius:9px;}
+.side-badge{background:var(--danger);color:#fff;font-size:11px;font-weight:800;border-radius:20px;padding:1px 7px;margin-inline-start:auto;}
+tr.row-cancel-new td{background:rgba(255,93,122,.08);}
+input[readonly].locked{opacity:.7;cursor:not-allowed;}
 
 /* Payment method cards */
 .payment-methods{display:flex;flex-direction:column;gap:10px;}
@@ -438,6 +472,55 @@ textarea{resize:vertical;min-height:70px;}
 .cl-del:hover{background:var(--danger);color:#fff;}
 .cl-empty{font-size:12.5px;color:var(--muted);padding:12px;border:1px dashed var(--line);border-radius:10px;margin-bottom:10px;text-align:center;}
 @media (max-width:700px){.cl-row{grid-template-columns:1fr auto;}.cl-row input:nth-child(2){grid-column:1/2;grid-row:2;}.cl-row .cl-del{grid-row:1/3;grid-column:2;height:auto;}}
+
+/* ===== توحيد الشكل: الهيدر + نوافذ الحساب/الطلبات/الإلغاء + لوحة التحكم ===== */
+.nav-btn{border-radius:16px;}
+.nav-btn.nb-admin{--c:#9AA0D0;}
+.nav-btn:active{transform:translateY(0) scale(.97);}
+
+/* النوافذ بنفس روح كروت الموقع */
+.simple-modal{border-radius:22px;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.035),transparent 140px),var(--bg2);}
+.simple-modal::before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+.simple-modal h3{display:flex;align-items:center;gap:10px;}
+.simple-modal input:focus,.simple-modal select:focus,.simple-modal textarea:focus,.field input:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 3px rgba(34,211,238,.14);}
+.auth-tabs{background:rgba(0,0,0,.22);}
+.auth-tab{transition:background .15s ease,color .15s ease;}
+.auth-tab.active{box-shadow:0 6px 16px rgba(255,93,59,.3);}
+.big-ico{width:84px;height:84px;margin:0 auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:40px;background:radial-gradient(circle,color-mix(in srgb,var(--g,var(--accent)) 28%,transparent),transparent 70%);border:1px solid color-mix(in srgb,var(--g,var(--accent)) 45%,transparent);box-shadow:0 0 32px color-mix(in srgb,var(--g,var(--accent)) 30%,transparent);}
+.big-ico.ok{--g:var(--ok);} .big-ico.bad{--g:var(--danger);}
+
+/* كروت طلباتي */
+.myo-card{position:relative;border-radius:16px;border-inline-start:4px solid var(--accent);transition:border-color .15s ease,transform .15s ease;}
+.myo-card:hover{transform:translateY(-2px);}
+.myo-card.st-done{border-inline-start-color:var(--ok);}
+.myo-card.st-cancelled{border-inline-start-color:var(--danger);opacity:.85;}
+.myo-card.st-new:hover{border-color:var(--accent);}
+.myo-foot b{color:var(--accent2);font-size:15px;}
+.pill{display:inline-flex;align-items:center;gap:6px;}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;}
+.by-tag{background:rgba(255,93,122,.12);border:1px solid rgba(255,93,122,.35);padding:2px 9px;border-radius:20px;}
+
+/* لوحة التحكم */
+.sidebar{background:linear-gradient(180deg,rgba(255,255,255,.03),transparent 220px),var(--bg2);}
+.side-link{border-inline-start:3px solid transparent;transition:background .15s ease,color .15s ease;}
+.side-link.active{background:linear-gradient(270deg,rgba(255,93,59,.16),var(--card));border-inline-start-color:var(--accent);}
+.stat-card{position:relative;overflow:hidden;transition:transform .15s ease,border-color .15s ease;}
+.stat-card::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+.stat-card:hover{transform:translateY(-3px);border-color:var(--accent);}
+.stat-card:has(#kpiCancelled)::before{background:var(--danger);}
+.panel{background:linear-gradient(180deg,rgba(255,255,255,.025),transparent 120px),var(--card);}
+tbody tr{transition:background .12s ease;}
+tbody tr:hover td{background:rgba(255,255,255,.025);}
+.row-actions button{transition:all .15s ease;}
+.row-actions button:not(:disabled):hover{transform:translateY(-1px);}
+.row-actions button:first-child:not(:disabled):hover{background:var(--ok);color:#0E1022;border-color:var(--ok);}
+.row-actions button:nth-child(2):not(:disabled):hover{background:var(--danger);color:#fff;border-color:var(--danger);}
+.row-actions button:disabled{opacity:.35;cursor:not-allowed;}
+.admin-chips{display:flex;gap:8px;flex-wrap:wrap;}
+.admin-chips .chip{cursor:pointer;}
+.admin-chips .chip b{margin-inline-start:6px;background:rgba(255,255,255,.12);padding:1px 8px;border-radius:20px;font-size:11px;}
+.chip.active.c-done{background:var(--ok);border-color:var(--ok);color:#0E1022;}
+.chip.active.c-cancel{background:var(--danger);border-color:var(--danger);color:#fff;}
 </style>
 </head>
 <body>
@@ -453,9 +536,22 @@ textarea{resize:vertical;min-height:70px;}
         <a href="#categories">الأقسام</a>
       </nav>
       <div class="nav-actions">
-        <a class="admin-link" href="#" onclick="openAdmin();return false;">لوحة التحكم</a>
-        <button class="icon-btn" id="accountBtn" onclick="openAuthModal()" title="حسابي">👤</button>
-        <button class="icon-btn" onclick="toggleCart(true)">🛒<span class="badge" id="cartCount">0</span></button>
+        <a class="nav-btn nb-admin" href="#" onclick="openAdmin();return false;" title="لوحة التحكم">
+          <span class="nb-ico">⚙️</span>
+          <span class="nb-txt">لوحة التحكم<small>إدارة المتجر</small></span>
+        </a>
+        <button class="nav-btn nb-orders" id="ordersBtn" onclick="openMyOrders()" title="طلباتي / إلغاء طلب">
+          <span class="nb-ico">📦<span class="badge" id="ordersCount" style="display:none;">0</span></span>
+          <span class="nb-txt">طلباتي<small>تابع أو الغي طلبك</small></span>
+        </button>
+        <button class="nav-btn nb-account" id="accountBtn" onclick="openAuthModal()" title="حسابي">
+          <span class="nb-ico">👤</span>
+          <span class="nb-txt"><span id="accLabel">دخول</span><small id="accSub">سجّل أو أنشئ حساب</small></span>
+        </button>
+        <button class="nav-btn nb-cart" id="cartBtn" onclick="toggleCart(true)" title="السلة">
+          <span class="nb-ico">🛒<span class="badge" id="cartCount">0</span></span>
+          <span class="nb-txt">السلة<small>راجع مشترياتك</small></span>
+        </button>
       </div>
     </div>
   </header>
@@ -534,6 +630,7 @@ textarea{resize:vertical;min-height:70px;}
   </section>
 
   <footer class="wrap">
+    <div class="cs-box"><span>📞 خدمة العملاء:</span><a class="cs-tel" href="#"><span class="cs-num"></span></a><a class="cs-wa" href="#" target="_blank" rel="noopener">💬 واتساب</a></div>
     <div class="social-links" id="socialLinks"></div>
     <div>© 2026 نيون ستور — متجر الألعاب الإلكترونية. جميع الحقوق محفوظة.</div>
   </footer>
@@ -548,7 +645,8 @@ textarea{resize:vertical;min-height:70px;}
   <div class="drawer-items" id="drawerItems"></div>
   <div class="drawer-foot">
     <div class="total"><span>الإجمالي</span><span id="cartTotal">0 ج.م</span></div>
-    <button class="btn" style="width:100%;" onclick="openCheckout()">إتمام الطلب</button>
+    <button class="btn" id="cartCheckoutBtn" style="width:100%;" onclick="openCheckout()">إتمام الطلب</button>
+    <p class="hint" style="text-align:center;margin:10px 0 0;">خدمة العملاء: <b class="cs-num" style="color:var(--accent2)"></b></p>
   </div>
 </aside>
 
@@ -590,10 +688,11 @@ textarea{resize:vertical;min-height:70px;}
   </div>
 </div>
 
-<!-- Customer account modal (login / register / account view) -->
+<!-- Customer account modal (login / register / account / orders / password) -->
 <div class="simple-modal-overlay" id="authOverlay" onclick="if(event.target===this) closeAuthModal()">
-  <div class="simple-modal narrow">
+  <div class="simple-modal narrow" id="authBox">
     <button class="pmodal-close" onclick="closeAuthModal()">✕</button>
+    <div class="auth-notice" id="authNotice"></div>
 
     <div id="auth-login">
       <h3>تسجيل الدخول</h3>
@@ -602,7 +701,7 @@ textarea{resize:vertical;min-height:70px;}
         <button class="auth-tab" onclick="showAuthView('register')">حساب جديد</button>
       </div>
       <div class="field"><label>رقم الموبايل</label><input id="loginPhone" type="tel" placeholder="01xxxxxxxxx"></div>
-      <div class="field"><label>كلمة المرور</label><input id="loginPasswordC" type="password"></div>
+      <div class="field"><label>كلمة المرور</label><input id="loginPasswordC" type="password" onkeydown="if(event.key==='Enter')loginCustomer()"></div>
       <button class="btn" style="width:100%;" onclick="loginCustomer()">دخول</button>
       <p class="hint">مفيش حساب؟ اضغط على <b onclick="showAuthView('register')" style="cursor:pointer;">حساب جديد</b> بالأعلى.</p>
     </div>
@@ -616,7 +715,8 @@ textarea{resize:vertical;min-height:70px;}
       <div class="field"><label>الاسم بالكامل</label><input id="regName"></div>
       <div class="field"><label>رقم الموبايل</label><input id="regPhone" type="tel" placeholder="01xxxxxxxxx"></div>
       <div class="field"><label>البريد الإلكتروني</label><input id="regEmail" type="email" placeholder="example@email.com"></div>
-      <div class="field"><label>كلمة المرور</label><input id="regPasswordC" type="password"></div>
+      <div class="field"><label>كلمة المرور (6 حروف/أرقام على الأقل)</label><input id="regPasswordC" type="password"></div>
+      <div class="field"><label>تأكيد كلمة المرور</label><input id="regPasswordC2" type="password" onkeydown="if(event.key==='Enter')registerCustomer()"></div>
       <button class="btn" style="width:100%;" onclick="registerCustomer()">إنشاء الحساب</button>
     </div>
 
@@ -624,11 +724,31 @@ textarea{resize:vertical;min-height:70px;}
       <h3>حسابي</h3>
       <div class="acc-row"><span>الاسم</span><span id="accName"></span></div>
       <div class="acc-row"><span>رقم الموبايل</span><span id="accPhone"></span></div>
+      <div class="acc-row"><span>عدد طلباتي</span><span id="accOrdersCount">0</span></div>
       <div class="field" style="margin-top:16px;"><label>البريد الإلكتروني</label><input id="accEmail" type="email" placeholder="example@email.com"></div>
-      <div style="display:flex;gap:10px;margin-top:6px;">
-        <button class="btn ok" style="flex:1;" onclick="saveAccountEmail()">حفظ البريد الإلكتروني</button>
+      <button class="btn ok" style="width:100%;" onclick="saveAccountEmail()">حفظ البريد الإلكتروني</button>
+      <button class="btn" style="width:100%;margin-top:10px;" onclick="showAuthView('orders')">📦 طلباتي / إلغاء طلب</button>
+      <div style="display:flex;gap:10px;margin-top:10px;">
+        <button class="btn outline" style="flex:1;" onclick="showAuthView('password')">🔑 تغيير كلمة المرور</button>
         <button class="btn outline" style="flex:1;" onclick="logoutCustomer()">تسجيل خروج</button>
       </div>
+      <p class="hint">خدمة العملاء: <b class="cs-num"></b></p>
+    </div>
+
+    <div id="auth-orders" style="display:none;">
+      <button class="back-link" onclick="showAuthView('account')">→ رجوع لحسابي</button>
+      <h3>طلباتي</h3>
+      <div class="myo-list" id="myOrdersList"></div>
+      <p class="hint">تقدر تلغي الطلب طول ما حالته «جديد». لأي مساعدة كلّم خدمة العملاء: <b class="cs-num"></b></p>
+    </div>
+
+    <div id="auth-password" style="display:none;">
+      <button class="back-link" onclick="showAuthView('account')">→ رجوع لحسابي</button>
+      <h3>تغيير كلمة المرور</h3>
+      <div class="field"><label>كلمة المرور الحالية</label><input id="pwOld" type="password"></div>
+      <div class="field"><label>كلمة المرور الجديدة</label><input id="pwNew" type="password"></div>
+      <div class="field"><label>تأكيد كلمة المرور الجديدة</label><input id="pwNew2" type="password" onkeydown="if(event.key==='Enter')changePassword()"></div>
+      <button class="btn" style="width:100%;" onclick="changePassword()">حفظ كلمة المرور</button>
     </div>
   </div>
 </div>
@@ -688,7 +808,7 @@ textarea{resize:vertical;min-height:70px;}
 <div class="simple-modal-overlay" id="thankyouOverlay" onclick="if(event.target===this) closeThankYou()">
   <div class="simple-modal narrow" style="text-align:center;">
     <button class="pmodal-close" onclick="closeThankYou()">✕</button>
-    <div style="font-size:52px;margin-bottom:10px;">🎉</div>
+    <div class="big-ico ok">🎉</div>
     <h3 style="margin-bottom:8px;">شكراً لك، <span id="tyName"></span>!</h3>
     <p style="color:var(--muted);font-size:14px;line-height:1.8;margin:0 0 16px;" id="tyMessage"></p>
     <div class="support-note" style="text-align:center;">
@@ -699,6 +819,24 @@ textarea{resize:vertical;min-height:70px;}
       <span style="font-size:18px;">🟢</span> تواصل معنا على واتساب بالضغط على الزر الأخضر لإكمال طلبك
     </a>
     <button class="btn" style="width:100%;margin-top:10px;" onclick="closeThankYou()">تم</button>
+  </div>
+</div>
+
+<!-- Cancel confirmation modal (after the customer cancels an order) -->
+<div class="simple-modal-overlay" id="cancelOverlay" onclick="if(event.target===this) closeCancelModal()">
+  <div class="simple-modal narrow" style="text-align:center;">
+    <button class="pmodal-close" onclick="closeCancelModal()">✕</button>
+    <div class="big-ico bad">🛑</div>
+    <h3 style="margin-bottom:8px;">تم إلغاء طلبك، <span id="cnName"></span></h3>
+    <p style="color:var(--muted);font-size:14px;line-height:1.8;margin:0 0 16px;" id="cnMessage"></p>
+    <div class="support-note" style="text-align:center;">
+      لأي استفسار، تواصل مع خدمة العملاء على الرقم<br>
+      <b style="font-size:16px;color:var(--accent2);" id="cnSupportNumber"></b>
+    </div>
+    <a id="cnWhatsappBtn" href="#" target="_blank" rel="noopener" class="btn" style="width:100%;margin-top:12px;background:#25D366;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+      <span style="font-size:18px;">🟢</span> أرسل رسالة الإلغاء على واتساب
+    </a>
+    <button class="btn" style="width:100%;margin-top:10px;" onclick="closeCancelModal()">تم</button>
   </div>
 </div>
 
@@ -720,7 +858,7 @@ textarea{resize:vertical;min-height:70px;}
       <a class="side-link active" data-page="dash" onclick="showPage('dash')">📊 الرئيسية</a>
       <a class="side-link" data-page="products" onclick="showPage('products')">🕹️ المنتجات</a>
       <a class="side-link" data-page="platforms" onclick="showPage('platforms')">🗂️ المنصات والأقسام</a>
-      <a class="side-link" data-page="orders" onclick="showPage('orders')">📦 الطلبات</a>
+      <a class="side-link" data-page="orders" onclick="showPage('orders')">📦 الطلبات <span class="side-badge" id="cancelBadge" style="display:none;"></span></a>
       <a class="side-link" data-page="customers" onclick="showPage('customers')">👤 العملاء</a>
       <a class="side-link" data-page="coupons" onclick="showPage('coupons')">🏷️ الكوبونات</a>
       <a class="side-link" data-page="settings" onclick="showPage('settings')">⚙️ الإعدادات</a>
@@ -735,6 +873,7 @@ textarea{resize:vertical;min-height:70px;}
           <div class="stat-card"><span>عدد الطلبات</span><b id="kpiOrders">0</b></div>
           <div class="stat-card"><span>عدد المنتجات</span><b id="kpiProducts">0</b></div>
           <div class="stat-card"><span>طلبات جديدة</span><b id="kpiNew">0</b></div>
+          <div class="stat-card"><span>طلبات ملغية</span><b id="kpiCancelled" style="color:var(--danger)">0</b></div>
         </div>
         <div class="panel">
           <h3>حركة المبيعات (آخر الطلبات)</h3>
@@ -893,7 +1032,7 @@ textarea{resize:vertical;min-height:70px;}
 
       <!-- Orders -->
       <div class="page" id="page-orders" style="display:none;">
-        <div class="admin-top"><h2>الطلبات</h2></div>
+        <div class="admin-top"><h2>الطلبات</h2><div class="admin-chips" id="orderFilterChips"></div></div>
         <div class="panel">
           <div class="field" style="max-width:320px;margin-bottom:14px;">
             <label>ابحث بكود الطلب</label>
@@ -908,7 +1047,7 @@ textarea{resize:vertical;min-height:70px;}
       <div class="page" id="page-customers" style="display:none;">
         <div class="admin-top"><h2>العملاء</h2></div>
         <div class="panel">
-          <table><thead><tr><th>العميل</th><th>عدد الطلبات</th><th>إجمالي الإنفاق</th></tr></thead>
+          <table><thead><tr><th>العميل</th><th>الموبايل</th><th>البريد الإلكتروني</th><th>عدد الطلبات</th><th>ملغية</th><th>إجمالي الإنفاق</th><th>تاريخ التسجيل</th><th>الحالة</th><th></th></tr></thead>
           <tbody id="customersBody"></tbody></table>
         </div>
       </div>
@@ -1696,70 +1835,312 @@ function toggleCart(open){
   document.getElementById('overlay').classList.toggle('show', open);
 }
 
-/* ---------- حسابات العملاء (تسجيل الدخول / إنشاء حساب) ---------- */
+/* ---------- حسابات العملاء (تسجيل الدخول / إنشاء حساب / طلباتي / إلغاء) ---------- */
+const CUSTOMER_SERVICE_NUMBER = SUPPORT_NUMBER;
+function waLink(msg){
+  return 'https://wa.me/20' + CUSTOMER_SERVICE_NUMBER.replace(/\D/g,'').replace(/^0/,'') + (msg ? '?text=' + encodeURIComponent(msg) : '');
+}
+function renderCustomerService(){
+  document.querySelectorAll('.cs-num').forEach(el=>{ el.textContent = CUSTOMER_SERVICE_NUMBER; });
+  document.querySelectorAll('.cs-wa').forEach(el=>{ el.href = waLink('مرحباً، أحتاج مساعدة من خدمة العملاء.'); });
+  document.querySelectorAll('.cs-tel').forEach(el=>{ el.href = 'tel:' + CUSTOMER_SERVICE_NUMBER; });
+}
+function normalizePhone(p){
+  let s = String(p||'').replace(/[٠-٩]/g, d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[^\d+]/g,'');
+  return s.replace(/^\+?20(?=1)/, '0');
+}
+function isValidPhone(p){ return /^01[0125]\d{8}$/.test(p); }
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/* كلمات المرور بتتخزن مشفّرة (SHA-256) بدل النص العادي. الحسابات القديمة بتتحوّل تلقائياً عند أول تسجيل دخول. */
+function fallbackHash(text){
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for(let i=0;i<text.length;i++){ const ch=text.charCodeAt(i); h1=Math.imul(h1^ch,2654435761); h2=Math.imul(h2^ch,1597334677); }
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);
+  h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+  return 'cyrb:' + (4294967296*(2097151&h2)+(h1>>>0)).toString(16);
+}
+async function hashPassword(phone, pw, forceFallback){
+  const text = 'ns1|' + phone + '|' + pw;
+  if(!forceFallback && window.crypto && crypto.subtle){
+    try{
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      return 'sha256:' + Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }catch(e){}
+  }
+  return fallbackHash(text);
+}
+async function passwordMatches(c, pw){
+  if(c.pwHash) return c.pwHash === await hashPassword(c.phone, pw, c.pwHash.indexOf('cyrb:')===0);
+  return c.password != null && c.password === pw; // حساب قديم بدون تشفير
+}
+
+/* بنسحب آخر نسخة من الطلبات والحسابات قبل أي عملية كتابة، علشان نتجنب مسح طلبات عملاء تانيين */
+function setBusy(btn, on, label){
+  if(!btn) return;
+  if(on){ btn.dataset.t = btn.textContent; btn.textContent = label; btn.disabled = true; btn.style.opacity = '.7'; }
+  else { btn.textContent = btn.dataset.t || btn.textContent; btn.disabled = false; btn.style.opacity = ''; }
+}
+/* حفظ جزئي: بيبعت بس الأعمدة اللي اتغيرت (الطلبات / العملاء) بدل ما يرفع المنتجات وصورها كل مرة — ده اللي كان بيبطّأ */
+function persistPart(cols){
+  persistLocalCache();
+  if(!remoteLoaded){
+    alert('الموقع مش متصل بقاعدة البيانات حالياً. حدّث الصفحة وتأكد من الإنترنت وحاول تاني.');
+    return Promise.resolve(false);
+  }
+  saveChain = saveChain.then(async ()=>{
+    const payload = {updated_at: new Date().toISOString()};
+    if(cols.includes('orders')) payload.orders = orders;
+    if(cols.includes('customers')) payload.customers = customers;
+    const { data, error } = await sb.from('store_state').update(payload).eq('id', 1).select('id').abortSignal(timeoutSignal(60000));
+    if(error) throw error;
+    if(!data || !data.length) throw new Error('الخادم ما عدّلش أي صف — غالباً صلاحيات (RLS) في Supabase');
+    return true;
+  }).catch(err=>{
+    console.error('تعذر الحفظ', err);
+    alert('تعذر الحفظ على الخادم!\n' + errText(err));
+    return false;
+  });
+  return saveChain;
+}
+async function refreshAccountsFromRemote(cols){
+  cols = cols || 'orders,customers';
+  try{
+    const { data, error } = await sb.from('store_state').select(cols).eq('id',1).abortSignal(timeoutSignal(20000)).maybeSingle();
+    if(error || !data) return false;
+    if(cols.includes('orders') && Array.isArray(data.orders)) orders = data.orders;
+    if(cols.includes('customers') && Array.isArray(data.customers)) customers = data.customers;
+    return true;
+  }catch(e){ return false; }
+}
+
+function showToastMsg(msg){
+  let t = document.getElementById('nsToast');
+  if(!t){
+    t = document.createElement('div'); t.id = 'nsToast';
+    t.style.cssText = 'position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--ok);color:var(--text);padding:12px 20px;border-radius:14px;font-weight:700;font-size:14px;z-index:300;box-shadow:0 12px 40px rgba(0,0,0,.5);transition:opacity .3s;max-width:90vw;text-align:center;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._h); t._h = setTimeout(()=>{ t.style.opacity = '0'; }, 3500);
+}
+function enforceBlockedSession(showMsg){
+  const c = getCurrentCustomer();
+  if(!c || !c.blocked) return false;
+  currentCustomerId = null; persistLocalCache(); renderAccountUI(); closeAuthModal();
+  if(showMsg) alert('تم حظر حسابك ولا يمكنك إتمام الطلبات. للاستفسار تواصل مع خدمة العملاء على ' + CUSTOMER_SERVICE_NUMBER);
+  return true;
+}
+let pendingCheckout = false;
 function getCurrentCustomer(){ return customers.find(c=>c.id===currentCustomerId) || null; }
+function openMyOrders(){
+  if(!getCurrentCustomer()){
+    openAuthModal({notice:'سجّل دخول الأول علشان تشوف طلباتك وتقدر تلغي أي طلب 📦'});
+    return;
+  }
+  openAuthModal({view:'orders'});
+}
+function updateOrdersBadge(){
+  const b = document.getElementById('ordersCount'); if(!b) return;
+  const n = getMyOrders().filter(o=>o.status==='جديد').length;
+  b.textContent = n; b.style.display = n ? 'inline-block' : 'none';
+}
 function renderAccountUI(){
   const c = getCurrentCustomer();
+  updateOrdersBadge();
+  document.getElementById('accLabel').textContent = c ? 'حسابي' : 'دخول';
+  document.getElementById('accSub').textContent = c ? c.name.split(' ')[0] : 'سجّل أو أنشئ حساب';
   document.getElementById('accountBtn').title = c ? `حسابي (${c.name})` : 'تسجيل الدخول / حساب جديد';
+  const b = document.getElementById('cartCheckoutBtn');
+  if(b) b.textContent = c ? 'إتمام الطلب' : '🔐 سجّل دخول لإتمام الطلب';
 }
-function openAuthModal(){
+function openAuthModal(opts){
+  opts = (opts && typeof opts==='object' && !(opts instanceof Event)) ? opts : {};
   document.getElementById('authOverlay').classList.add('show');
   const c = getCurrentCustomer();
-  if(c){
-    showAuthView('account');
+  const n = document.getElementById('authNotice');
+  n.textContent = opts.notice || ''; n.classList.toggle('show', !!opts.notice);
+  if(c) showAuthView(opts.view || 'account', true);
+  else showAuthView(opts.view==='register' ? 'register' : 'login', true);
+}
+function closeAuthModal(){
+  pendingCheckout = false;
+  document.getElementById('authOverlay').classList.remove('show');
+}
+function showAuthView(view, keepNotice){
+  ['login','register','account','orders','password'].forEach(v=>{
+    document.getElementById('auth-'+v).style.display = (v===view) ? 'block' : 'none';
+  });
+  const box = document.getElementById('authBox');
+  box.classList.toggle('mid', view==='orders'); box.classList.toggle('narrow', view!=='orders');
+  if(!keepNotice || (view!=='login' && view!=='register')) document.getElementById('authNotice').classList.remove('show');
+  const c = getCurrentCustomer();
+  if(view==='account' && c){
     document.getElementById('accName').textContent = c.name;
     document.getElementById('accPhone').textContent = c.phone;
     document.getElementById('accEmail').value = c.email || '';
-  } else {
-    showAuthView('login');
+    document.getElementById('accOrdersCount').textContent = getMyOrders().length;
   }
+  if(view==='orders') renderMyOrders();
+  updateOrdersBadge();
 }
-function closeAuthModal(){ document.getElementById('authOverlay').classList.remove('show'); }
-function showAuthView(view){
-  ['login','register','account'].forEach(v=>{
-    document.getElementById('auth-'+v).style.display = (v===view) ? 'block' : 'none';
-  });
+function finishAuthSuccess(){
+  const resume = pendingCheckout;
+  closeAuthModal();
+  renderAccountUI();
+  if(resume) openCheckout();
 }
-function registerCustomer(){
+async function registerCustomer(){
   const name = document.getElementById('regName').value.trim();
-  const phone = document.getElementById('regPhone').value.trim();
+  const phone = normalizePhone(document.getElementById('regPhone').value);
   const email = document.getElementById('regEmail').value.trim();
-  const password = document.getElementById('regPasswordC').value;
-  if(!name || !phone || !email || !password){ alert('يرجى إدخال الاسم ورقم الموبايل والبريد الإلكتروني وكلمة المرور'); return; }
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ alert('يرجى إدخال بريد إلكتروني صحيح'); return; }
-  if(customers.find(c=>c.phone===phone)){ alert('رقم الموبايل ده مسجل بالفعل، جرب تسجيل الدخول'); return; }
-  const c = {id:uid(), name, phone, email, password};
-  customers.push(c);
-  currentCustomerId = c.id;
-  persist();
-  closeAuthModal();
-  renderAccountUI();
-  alert('تم إنشاء الحساب بنجاح، أهلاً بيك يا '+name+'!');
+  const pw = document.getElementById('regPasswordC').value;
+  const pw2 = document.getElementById('regPasswordC2').value;
+  if(!name || !phone || !email || !pw){ alert('يرجى إدخال الاسم ورقم الموبايل والبريد الإلكتروني وكلمة المرور'); return; }
+  if(name.length < 2){ alert('اكتب اسمك بشكل صحيح'); return; }
+  if(!isValidPhone(phone)){ alert('رقم الموبايل لازم يكون رقم مصري صحيح (مثال: 01012345678)'); return; }
+  if(!EMAIL_RE.test(email)){ alert('يرجى إدخال بريد إلكتروني صحيح'); return; }
+  if(pw.length < 6){ alert('كلمة المرور لازم تكون 6 حروف أو أرقام على الأقل'); return; }
+  if(pw !== pw2){ alert('كلمتا المرور مش متطابقتين'); return; }
+  const emailKey = email.toLowerCase();
+  const dupMsg = ()=>{
+    if(customers.find(c=>normalizePhone(c.phone)===phone)) return 'رقم الموبايل ده مسجل بالفعل، جرب تسجيل الدخول';
+    if(customers.find(c=>(c.email||'').trim().toLowerCase()===emailKey)) return 'البريد الإلكتروني ده مسجل بالفعل على حساب تاني';
+    return null;
+  };
+  let dm = dupMsg();
+  if(dm){ alert(dm); return; }
+  const btn = document.querySelector('#auth-register .btn');
+  setBusy(btn, true, '⏳ جاري إنشاء الحساب...');
+  try{
+    const [pwHash] = await Promise.all([hashPassword(phone, pw), refreshAccountsFromRemote('customers')]);
+    dm = dupMsg();
+    if(dm){ alert(dm); return; }
+    const c = {id:uid(), name, phone, email: emailKey, pwHash, createdAt:new Date().toISOString()};
+    customers.push(c);
+    const ok = await persistPart(['customers']);
+    if(!ok){ customers = customers.filter(x=>x.id!==c.id); return; }
+    currentCustomerId = c.id;
+    persistLocalCache();
+    ['regName','regPhone','regEmail','regPasswordC','regPasswordC2'].forEach(id=>document.getElementById(id).value='');
+    finishAuthSuccess();
+    showToastMsg('تم إنشاء الحساب بنجاح، أهلاً بيك يا '+name+' 🎉');
+  } finally { setBusy(btn, false); }
 }
-function loginCustomer(){
-  const phone = document.getElementById('loginPhone').value.trim();
-  const password = document.getElementById('loginPasswordC').value;
-  const c = customers.find(c=>c.phone===phone && c.password===password);
-  if(!c){ alert('رقم الموبايل أو كلمة المرور غير صحيحة'); return; }
-  currentCustomerId = c.id;
-  persist();
-  closeAuthModal();
-  renderAccountUI();
+async function loginCustomer(){
+  const phone = normalizePhone(document.getElementById('loginPhone').value);
+  const pw = document.getElementById('loginPasswordC').value;
+  if(!phone || !pw){ alert('اكتب رقم الموبايل وكلمة المرور'); return; }
+  const btn = document.querySelector('#auth-login .btn');
+  setBusy(btn, true, '⏳ جاري الدخول...');
+  try{
+    const find = async ()=>{
+      const c = customers.find(x=>normalizePhone(x.phone)===phone);
+      return (c && await passwordMatches(c, pw)) ? c : null;
+    };
+    let c = await find();                       // الأول من البيانات المحمّلة (فوري)
+    if(!c){ await refreshAccountsFromRemote('customers'); c = await find(); } // لو مش لاقيه، نجيب آخر نسخة
+    if(!c){ alert('رقم الموبايل أو كلمة المرور غير صحيحة'); return; }
+    if(c.blocked){ alert('تم حظر هذا الحساب ولا يمكن تسجيل الدخول به. للاستفسار تواصل مع خدمة العملاء على ' + CUSTOMER_SERVICE_NUMBER); return; }
+    if(!c.pwHash){ c.pwHash = await hashPassword(c.phone, pw); delete c.password; persistPart(['customers']); }
+    currentCustomerId = c.id;
+    persistLocalCache();
+    document.getElementById('loginPasswordC').value = '';
+    finishAuthSuccess();
+  } finally { setBusy(btn, false); }
 }
 function logoutCustomer(){
   currentCustomerId = null;
-  persist();
+  persistLocalCache();
   closeAuthModal();
   renderAccountUI();
 }
-function saveAccountEmail(){
+async function saveAccountEmail(){
   const c = getCurrentCustomer(); if(!c) return;
   const email = document.getElementById('accEmail').value.trim();
-  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ alert('يرجى إدخال بريد إلكتروني صحيح'); return; }
-  c.email = email;
-  persist();
-  alert('تم تحديث البريد الإلكتروني بنجاح');
+  if(!email || !EMAIL_RE.test(email)){ alert('يرجى إدخال بريد إلكتروني صحيح'); return; }
+  await refreshAccountsFromRemote('customers');
+  const fresh = getCurrentCustomer(); if(!fresh) return;
+  const key = email.toLowerCase();
+  if(customers.find(x=>x.id!==fresh.id && (x.email||'').trim().toLowerCase()===key)){ alert('البريد ده مستخدم على حساب تاني'); return; }
+  fresh.email = key;
+  if(await persistPart(['customers'])) showToastMsg('تم تحديث البريد الإلكتروني ✓');
 }
+async function changePassword(){
+  const c = getCurrentCustomer(); if(!c) return;
+  const oldPw = document.getElementById('pwOld').value;
+  const pw = document.getElementById('pwNew').value;
+  const pw2 = document.getElementById('pwNew2').value;
+  if(!oldPw || !pw){ alert('اكتب كلمة المرور الحالية والجديدة'); return; }
+  if(pw.length < 6){ alert('كلمة المرور الجديدة لازم تكون 6 حروف أو أرقام على الأقل'); return; }
+  if(pw !== pw2){ alert('كلمتا المرور الجديدتان مش متطابقتين'); return; }
+  await refreshAccountsFromRemote('customers');
+  const fresh = getCurrentCustomer(); if(!fresh) return;
+  if(!(await passwordMatches(fresh, oldPw))){ alert('كلمة المرور الحالية غير صحيحة'); return; }
+  fresh.pwHash = await hashPassword(fresh.phone, pw); delete fresh.password;
+  if(await persistPart(['customers'])){
+    ['pwOld','pwNew','pwNew2'].forEach(id=>document.getElementById(id).value='');
+    showToastMsg('تم تغيير كلمة المرور ✓');
+    showAuthView('account');
+  }
+}
+
+/* ---------- طلباتي + إلغاء الطلب ---------- */
+function getMyOrders(){
+  const c = getCurrentCustomer(); if(!c) return [];
+  return orders.filter(o=>o.customerId===c.id);
+}
+function orderStatusClass(o){ return o.status==='مكتمل' ? 'done' : (o.status==='ملغي' ? 'cancelled' : 'new'); }
+function renderMyOrders(){
+  const list = getMyOrders();
+  document.getElementById('myOrdersList').innerHTML = list.length ? list.map(o=>`
+    <div class="myo-card st-${orderStatusClass(o)}">
+      <div class="myo-top"><span class="myo-code">#${escapeHtml(o.code||'')}</span><span class="pill ${orderStatusClass(o)}">${escapeHtml(o.status)}</span></div>
+      <div class="myo-items">${escapeHtml(o.item)}</div>
+      <div class="myo-foot"><b>${fmt(o.amount)}</b>
+        ${o.status==='جديد' ? `<button class="myo-cancel" onclick="cancelMyOrder('${o.id}', this)">إلغاء الطلب</button>`
+          : (o.status==='ملغي' ? `<span class="by-tag">${o.cancelledBy==='العميل' ? 'ألغيته أنت' : 'تم إلغاؤه من الإدارة'}</span>` : '')}
+      </div>
+    </div>`).join('') : '<div class="support-note" style="text-align:center;margin:0;">لسه معملتش أي طلبات.</div>';
+}
+let cancelling = false;
+async function cancelMyOrder(id, btn){
+  if(cancelling) return;
+  const c0 = getCurrentCustomer();
+  if(!c0){ openAuthModal({notice:'سجّل دخول الأول علشان تدير طلباتك'}); return; }
+  if(!confirm('هل أنت متأكد إنك عايز تلغي الطلب ده؟')) return;
+  cancelling = true;
+  setBusy(btn, true, '⏳ جاري الإلغاء...');
+  try{
+    await refreshAccountsFromRemote('orders,customers');
+    const c = getCurrentCustomer() || c0;
+    const o = orders.find(x=>x.id===id);
+    if(!o || o.customerId !== c.id){ alert('الطلب ده مش تابع لحسابك'); renderMyOrders(); return; }
+    if(o.status !== 'جديد'){
+      alert(o.status==='ملغي' ? 'الطلب ده اتلغى بالفعل' : 'مينفعش تلغي الطلب ده لأنه اتأكد بالفعل. كلّم خدمة العملاء على ' + CUSTOMER_SERVICE_NUMBER);
+      renderMyOrders(); return;
+    }
+    o.status = 'ملغي'; o.cancelledBy = 'العميل'; o.cancelledAt = new Date().toISOString(); o.cancelSeen = false;
+    const ok = await persistPart(['orders']);
+    if(!ok){
+      o.status = 'جديد'; delete o.cancelledBy; delete o.cancelledAt; delete o.cancelSeen;
+      renderMyOrders(); return;
+    }
+    renderAdminData(); renderMyOrders(); updateOrdersBadge();
+    closeAuthModal();
+    openCancelModal(c.name, o);
+  } finally { cancelling = false; setBusy(btn, false); }
+}
+function openCancelModal(name, o){
+  document.getElementById('cnName').textContent = name;
+  document.getElementById('cnMessage').textContent = `تم إلغاء طلبك رقم ${o.code} (${o.item}) بنجاح. لو كنت دفعت أو حوّلت أي مبلغ، تواصل مع خدمة العملاء على واتساب علشان نراجع معاك. ويسعدنا نخدمك تاني في أي وقت.`;
+  document.getElementById('cnSupportNumber').textContent = CUSTOMER_SERVICE_NUMBER;
+  const href = waLink(`مرحباً، أنا ${name}، قمت بإلغاء طلبي رقم ${o.code} (${o.item}). برجاء تأكيد الإلغاء.`);
+  document.getElementById('cnWhatsappBtn').href = href;
+  document.getElementById('cancelOverlay').classList.add('show');
+  try{ window.open(href, '_blank', 'noopener'); }catch(e){} // لو المتصفح منع فتح النافذة، الزر الأخضر موجود
+}
+function closeCancelModal(){ document.getElementById('cancelOverlay').classList.remove('show'); }
 
 /* ---------- إتمام الطلب (بيانات العميل + كوبون + طريقة الدفع) ---------- */
 let selectedPayment = PAYMENT_METHODS[0].id;
@@ -1801,10 +2182,18 @@ function resetProofFields(){
 }
 function openCheckout(){
   if(!cart.length){ alert('السلة فارغة'); return; }
+  if(enforceBlockedSession(true)) return;
   const c = getCurrentCustomer();
-  document.getElementById('coName').value = c ? c.name : '';
-  document.getElementById('coPhone').value = c ? c.phone : '';
-  document.getElementById('coEmail').value = c ? (c.email||'') : '';
+  if(!c){
+    toggleCart(false);
+    openAuthModal({notice:'لازم تسجّل دخول أو تنشئ حساب جديد الأول علشان تقدر تكمل طلبك 🔐'});
+    pendingCheckout = true;
+    return;
+  }
+  document.getElementById('coName').value = c.name;
+  document.getElementById('coPhone').value = c.phone;
+  document.getElementById('coEmail').value = c.email || '';
+  ['coName','coPhone'].forEach(id=>{ const el=document.getElementById(id); el.readOnly = true; el.classList.add('locked'); });
   document.getElementById('coCoupon').value = '';
   document.getElementById('couponMsg').textContent = '';
   appliedCoupon = null;
@@ -1856,7 +2245,12 @@ function updateCheckoutTotals(){
 function genOrderCode(){
   return uid().slice(0,6).toUpperCase();
 }
-function confirmCheckout(){
+let checkingOut = false;
+async function confirmCheckout(){
+  if(checkingOut) return;
+  const cust = getCurrentCustomer();
+  if(!cust){ closeCheckout(); openCheckout(); return; }
+  if(cust.blocked){ closeCheckout(); enforceBlockedSession(true); return; }
   const soldOutInCart = cart.filter(c=>isSoldOut(products.find(p=>p.id===c.id)));
   if(soldOutInCart.length){
     const names = soldOutInCart.map(c=>products.find(p=>p.id===c.id).name).join('، ');
@@ -1865,8 +2259,8 @@ function confirmCheckout(){
     alert('تم حذف ألعاب نفدت كميتها من السلة: ' + names);
     return;
   }
-  const name = document.getElementById('coName').value.trim();
-  const phone = document.getElementById('coPhone').value.trim();
+  const name = cust.name;
+  const phone = cust.phone;
   const email = document.getElementById('coEmail').value.trim();
   if(!name || !phone || !email){ alert('يرجى إدخال الاسم ورقم الموبايل والبريد الإلكتروني'); return; }
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ alert('يرجى إدخال بريد إلكتروني صحيح'); return; }
@@ -1888,16 +2282,30 @@ function confirmCheckout(){
   }).filter(Boolean).join('، ');
   const pm = PAYMENT_METHODS.find(m=>m.id===selectedPayment);
   const newOrder = {
-    id:uid(), code: genOrderCode(), customer:name, phone, email,
+    id:uid(), code: genOrderCode(), customerId: cust.id, customer:name, phone, email,
     payment: pm ? pm.name : '', coupon: appliedCoupon ? appliedCoupon.code : null, discount,
     item:names, amount:total, status:'جديد',
     txnId, proofImage: proofImg
   };
-  orders.unshift(newOrder);
-  cart = [];
-  persist(); renderCart(); closeCheckout(); renderAdminData();
-  resetProofFields();
-  openThankYou(name, pm, newOrder.code);
+  checkingOut = true;
+  const coBtn = document.querySelector('#checkoutOverlay button[onclick="confirmCheckout()"]');
+  setBusy(coBtn, true, '⏳ جاري تأكيد الطلب...');
+  try{
+    await refreshAccountsFromRemote('orders,customers'); // علشان منمسحش طلبات عملاء تانيين + نتأكد إن الحساب مش محظور
+    const live = customers.find(x=>x.id===cust.id);
+    if(!live || live.blocked){
+      closeCheckout();
+      if(!enforceBlockedSession(true)){ currentCustomerId = null; persistLocalCache(); renderAccountUI(); alert('الحساب ده مش موجود، سجّل دخول من جديد'); }
+      return;
+    }
+    orders.unshift(newOrder);
+    const ok = await persistPart(['orders']);
+    if(!ok){ orders = orders.filter(o=>o.id!==newOrder.id); return; }
+    cart = [];
+    persistLocalCache(); renderCart(); closeCheckout(); renderAdminData(); updateOrdersBadge();
+    resetProofFields();
+    openThankYou(name, pm, newOrder.code);
+  } finally { checkingOut = false; setBusy(coBtn, false); }
 }
 function openThankYou(name, pm, orderCode){
   document.getElementById('tyName').textContent = name;
@@ -1940,7 +2348,22 @@ function doLogin(){
     renderAdminData();
   } else alert('بيانات الدخول غير صحيحة');
 }
+let adminPageNow = 'dash';
+let adminOrderFilter = 'الكل';
+function setOrderFilter(f){ adminOrderFilter = f; renderAdminData(); }
+function markCancelsSeen(){
+  let changed = false;
+  orders.forEach(o=>{ if(o.cancelledBy==='العميل' && !o.cancelSeen){ o.cancelSeen = true; changed = true; } });
+  if(changed){ persist(); renderAdminData(); }
+}
+function cancelTagHtml(o){
+  if(o.status!=='ملغي' || !o.cancelledBy) return '';
+  const d = o.cancelledAt ? ' · ' + new Date(o.cancelledAt).toLocaleString('ar-EG',{dateStyle:'short',timeStyle:'short'}) : '';
+  return `<br><span class="by-tag">${o.cancelledBy==='العميل' ? '🙋 ألغاه العميل' : 'ألغته الإدارة'}${d}</span>`;
+}
 function showPage(name){
+  if(adminPageNow==='orders' && name!=='orders') markCancelsSeen();
+  adminPageNow = name;
   document.querySelectorAll('.page').forEach(el=>el.style.display='none');
   document.getElementById('page-'+name).style.display='block';
   document.querySelectorAll('.side-link').forEach(el=>el.classList.remove('active'));
@@ -1953,10 +2376,14 @@ function renderAdminData(){
   document.getElementById('kpiOrders').textContent = orders.length;
   document.getElementById('kpiProducts').textContent = products.length;
   document.getElementById('kpiNew').textContent = orders.filter(o=>o.status==='جديد').length;
+  document.getElementById('kpiCancelled').textContent = orders.filter(o=>o.status==='ملغي').length;
+  const newCancels = orders.filter(o=>o.cancelledBy==='العميل' && !o.cancelSeen).length;
+  const cb = document.getElementById('cancelBadge');
+  cb.textContent = newCancels; cb.style.display = newCancels ? 'inline-block' : 'none';
 
   document.getElementById('recentOrdersBody').innerHTML = orders.slice(0,5).map(o=>`
     <tr><td>${escapeHtml(o.customer)}</td><td>${escapeHtml(o.item)}</td><td>${fmt(o.amount)}</td>
-    <td><span class="pill ${o.status==='مكتمل'?'done':(o.status==='ملغي'?'cancelled':'new')}">${o.status}</span></td></tr>`).join('') || '<tr><td colspan="4">لا توجد طلبات بعد</td></tr>';
+    <td><span class="pill ${o.status==='مكتمل'?'done':(o.status==='ملغي'?'cancelled':'new')}">${o.status}</span>${cancelTagHtml(o)}</td></tr>`).join('') || '<tr><td colspan="4">لا توجد طلبات بعد</td></tr>';
 
   document.getElementById('productsBody').innerHTML = products.map((p,idx)=>{
     const stock = p.stock ?? 20;
@@ -1979,13 +2406,19 @@ function renderAdminData(){
 
   const orderSearchEl = document.getElementById('orderSearchInput');
   const orderSearch = orderSearchEl ? orderSearchEl.value.trim().toUpperCase() : '';
-  const filteredOrders = orderSearch ? orders.filter(o=>(o.code||'').toUpperCase().includes(orderSearch)) : orders;
+  const ORDER_FILTERS = [['الكل',''],['جديد',''],['مكتمل','c-done'],['ملغي','c-cancel']];
+  document.getElementById('orderFilterChips').innerHTML = ORDER_FILTERS.map(([f,cls])=>{
+    const n = f==='الكل' ? orders.length : orders.filter(o=>o.status===f).length;
+    return `<button class="chip ${cls} ${f===adminOrderFilter?'active':''}" onclick="setOrderFilter('${f}')">${f}<b>${n}</b></button>`;
+  }).join('');
+  const byStatus = adminOrderFilter==='الكل' ? orders : orders.filter(o=>o.status===adminOrderFilter);
+  const filteredOrders = orderSearch ? byStatus.filter(o=>(o.code||'').toUpperCase().includes(orderSearch)) : byStatus;
   document.getElementById('ordersBody').innerHTML = filteredOrders.map(o=>{
     const statusClass = o.status==='مكتمل' ? 'done' : (o.status==='ملغي' ? 'cancelled' : 'new');
-    return `<tr><td><b>${o.code || o.id.slice(0,5).toUpperCase()}</b></td><td>${escapeHtml(o.customer)}</td><td>${escapeHtml(o.phone||'-')}</td><td style="max-width:180px;white-space:normal;">${escapeHtml(o.email||'-')}</td><td>${escapeHtml(o.item)}</td><td>${escapeHtml(o.payment||'-')}${o.coupon?`<br><span style="color:var(--ok);font-size:11px;">كوبون: ${escapeHtml(o.coupon)}</span>`:''}${(o.txnId||o.accountName||o.proofImage)?`<br><span style="font-size:11px;color:var(--muted);white-space:normal;display:block;">${o.txnId?'رقم العملية / اسم صاحب الحساب: '+escapeHtml(o.txnId)+'<br>':''}${o.accountName?'صاحب الحساب: '+escapeHtml(o.accountName)+'<br>':''}</span>${o.proofImage?`<a href="#" onclick="viewProof('${o.id}');return false;" style="color:var(--accent2);font-size:12px;font-weight:700;">عرض الإيصال</a>`:''}`:''}</td><td>${fmt(o.amount)}</td>
-    <td><span class="pill ${statusClass}">${o.status}</span></td>
+    return `<tr class="${o.cancelledBy==='العميل' && !o.cancelSeen ? 'row-cancel-new' : ''}"><td><b>${o.code || o.id.slice(0,5).toUpperCase()}</b></td><td>${escapeHtml(o.customer)}</td><td>${escapeHtml(o.phone||'-')}</td><td style="max-width:180px;white-space:normal;">${escapeHtml(o.email||'-')}</td><td>${escapeHtml(o.item)}</td><td>${escapeHtml(o.payment||'-')}${o.coupon?`<br><span style="color:var(--ok);font-size:11px;">كوبون: ${escapeHtml(o.coupon)}</span>`:''}${(o.txnId||o.accountName||o.proofImage)?`<br><span style="font-size:11px;color:var(--muted);white-space:normal;display:block;">${o.txnId?'رقم العملية / اسم صاحب الحساب: '+escapeHtml(o.txnId)+'<br>':''}${o.accountName?'صاحب الحساب: '+escapeHtml(o.accountName)+'<br>':''}</span>${o.proofImage?`<a href="#" onclick="viewProof('${o.id}');return false;" style="color:var(--accent2);font-size:12px;font-weight:700;">عرض الإيصال</a>`:''}`:''}</td><td>${fmt(o.amount)}</td>
+    <td><span class="pill ${statusClass}">${o.status}</span>${cancelTagHtml(o)}</td>
     <td class="row-actions">
-      <button onclick="approveOrder('${o.id}')" title="الموافقة على الطلب" ${o.status==='مكتمل'?'disabled':''}>✓</button>
+      <button onclick="approveOrder('${o.id}')" title="الموافقة على الطلب" ${(o.status==='مكتمل'||o.status==='ملغي')?'disabled':''}>✓</button>
       <button onclick="cancelOrder('${o.id}')" title="التراجع عن الطلب" ${o.status==='ملغي'?'disabled':''}>✕</button>
     </td></tr>`;
   }).join('') || '<tr><td colspan="9">لا توجد طلبات</td></tr>';
@@ -2024,14 +2457,46 @@ function renderSalesChart(){
 }
 
 function renderCustomers(){
-  const map = {};
-  orders.forEach(o=>{
-    if(!map[o.customer]) map[o.customer] = {count:0, total:0};
-    map[o.customer].count++; map[o.customer].total += o.amount;
+  const rows = [];
+  customers.forEach(c=>{
+    const mine = orders.filter(o=>o.customerId===c.id);
+    const live = mine.filter(o=>o.status!=='ملغي');
+    rows.push({id:c.id, name:c.name, phone:c.phone||'-', email:c.email||'-', count:mine.length, cancelled:mine.length-live.length,
+      total:live.reduce((a,o)=>a+o.amount,0), since:c.createdAt ? new Date(c.createdAt).toLocaleDateString('ar-EG') : '-',
+      guest:false, blocked:!!c.blocked, reason:c.blockReason||''});
   });
-  const rows = Object.entries(map);
-  document.getElementById('customersBody').innerHTML = rows.map(([name,d])=>`
-    <tr><td>${escapeHtml(name)}</td><td>${d.count}</td><td>${fmt(d.total)}</td></tr>`).join('') || '<tr><td colspan="3">لا يوجد عملاء بعد</td></tr>';
+  const guests = {};
+  orders.filter(o=>!o.customerId).forEach(o=>{
+    const g = guests[o.customer] || (guests[o.customer] = {count:0, cancelled:0, total:0, phone:o.phone||'-', email:o.email||'-'});
+    g.count++; if(o.status==='ملغي') g.cancelled++; else g.total += o.amount;
+  });
+  Object.entries(guests).forEach(([name,g])=>rows.push({name, phone:g.phone, email:g.email, count:g.count, cancelled:g.cancelled, total:g.total, since:'-', guest:true}));
+  document.getElementById('customersBody').innerHTML = rows.map(r=>`
+    <tr><td>${escapeHtml(r.name)}${r.guest?'<br><span style="font-size:11px;color:var(--muted);">طلب قديم بدون حساب</span>':''}</td>
+    <td>${escapeHtml(r.phone)}</td><td style="max-width:180px;white-space:normal;">${escapeHtml(r.email)}</td>
+    <td>${r.count}</td><td style="color:${r.cancelled?'var(--danger)':'inherit'}">${r.cancelled}</td><td>${fmt(r.total)}</td><td>${escapeHtml(r.since)}</td>
+    <td>${r.guest ? '-' : `<span class="pill ${r.blocked?'cancelled':'done'}">${r.blocked?'محظور':'نشط'}</span>${r.blocked && r.reason ? `<br><span style="font-size:11px;color:var(--muted);white-space:normal;display:block;max-width:150px;">السبب: ${escapeHtml(r.reason)}</span>` : ''}`}</td>
+    <td>${r.guest ? '' : `<button class="btn small ${r.blocked?'ok':'danger'}" onclick="toggleBlockCustomer('${r.id}')">${r.blocked?'✅ فك الحظر':'🚫 حظر'}</button>`}</td></tr>`).join('') || '<tr><td colspan="9">لا يوجد عملاء بعد</td></tr>';
+}
+async function toggleBlockCustomer(id){
+  const c0 = customers.find(x=>x.id===id); if(!c0) return;
+  const blocking = !c0.blocked;
+  let reason = '';
+  if(blocking){
+    if(!confirm(`هل تريد حظر حساب «${c0.name}»؟\nمش هيقدر يسجل دخول أو يعمل طلبات جديدة.`)) return;
+    const r = prompt('سبب الحظر (اختياري — بيظهر لك أنت بس):');
+    if(r === null) return;
+    reason = r.trim();
+  } else if(!confirm(`هل تريد فك الحظر عن حساب «${c0.name}»؟`)) return;
+  await refreshAccountsFromRemote('customers');
+  const c = customers.find(x=>x.id===id); if(!c) return;
+  const backup = {blocked:c.blocked, blockedAt:c.blockedAt, blockReason:c.blockReason};
+  if(blocking){ c.blocked = true; c.blockedAt = new Date().toISOString(); c.blockReason = reason; }
+  else { delete c.blocked; delete c.blockedAt; delete c.blockReason; }
+  const ok = await persistPart(['customers']);
+  if(!ok){ Object.keys(backup).forEach(k=>{ if(backup[k]===undefined) delete c[k]; else c[k]=backup[k]; }); renderAdminData(); return; }
+  if(blocking && currentCustomerId===id) enforceBlockedSession(false);
+  renderAdminData();
 }
 
 let editingCouponId = null;
@@ -2271,14 +2736,14 @@ function applySettingsToStore(){
 }
 
 function approveOrder(id){
-  const o = orders.find(o=>o.id===id); if(!o) return;
+  const o = orders.find(o=>o.id===id); if(!o || o.status==='ملغي') return;
   o.status = 'مكتمل';
   persist(); renderAdminData();
 }
 function cancelOrder(id){
   const o = orders.find(o=>o.id===id); if(!o) return;
   if(!confirm('هل أنت متأكد من التراجع عن هذا الطلب؟')) return;
-  o.status = 'ملغي';
+  o.status = 'ملغي'; o.cancelledBy = 'الإدارة'; o.cancelledAt = new Date().toISOString(); o.cancelSeen = true;
   persist(); renderAdminData();
 }
 
@@ -2589,11 +3054,12 @@ function dragProductEnd(e){
 }
 
 function renderAll(){
-  renderTrending(); renderMostPlayed(); renderCategories(); renderFilters(); renderGrid(); renderCart(); renderAccountUI(); renderSocials();
+  renderTrending(); renderMostPlayed(); renderCategories(); renderFilters(); renderGrid(); renderCart(); renderAccountUI(); renderSocials(); renderCustomerService();
 }
 
 (async function init(){
   await loadRemoteState();
+  enforceBlockedSession(true);
   applySettingsToStore();
   renderAll();
   hideGlobalLoader();

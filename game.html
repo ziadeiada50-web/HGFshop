@@ -746,7 +746,7 @@ function addToCart(){
   if(found) found.qty++; else cart.push({id:p.id, editionId, qty:1});
   try{ localStorage.setItem(LS_CART, JSON.stringify(cart)); }catch(e){ alert('تعذر حفظ السلة على هذا الجهاز'); return; }
   updateCartBadge();
-  showToast('تمت إضافة «' + p.name + '» إلى السلة ✓');
+  showToast('تمت إضافة «' + p.name + '» إلى السلة ✓' + (getCurrentCustomer() ? '' : ' — لازم تسجّل دخول قبل إتمام الطلب'));
 }
 
 /* ---------- عرض الصفحة ---------- */

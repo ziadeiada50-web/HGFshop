@@ -626,8 +626,7 @@ function imgFitOn(p, ctx){ const m = (p && p.imgFit) || 'detail'; return m==='bo
 function thumbSrc(p, ctx){ return (ctx!=='detail' && p.sameImage===false && p.cardImage) ? p.cardImage : p.image; }
 function thumbHtml(p, ctx){ const src = thumbSrc(p, ctx); return src ? `<img src="${src}" alt="${escapeHtml(p.name)}"${imgFitOn(p,ctx)?' class="fit-full"':''}>` : (p.icon||'🎮'); }
 function isSoldOut(p){ return !!(p && p.soldOut); }
-function isDiscountActive(p){
-  if(!p.discountPercent || p.discountPercent<=0) return false;
+function discountWindowOk(p){
   const now = new Date();
   if(p.discountStart){ if(now < new Date(p.discountStart)) return false; }
   if(p.discountEnd){ const end = new Date(p.discountEnd); end.setHours(23,59,59,999); if(now > end) return false; }
@@ -664,8 +663,16 @@ function curEds(p){ const l=p.editions.filter(e=>groupOf(edPlat(e,p))===curGroup
 function pickVariant(p, grp){ const v = variantsOf(p, grp); return (SECTION && v.includes(SECTION)) ? SECTION : v[0]; }
 function selectPlat(name){ curGroup = name; curPlat = pickVariant(current, name); editionId = curEds(current)[0].id; renderEditions(current); }
 function selectVariant(name){ curPlat = name; editionId = curEds(current)[0].id; renderEditions(current); }
-function effPrice(price, p){ return isDiscountActive(p) ? Math.round(price - price*p.discountPercent/100) : price; }
-function minPrice(p){ return Math.min(...p.editions.map(e=>effPrice(e.price,p))); }
+function edPct(e,p){
+  const own = (e && e.discount!=null && e.discount!=='') ? parseFloat(e.discount) : NaN;
+  const v = isNaN(own) ? (p.discountPercent||0) : own;
+  return (v>0 && discountWindowOk(p)) ? v : 0;
+}
+function effPrice(price, p, e){
+  const pct = e ? edPct(e,p) : ((p.discountPercent>0 && discountWindowOk(p)) ? p.discountPercent : 0);
+  return pct>0 ? Math.round(price - price*pct/100) : price;
+}
+function minPrice(p){ return Math.min(...p.editions.map(e=>effPrice(e.price,p,e))); }
 function avgRating(p){ const r=(p&&p.reviews)||[]; return r.length ? r.reduce((s,x)=>s+(x.stars||0),0)/r.length : 0; }
 function starsHtml(v){ return `<span class="stars" style="--v:${(+v||0).toFixed(2)}">★★★★★</span>`; }
 
@@ -879,13 +886,13 @@ function renderEditions(p){
   } else { vt.style.display = 'none'; vl.style.display = 'none'; }
   document.getElementById('pmodalEditions').innerHTML = eds.map(e=>`
     <button type="button" class="edition-pill ${e.id===editionId?'active':''}" onclick="selectEdition('${e.id}')">
-      ${escapeHtml(e.name)}<span class="p">${fmt(effPrice(e.price,p))}</span>
+      ${escapeHtml(e.name)}<span class="p">${fmt(effPrice(e.price,p,e))}</span>
     </button>`).join('');
   document.getElementById('pmodalEditionsWrap').style.display = (order.length>1 || eds.length>1) ? '' : 'none';
   const sel = eds.find(e=>e.id===editionId) || eds[0];
-  const eff = effPrice(sel.price, p);
-  document.getElementById('pmodalPrice').innerHTML = isDiscountActive(p)
-    ? `<span>${fmt(eff)}</span><span class="old-price">${fmt(sel.price)}</span><span class="discount-badge">خصم ${p.discountPercent}%</span>`
+  const eff = effPrice(sel.price, p, sel), pct = edPct(sel, p);
+  document.getElementById('pmodalPrice').innerHTML = pct>0
+    ? `<span>${fmt(eff)}</span><span class="old-price">${fmt(sel.price)}</span><span class="discount-badge">خصم ${pct}%</span>`
     : `<span>${fmt(eff)}</span>`;
 }
 function selectEdition(id){ editionId = id; renderEditions(current); }

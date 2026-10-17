@@ -921,7 +921,7 @@ tbody tr:hover td{background:rgba(255,255,255,.025);}
               </select>
             </div>
             <div class="field"><label>الكمية بالمخزون</label><input id="pfStock" type="number" value="20"></div>
-            <div class="field"><label>نسبة الخصم % (اتركها صفر لعدم وجود خصم)</label><input id="pfDiscount" type="number" min="0" max="90" value="0"></div>
+            <div class="field"><label>نسبة الخصم الافتراضية % (للنسخ اللي ملهاش خصم خاص — صفر لعدم الخصم)</label><input id="pfDiscount" type="number" min="0" max="90" value="0"></div>
             <div class="field"><label>بداية الخصم (اختياري)</label><input id="pfDiscountStart" type="date"></div>
             <div class="field"><label>نهاية الخصم (اختياري)</label><input id="pfDiscountEnd" type="date"></div>
             <div class="field"><label>الأيقونة (إيموجي احتياطي)</label><input id="pfIcon" value="🎮"></div>
@@ -1063,6 +1063,10 @@ tbody tr:hover td{background:rgba(255,255,255,.025);}
           <div class="form-grid">
             <div class="field"><label>الكود</label><input id="cfCode" style="text-transform:uppercase;"></div>
             <div class="field"><label>نسبة الخصم %</label><input id="cfPercent" type="number" value="10"></div>
+            <div class="field"><label>عدد مرات الاستخدام (اتركها 0 لعدد غير محدود)</label><input id="cfMaxUses" type="number" min="0" value="0"></div>
+            <div class="field"><label>بداية الصلاحية (اختياري — فاضية يعني شغال من دلوقتي)</label><input id="cfStart" type="datetime-local"></div>
+            <div class="field"><label>نهاية الصلاحية (اختياري — فاضية يعني بدون انتهاء)</label><input id="cfEnd" type="datetime-local"></div>
+            <div class="field"><label>حسابات محددة (أرقام موبايل مفصولة بفاصلة — اتركها فاضية لأي شخص)</label><input id="cfPhones" dir="ltr" inputmode="tel" placeholder="01012345678, 01112345678"></div>
           </div>
           <div style="display:flex;gap:10px;margin-top:16px;">
             <button class="btn ok" onclick="saveCoupon()">حفظ</button>
@@ -1070,7 +1074,7 @@ tbody tr:hover td{background:rgba(255,255,255,.025);}
           </div>
         </div>
         <div class="panel">
-          <table><thead><tr><th>الكود</th><th>نسبة الخصم</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+          <table><thead><tr><th>الكود</th><th>نسبة الخصم</th><th>مين يقدر يستخدمه</th><th>الصلاحية</th><th>الاستخدام</th><th>الحالة</th><th>إجراءات</th></tr></thead>
           <tbody id="couponsBody"></tbody></table>
         </div>
       </div>
@@ -1445,29 +1449,42 @@ function imgFitOn(p, ctx){ const m = (p && p.imgFit) || 'detail'; return m==='bo
 function thumbSrc(p, ctx){ return (ctx!=='detail' && p.sameImage===false && p.cardImage) ? p.cardImage : p.image; }
 function thumbHtml(p, ctx){ const src = thumbSrc(p, ctx); return src ? `<img src="${src}" alt="${escapeHtml(p.name)}"${imgFitOn(p,ctx)?' class="fit-full"':''}>` : p.icon; }
 function isSoldOut(p){ return !!(p && p.soldOut); }
-function minPrice(p){ return Math.min(...p.editions.map(e=>effPrice(e.price,p))); }
-function isDiscountActive(p){
-  if(!p.discountPercent || p.discountPercent<=0) return false;
+function minPrice(p){ return Math.min(...p.editions.map(e=>effPrice(e.price,p,e))); }
+/* مدة الخصم (من/إلى) مشتركة للعبة، لكن نسبة الخصم ممكن تتحدد لكل نسخة لوحدها */
+function discountWindowOk(p){
   const now = new Date();
   if(p.discountStart){ const start = new Date(p.discountStart); if(now < start) return false; }
   if(p.discountEnd){ const end = new Date(p.discountEnd); end.setHours(23,59,59,999); if(now > end) return false; }
   return true;
 }
+/* نسبة خصم النسخة: لو النسخة ليها خصم خاص (حتى 0) بنستخدمه، غير كده بنستخدم خصم اللعبة الافتراضي */
+function edPct(e,p){
+  const own = (e && e.discount!=null && e.discount!=='') ? parseFloat(e.discount) : NaN;
+  const v = isNaN(own) ? (p.discountPercent||0) : own;
+  return (v>0 && discountWindowOk(p)) ? v : 0;
+}
+function isDiscountActive(p){ return (p.editions||[]).some(e=>edPct(e,p)>0); }
 /* ---------- الأقسام: كل نسخة ممكن تتبع قسم (منصة) مختلف ---------- */
 function edPlat(e,p){ return (e && e.platform) || (p && p.platform) || ''; }
 function prodPlats(p){ const a=[]; (p.editions||[]).forEach(e=>{ const x=edPlat(e,p); if(x && !a.includes(x)) a.push(x); }); if(!a.length && p.platform) a.push(p.platform); return a; }
 function edsFor(p, sec){ if(!sec || sec==='الكل') return p.editions; const l=p.editions.filter(e=>edPlat(e,p)===sec); return l.length ? l : p.editions; }
-function effPrice(price, p){
-  return isDiscountActive(p) ? Math.round(price - price*p.discountPercent/100) : price;
+function effPrice(price, p, e){
+  const pct = e ? edPct(e,p) : ((p.discountPercent>0 && discountWindowOk(p)) ? p.discountPercent : 0);
+  return pct>0 ? Math.round(price - price*pct/100) : price;
 }
 function priceRangeText(p, sec){
-  const prices = edsFor(p, sec).map(e=>e.price);
+  const eds = edsFor(p, sec);
+  const prices = eds.map(e=>e.price);
   const min = Math.min(...prices), max = Math.max(...prices);
   const original = min===max ? fmt(min) : `${fmt(min)} - ${fmt(max)}`;
-  if(isDiscountActive(p)){
-    const effMin = effPrice(min,p), effMax = effPrice(max,p);
+  const pcts = eds.map(e=>edPct(e,p)).filter(x=>x>0);
+  if(pcts.length){
+    const effs = eds.map(e=>effPrice(e.price,p,e));
+    const effMin = Math.min(...effs), effMax = Math.max(...effs);
     const discounted = effMin===effMax ? fmt(effMin) : `${fmt(effMin)} - ${fmt(effMax)}`;
-    return `<span class="old-price">${original}</span> ${discounted} <span class="discount-badge">خصم ${p.discountPercent}%</span>`;
+    const top = Math.max(...pcts);
+    const same = pcts.length===eds.length && pcts.every(x=>x===top);
+    return `<span class="old-price">${original}</span> ${discounted} <span class="discount-badge">${same ? 'خصم '+top+'%' : 'خصم حتى '+top+'%'}</span>`;
   }
   return original;
 }
@@ -1625,12 +1642,12 @@ function openProductModal(id){
 function renderModalEditions(p){
   document.getElementById('pmodalEditions').innerHTML = p.editions.map((e,i)=>`
     <button type="button" class="edition-pill ${e.id===modalEditionId?'active':''}" onclick="selectModalEdition('${e.id}')">
-      ${escapeHtml(e.name)}<span class="p">${fmt(effPrice(e.price,p))}</span>
+      ${escapeHtml(e.name)}<span class="p">${fmt(effPrice(e.price,p,e))}</span>
     </button>`).join('');
   const selected = p.editions.find(e=>e.id===modalEditionId) || p.editions[0];
-  const eff = effPrice(selected.price, p);
-  document.getElementById('pmodalPrice').innerHTML = isDiscountActive(p)
-    ? `<span>${fmt(eff)}</span><span class="old-price">${fmt(selected.price)}</span><span class="discount-badge">خصم ${p.discountPercent}%</span>`
+  const eff = effPrice(selected.price, p, selected), pct = edPct(selected, p);
+  document.getElementById('pmodalPrice').innerHTML = pct>0
+    ? `<span>${fmt(eff)}</span><span class="old-price">${fmt(selected.price)}</span><span class="discount-badge">خصم ${pct}%</span>`
     : `<span>${fmt(eff)}</span>`;
 }
 function selectModalEdition(editionId){
@@ -1805,7 +1822,7 @@ function changeQty(id,editionId,delta){
 function cartSubtotal(){
   return cart.reduce((s,c)=>{
     const p=products.find(p=>p.id===c.id); const ed=p?.editions.find(e=>e.id===c.editionId);
-    return s + (ed?effPrice(ed.price,p)*c.qty:0);
+    return s + (ed?effPrice(ed.price,p,ed)*c.qty:0);
   },0);
 }
 function renderCart(){
@@ -1818,7 +1835,7 @@ function renderCart(){
       const p = products.find(p=>p.id===c.id);
       if(!p) return '';
       const ed = p.editions.find(e=>e.id===c.editionId) || p.editions[0];
-      const price = effPrice(ed.price, p);
+      const price = effPrice(ed.price, p, ed);
       return `<div class="citem">
         <div class="ico">${thumbHtml(p)}</div>
         <div class="info"><b>${escapeHtml(p.name)}</b>${escapeHtml(ed.name)} — ${fmt(price)}</div>
@@ -2234,12 +2251,40 @@ function renderPaymentMethods(){
   document.getElementById('payProofBox').style.display = (pm && pm.needsTransfer) ? 'block' : 'none';
 }
 function selectPayment(id){ selectedPayment = id; renderPaymentMethods(); }
+/* عدد مرات استخدام الكود = الطلبات اللي استخدمته وما اتلغتش (الطلب الملغي بيرجّع الاستخدام) */
+function couponUsed(code){ return orders.filter(o=>o.coupon===code && o.status!=='ملغي').length; }
+function couponExhausted(c){ return !!(c && c.maxUses > 0 && couponUsed(c.code) >= c.maxUses); }
+/* مدة صلاحية الكود: 'soon' = لسه ما بدأش، 'expired' = المدة خلصت، 'ok' = ساري */
+function couponTimeState(c){
+  const now = Date.now();
+  if(c && c.startAt && now < new Date(c.startAt).getTime()) return 'soon';
+  if(c && c.endAt && now > new Date(c.endAt).getTime()) return 'expired';
+  return 'ok';
+}
+function fmtCouponDate(v){ return v ? new Date(v).toLocaleString('ar-EG',{dateStyle:'short',timeStyle:'short'}) : ''; }
+/* لو الكود مربوط بأرقام موبايل محددة، بس أصحاب الحسابات دي يقدروا يستخدموه */
+function couponAllowedFor(c, cust){
+  if(!c || !Array.isArray(c.phones) || !c.phones.length) return true;
+  return !!(cust && c.phones.includes(normalizePhone(cust.phone)));
+}
 function applyCoupon(){
   const code = document.getElementById('coCoupon').value.trim().toUpperCase();
   const msg = document.getElementById('couponMsg');
   if(!code){ appliedCoupon = null; msg.textContent = ''; updateCheckoutTotals(); return; }
   const found = coupons.find(c=>c.code===code);
-  if(found){
+  if(found && couponExhausted(found)){
+    appliedCoupon = null;
+    msg.textContent = 'كود الخصم ده استُخدم بالكامل ومبقاش متاح';
+    msg.style.color = 'var(--danger)';
+  } else if(found && couponTimeState(found)!=='ok'){
+    appliedCoupon = null;
+    msg.textContent = couponTimeState(found)==='soon' ? 'كود الخصم ده لسه ما بدأش (يبدأ ' + fmtCouponDate(found.startAt) + ')' : 'كود الخصم ده انتهت مدته';
+    msg.style.color = 'var(--danger)';
+  } else if(found && !couponAllowedFor(found, getCurrentCustomer())){
+    appliedCoupon = null;
+    msg.textContent = 'كود الخصم ده مش متاح لحسابك';
+    msg.style.color = 'var(--danger)';
+  } else if(found){
     appliedCoupon = found;
     msg.textContent = `تم تطبيق كود الخصم بنجاح (خصم ${found.percent}%)`;
     msg.style.color = 'var(--ok)';
@@ -2310,6 +2355,32 @@ async function confirmCheckout(){
     const v = await verifyAccount(); // نتأكد إن الحساب لسه شغال وغير محظور
     if(!v.ok){ closeCheckout(); await enforceBlockedSession(true); return; }
     await refreshAccountsFromRemote(); // علشان منمسحش طلبات عملاء تانيين
+    if(appliedCoupon && couponExhausted(appliedCoupon)){
+      appliedCoupon = null;
+      document.getElementById('coCoupon').value = '';
+      const cm = document.getElementById('couponMsg');
+      cm.textContent = 'كود الخصم استُخدم بالكامل قبل ما تأكد الطلب، اتشال من الطلب';
+      cm.style.color = 'var(--danger)';
+      updateCheckoutTotals();
+      alert('كود الخصم وصل للحد الأقصى من الاستخدام واتشال من طلبك. راجع الإجمالي الجديد وأكد الطلب تاني.');
+      return;
+    }
+    if(appliedCoupon && couponTimeState(appliedCoupon)!=='ok'){
+      appliedCoupon = null;
+      document.getElementById('coCoupon').value = '';
+      document.getElementById('couponMsg').textContent = '';
+      updateCheckoutTotals();
+      alert('مدة كود الخصم انتهت واتشال من الطلب. راجع الإجمالي الجديد.');
+      return;
+    }
+    if(appliedCoupon && !couponAllowedFor(appliedCoupon, cust)){
+      appliedCoupon = null;
+      document.getElementById('coCoupon').value = '';
+      document.getElementById('couponMsg').textContent = '';
+      updateCheckoutTotals();
+      alert('كود الخصم ده مش متاح لحسابك واتشال من الطلب.');
+      return;
+    }
     orders.unshift(newOrder);
     const ok = await persistPart(['orders']);
     if(!ok){ orders = orders.filter(o=>o.id!==newOrder.id); return; }
@@ -2522,14 +2593,27 @@ let editingCouponId = null;
 function openCouponForm(){
   editingCouponId = null;
   document.getElementById('couponFormPanel').style.display='block';
-  document.getElementById('cfCode').value=''; document.getElementById('cfPercent').value=10;
+  document.getElementById('cfCode').value=''; document.getElementById('cfPercent').value=10; document.getElementById('cfMaxUses').value=0; document.getElementById('cfPhones').value='';
+  document.getElementById('cfStart').value=''; document.getElementById('cfEnd').value='';
 }
 function closeCouponForm(){ document.getElementById('couponFormPanel').style.display='none'; }
 function saveCoupon(){
   const code = document.getElementById('cfCode').value.trim().toUpperCase();
   const percent = parseFloat(document.getElementById('cfPercent').value);
   if(!code || !percent){ alert('يرجى إدخال الكود ونسبة الخصم'); return; }
-  coupons.unshift({id:uid(), code, percent});
+  const maxUses = Math.max(0, Math.floor(parseFloat(document.getElementById('cfMaxUses').value) || 0));
+  if(coupons.some(c=>c.code===code)){ alert('الكود ده موجود بالفعل'); return; }
+  const phones = [];
+  for(const raw of document.getElementById('cfPhones').value.split(/[,،\s]+/).filter(Boolean)){
+    const ph = normalizePhone(raw);
+    if(!isValidPhone(ph)){ alert('رقم الموبايل «' + raw + '» مش صحيح (مثال: 01012345678)'); return; }
+    if(!phones.includes(ph)) phones.push(ph);
+  }
+  const startAt = document.getElementById('cfStart').value || null;
+  const endAt = document.getElementById('cfEnd').value || null;
+  if(startAt && endAt && new Date(endAt) <= new Date(startAt)){ alert('نهاية الصلاحية لازم تكون بعد البداية'); return; }
+  if(endAt && new Date(endAt) <= new Date()){ alert('نهاية الصلاحية لازم تكون في المستقبل'); return; }
+  coupons.unshift({id:uid(), code, percent, maxUses, phones, startAt, endAt});
   persist(); closeCouponForm(); renderAdminData();
 }
 function deleteCoupon(id){
@@ -2539,8 +2623,12 @@ function deleteCoupon(id){
 }
 function renderCoupons(){
   document.getElementById('couponsBody').innerHTML = coupons.map(c=>`
-    <tr><td>${escapeHtml(c.code)}</td><td>${c.percent}%</td><td><span class="pill done">فعّال</span></td>
-    <td class="row-actions"><button onclick="deleteCoupon('${c.id}')">🗑</button></td></tr>`).join('') || '<tr><td colspan="4">لا توجد أكواد خصم</td></tr>';
+    <tr><td>${escapeHtml(c.code)}</td><td>${c.percent}%</td>
+    <td style="white-space:normal;max-width:200px;direction:ltr;text-align:right;">${(c.phones && c.phones.length) ? c.phones.map(escapeHtml).join('<br>') : '<span style="direction:rtl;display:inline-block;">أي شخص</span>'}</td>
+    <td style="white-space:normal;font-size:12px;">${(c.startAt||c.endAt) ? ((c.startAt?'من '+fmtCouponDate(c.startAt)+'<br>':'')+(c.endAt?'إلى '+fmtCouponDate(c.endAt):'')) : 'بدون مدة'}</td>
+    <td>${couponUsed(c.code)} / ${c.maxUses>0 ? c.maxUses : '∞'}</td>
+    <td>${couponExhausted(c) ? '<span class="pill cancelled">استُخدم بالكامل</span>' : couponTimeState(c)==='expired' ? '<span class="pill cancelled">انتهت المدة</span>' : couponTimeState(c)==='soon' ? '<span class="pill new">لسه ما بدأش</span>' : '<span class="pill done">فعّال</span>'}</td>
+    <td class="row-actions"><button onclick="deleteCoupon('${c.id}')">🗑</button></td></tr>`).join('') || '<tr><td colspan="7">لا توجد أكواد خصم</td></tr>';
 }
 
 /* ---------- إدارة المنصات والأقسام (من لوحة التحكم) ---------- */
@@ -2775,6 +2863,7 @@ function renderEditionsManager(){
     <div class="edition-row">
       <input type="text" placeholder="اسم النسخة (مثال: نسخة المؤسسين)" value="${escapeHtml(e.name)}" oninput="updateEditionField(${i},'name',this.value)">
       <input type="number" placeholder="السعر" value="${e.price}" oninput="updateEditionField(${i},'price',this.value)">
+      <input type="number" min="0" max="90" class="ed-disc" style="max-width:130px;" placeholder="خصم % (اختياري)" title="خصم خاص بالنسخة دي. اتركه فاضي لاستخدام خصم اللعبة الافتراضي، أو اكتب 0 لإلغاء الخصم عنها" value="${e.discount==null?'':e.discount}" oninput="updateEditionField(${i},'discount',this.value)">
       <input type="text" list="deviceList" class="ed-device" placeholder="الجهاز (PS4 / PS5)" title="الجهاز اللي العميل يختاره جوه القسم (اختياري)" value="${escapeHtml(e.variant||'')}" oninput="updateEditionField(${i},'variant',this.value)">
       <select title="القسم اللي بتظهر فيه النسخة دي" onchange="updateEditionField(${i},'platform',this.value)">${platforms.map(pl=>`<option value="${escapeHtml(pl.name)}" ${(e.platform||document.getElementById('pfPlatform').value)===pl.name?'selected':''}>${escapeHtml(pl.name)}</option>`).join('')}</select>
       <button type="button" class="row-del-btn" onclick="removeEditionRow(${i})" ${pfEditions.length<=1?'disabled':''} title="حذف النسخة">🗑</button>
@@ -2933,7 +3022,7 @@ function clearImage(){
 async function saveProduct(){
   const name = document.getElementById('pfName').value.trim();
   const cleanEditions = pfEditions
-    .map(e=>({id:e.id||uid(), name:(e.name||'').trim(), price:parseFloat(e.price), platform:e.platform||document.getElementById('pfPlatform').value, variant:(e.variant||'').trim()}))
+    .map(e=>({id:e.id||uid(), name:(e.name||'').trim(), price:parseFloat(e.price), platform:e.platform||document.getElementById('pfPlatform').value, variant:(e.variant||'').trim(), discount:(e.discount===''||e.discount==null||isNaN(parseFloat(e.discount))) ? null : Math.min(90, Math.max(0, parseFloat(e.discount)))}))
     .filter(e=>e.name && !isNaN(e.price) && e.price>0);
   if(!name || !cleanEditions.length){ alert('يرجى إدخال اسم اللعبة، ونسخة واحدة على الأقل باسم وسعر صحيحين'); return; }
   const data = {

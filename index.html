@@ -1200,7 +1200,22 @@ tbody tr:hover td{background:rgba(255,255,255,.025);}
 </div>
 <script>
 /* بيخلّي شاشة التحميل ظاهرة ~0.9 ثانية على الأقل عشان الحركة تكمل، وبعدها تختفي بنعومة */
-(function(){var t0=Date.now();window.hideGlobalLoader=function(){var l=document.getElementById('globalLoader');if(!l||l.dataset.done)return;l.dataset.done='1';setTimeout(function(){l.classList.add('hide');setTimeout(function(){l.style.display='none';},650);},Math.max(0,900-(Date.now()-t0)));};})();
+(function(){
+  var t0=Date.now(), tHide=null, tNone=null;
+  window.hideGlobalLoader=function(){
+    var l=document.getElementById('globalLoader');if(!l||l.dataset.done)return;l.dataset.done='1';
+    tHide=setTimeout(function(){l.classList.add('hide');tNone=setTimeout(function(){l.style.display='none';},650);},Math.max(0,900-(Date.now()-t0)));
+  };
+  /* بتظهر شاشة التحميل تاني من الأول (بنفس الحركة) — بنستخدمها لما نرجع للرئيسية من صفحة لعبة */
+  window.showGlobalLoader=function(){
+    var l=document.getElementById('globalLoader');if(!l)return;
+    clearTimeout(tHide);clearTimeout(tNone);
+    t0=Date.now();delete l.dataset.done;
+    var inner=l.innerHTML;l.innerHTML='';
+    l.style.display='flex';l.classList.remove('hide');
+    void l.offsetWidth;l.innerHTML=inner; /* بيعيد تشغيل الحركة من البداية */
+  };
+})();
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1562,10 +1577,14 @@ window.addEventListener('message', e=>{
   const d = e.data;
   if(!d || d.type !== 'ns-nav') return;
   if(d.to === 'game' && d.id){ openGamePage(d.id, d.section); return; }
+  /* زي ما كان بيحصل لما الصفحة كانت بتتحمل من الأول: تظهر شاشة التحميل وبعدها الرئيسية */
+  showGlobalLoader();
   goHomeUrl();
-  if(d.to === 'cart') toggleCart(true);
-  else if(d.to === 'games'){ const g = document.getElementById('games'); if(g) g.scrollIntoView(); }
+  renderAll();
+  if(d.to === 'games'){ const g = document.getElementById('games'); if(g) g.scrollIntoView(); }
   else window.scrollTo(0, 0);
+  hideGlobalLoader();
+  if(d.to === 'cart') setTimeout(()=>toggleCart(true), 1000);
 });
 
 /* ---------- نافذة عرض تفاصيل اللعبة واختيار النسخة ---------- */

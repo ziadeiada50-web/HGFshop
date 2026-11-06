@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>تفاصيل اللعبة | استور HGF</title>
-<meta name="description" content="تفاصيل اللعبة والنسخ المتاحة والتقييمات">
+<meta name="description" content="تفاصيل اللعبة في متجر HGF: اعرف النسخ والأسعار المتاحة ومواصفات التشغيل وتقييمات العملاء، واطلب مفتاح التفعيل الأصلي بسهولة وسرعة.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -347,6 +347,7 @@ textarea{resize:vertical;min-height:70px;}
 .pm-rating-sum{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:700;color:var(--muted);}
 .pm-rating-sum b{color:var(--text);font-size:15px;}
 .pm-rating-sum:hover{color:var(--text);}
+.pm-rating-sum{background:none;border:0;padding:0;text-align:start;font-family:inherit;}
 .stars{--v:0;display:inline-block;position:relative;font-size:17px;line-height:1;letter-spacing:2px;color:#323868;direction:ltr;white-space:nowrap;}
 .stars::after{content:"★★★★★";position:absolute;top:0;left:0;width:calc(var(--v) / 5 * 100%);overflow:hidden;color:#FFC24B;white-space:nowrap;}
 .pm-price-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
@@ -489,7 +490,7 @@ footer{padding:30px 20px;text-align:center;color:var(--muted);font-size:13px;bor
           <span class="pmodal-plat" id="pmodalPlat"></span><span class="age-chip" id="pmodalAge" style="display:none;"></span>
           <h1 id="pmodalName" style="margin:6px 0 0;font-size:30px;line-height:1.3;font-weight:800;"></h1>
         </div>
-        <a class="pm-rating-sum" id="pmodalRatingSum" onclick="pmShowTab('reviews', true)"></a>
+        <button type="button" class="pm-rating-sum" id="pmodalRatingSum" aria-label="التقييمات" onclick="pmShowTab('reviews', true)"></button>
         <div class="pm-price-row">
           <div class="pm-price" id="pmodalPrice"></div>
           <span class="pm-stock" id="pmodalStock"></span>

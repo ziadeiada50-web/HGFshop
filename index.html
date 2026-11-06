@@ -1501,9 +1501,72 @@ function quickAdd(id, sec){
 }
 
 /* ---------- صفحة اللعبة (game.html) بتتفتح في نفس التاب ---------- */
-function openGamePage(id, sec){
-  location.href = 'game.html?id=' + encodeURIComponent(id) + ((sec && sec!=='الكل') ? '&section=' + encodeURIComponent(sec) : '');
+/* ===== صفحة اللعبة بتتفتح جوه نفس الصفحة (iframe). الرابط الأساسي هو الرئيسية دايماً،
+   واللعبة بتظهر بس كعلامة # في آخره (مثال: ...index.html#game-abc123) فتقدر تشاركها، وزر الرجوع شغال ===== */
+try{ history.scrollRestoration = 'manual'; }catch(e){}
+function baseUrl(){ return location.pathname + location.search; }
+function gameHash(id, sec){ return '#game-' + id + ((sec && sec!=='الكل') ? '--' + encodeURIComponent(sec) : ''); }
+function parseGameHash(){
+  const m = /^#game-([^-]+)(?:--(.+))?$/.exec(location.hash);
+  if(!m) return null;
+  let sec = ''; try{ sec = m[2] ? decodeURIComponent(m[2]) : ''; }catch(e){}
+  return {id:m[1], sec};
 }
+function gameUrl(g){ return 'game.html?id=' + encodeURIComponent(g.id) + (g.sec ? '&section=' + encodeURIComponent(g.sec) : ''); }
+let gameView = null, gameViewKey = '';
+function openGamePage(id, sec){
+  try{ history.pushState(null, '', gameHash(id, sec)); }catch(e){ location.hash = gameHash(id, sec); return; }
+  syncFromHash();
+}
+function goHomeUrl(){
+  if(parseGameHash()){ try{ history.pushState(null, '', baseUrl()); }catch(e){ location.hash = ''; } }
+  syncFromHash();
+}
+function removeGameView(){
+  if(!gameView) return;
+  gameView.remove(); gameView = null; gameViewKey = '';
+  document.body.style.overflow = '';
+  try{ cart = JSON.parse(localStorage.getItem(LS_CART) || '[]') || []; }catch(e){ cart = []; }
+  renderCart();
+  syncReviewsFromRemote();
+}
+/* بتخلّي اللي ظاهر على الشاشة يطابق الرابط الحالي (تشتغل عند الفتح، الرجوع، أو فتح رابط لعبة مباشرة) */
+function syncFromHash(){
+  const g = parseGameHash();
+  if(!g){ removeGameView(); return; }
+  const key = g.id + '|' + g.sec;
+  if(gameView){
+    if(key !== gameViewKey){
+      gameViewKey = key;
+      const fr = gameView.firstChild;
+      try{ fr.contentWindow.location.replace(gameUrl(g)); }catch(e){ fr.src = gameUrl(g); }
+    }
+    return;
+  }
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;inset:0;z-index:80;background:var(--bg);';
+  const fr = document.createElement('iframe');
+  fr.title = 'تفاصيل اللعبة';
+  fr.style.cssText = 'width:100%;height:100%;border:0;display:block;background:var(--bg);';
+  fr.src = gameUrl(g);
+  wrap.appendChild(fr);
+  document.body.appendChild(wrap);
+  document.body.style.overflow = 'hidden';
+  gameView = wrap; gameViewKey = key;
+}
+window.addEventListener('popstate', syncFromHash);
+window.addEventListener('hashchange', syncFromHash);
+/* رسائل من صفحة اللعبة (الرجوع / السلة / كل الألعاب / لعبة تانية) */
+window.addEventListener('message', e=>{
+  if(!gameView || !gameView.firstChild || e.source !== gameView.firstChild.contentWindow) return;
+  const d = e.data;
+  if(!d || d.type !== 'ns-nav') return;
+  if(d.to === 'game' && d.id){ openGamePage(d.id, d.section); return; }
+  goHomeUrl();
+  if(d.to === 'cart') toggleCart(true);
+  else if(d.to === 'games'){ const g = document.getElementById('games'); if(g) g.scrollIntoView(); }
+  else window.scrollTo(0, 0);
+});
 
 /* ---------- نافذة عرض تفاصيل اللعبة واختيار النسخة ---------- */
 let modalProductId = null, modalEditionId = null;
@@ -3218,6 +3281,7 @@ window.addEventListener('hashchange', openAdminFromHash);
       history.replaceState(null, '', location.pathname + location.hash);
     }
     openAdminFromHash();
+    syncFromHash();
   }catch(e){
     console.error('خطأ أثناء تشغيل الصفحة', e);
   }finally{

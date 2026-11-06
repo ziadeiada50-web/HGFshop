@@ -6,6 +6,10 @@
 <title>تفاصيل اللعبة | استور HGF</title>
 <meta name="description" content="تفاصيل اللعبة في متجر HGF: اعرف النسخ والأسعار المتاحة ومواصفات التشغيل وتقييمات العملاء، واطلب مفتاح التفعيل الأصلي بسهولة وسرعة.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://vdmtspzmdwkccfxbwxdq.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://vdmtspzmdwkccfxbwxdq.supabase.co">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 
@@ -648,7 +652,7 @@ function ageBadgeHtml(p){ return p && p.age ? `<span class="age-badge age-${p.ag
 /* ctx: 'card' (كروت الألعاب) أو 'detail' (صفحة/نافذة اللعبة) — imgFit: detail | card | both | none */
 function imgFitOn(p, ctx){ const m = (p && p.imgFit) || 'detail'; return m==='both' || m===ctx; }
 function thumbSrc(p, ctx){ return (ctx!=='detail' && p.sameImage===false && p.cardImage) ? p.cardImage : p.image; }
-function thumbHtml(p, ctx){ const src = thumbSrc(p, ctx); return src ? `<img src="${src}" alt="${escapeHtml(p.name)}"${imgFitOn(p,ctx)?' class="fit-full"':''}>` : (p.icon||'🎮'); }
+function thumbHtml(p, ctx){ const src = thumbSrc(p, ctx); return src ? `<img src="${src}" alt="${escapeHtml(p.name)}"${imgFitOn(p,ctx)?' class="fit-full"':''}${ctx==='card'?' loading="lazy"':''} decoding="async">` : (p.icon||'🎮'); }
 function isSoldOut(p){ return !!(p && p.soldOut); }
 function discountWindowOk(p){
   const now = new Date();

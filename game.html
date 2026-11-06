@@ -962,17 +962,23 @@ function renderGame(p){
 window.addEventListener('storage', e=>{ if(e.key===LS_CART) updateCartBadge(); });
 
 (async function init(){
-  await loadData();
-  const parts = (settings.storeName || '').split(' ');
-  document.getElementById('logo').innerHTML = `🎮 ${escapeHtml(parts[0]||'')}<span>${escapeHtml(parts.slice(1).join(' ')||'')}</span>`;
-  document.getElementById('footerText').textContent = `© 2026 ${settings.storeName || 'المتجر'} — متجر الألعاب الإلكترونية. جميع الحقوق محفوظة.`;
-  renderSocials();
-  updateCartBadge();
-  const id = new URLSearchParams(location.search).get('id');
-  const p = products.find(x=>x.id===id);
-  if(p) renderGame(p);
-  else { document.title = 'اللعبة غير موجودة | ' + (settings.storeName || 'المتجر'); document.getElementById('notFound').style.display = ''; }
-  hideGlobalLoader();
+  try{
+    await loadData();
+    const parts = (settings.storeName || '').split(' ');
+    document.getElementById('logo').innerHTML = `🎮 ${escapeHtml(parts[0]||'')}<span>${escapeHtml(parts.slice(1).join(' ')||'')}</span>`;
+    document.getElementById('footerText').textContent = `© 2026 ${settings.storeName || 'المتجر'} — متجر الألعاب الإلكترونية. جميع الحقوق محفوظة.`;
+    renderSocials();
+    updateCartBadge();
+    const id = new URLSearchParams(location.search).get('id');
+    const p = products.find(x=>x.id===id);
+    if(p) renderGame(p);
+    else { document.title = 'اللعبة غير موجودة | ' + (settings.storeName || 'المتجر'); document.getElementById('notFound').style.display = ''; }
+  }catch(e){
+    console.error('خطأ أثناء تحميل صفحة اللعبة', e);
+    document.getElementById('notFound').style.display = '';
+  }finally{
+    hideGlobalLoader(); // شاشة التحميل لازم تختفي حتى لو حصل خطأ
+  }
 })();
 </script>
 </body>

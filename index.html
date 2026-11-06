@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>استور HGF | متجر الألعاب الإكترونية</title>
+<title>استور HGF | متجر الألعاب الإلكترونية</title>
+<meta name="description" content="مفاتيح تفعيل أصلية لألعاب PS5 وXbox وPC، تصلك خلال دقائق مع دعم فني وأسعار تنافسية.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="استور HGF | متجر الألعاب الإلكترونية">
+<meta property="og:description" content="مفاتيح تفعيل أصلية لألعاب PS5 وXbox وPC، تصلك خلال دقائق مع دعم فني وأسعار تنافسية.">
+<meta property="og:locale" content="ar_EG">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -536,10 +541,7 @@ tbody tr:hover td{background:rgba(255,255,255,.025);}
         <a href="#categories">الأقسام</a>
       </nav>
       <div class="nav-actions">
-        <a class="nav-btn nb-admin" href="#" onclick="openAdmin();return false;" title="لوحة التحكم">
-          <span class="nb-ico">⚙️</span>
-          <span class="nb-txt">لوحة التحكم<small>إدارة المتجر</small></span>
-        </a>
+        <!-- زر لوحة التحكم اتشال من الواجهة العامة. الإدارة بتفتحها من الرابط: index.html#admin -->
         <button class="nav-btn nb-orders" id="ordersBtn" onclick="openMyOrders()" title="طلباتي / إلغاء طلب">
           <span class="nb-ico">📦<span class="badge" id="ordersCount" style="display:none;">0</span></span>
           <span class="nb-txt">طلباتي<small>تابع أو الغي طلبك</small></span>
@@ -592,7 +594,7 @@ tbody tr:hover td{background:rgba(255,255,255,.025);}
     <div class="wrap">
       <div class="section-title-row">
         <div>
-          <p class="eyebrow-tag">الأعلى تقييماً</p>
+          <p class="eyebrow-tag">الأكثر شعبية</p>
           <h2>الأكثر لعباً</h2>
         </div>
         <button class="btn outline" onclick="document.getElementById('games').scrollIntoView({behavior:'smooth'})">عرض الكل</button>
@@ -630,7 +632,7 @@ tbody tr:hover td{background:rgba(255,255,255,.025);}
   </section>
 
   <footer class="wrap">
-    <div class="cs-box"><span>📞 خدمة العملاء:</span><a class="cs-tel" href="#"><span class="cs-num"></span></a><a class="cs-wa" href="#" target="_blank" rel="noopener">💬 واتساب</a></div>
+    <div class="cs-box"><span>📞 خدمة العملاء:</span><a class="cs-tel" href="tel:01042018241"><span class="cs-num">01042018241</span></a><a class="cs-wa" href="https://wa.me/201042018241" target="_blank" rel="noopener">💬 واتساب</a></div>
     <div class="social-links" id="socialLinks"></div>
     <div>© 2026 نيون ستور — متجر الألعاب الإلكترونية. جميع الحقوق محفوظة.</div>
   </footer>
@@ -704,6 +706,7 @@ tbody tr:hover td{background:rgba(255,255,255,.025);}
       <div class="field"><label>كلمة المرور</label><input id="loginPasswordC" type="password" onkeydown="if(event.key==='Enter')loginCustomer()"></div>
       <button class="btn" style="width:100%;" onclick="loginCustomer()">دخول</button>
       <p class="hint">مفيش حساب؟ اضغط على <b onclick="showAuthView('register')" style="cursor:pointer;">حساب جديد</b> بالأعلى.</p>
+      <p class="hint">نسيت كلمة المرور؟ <a href="https://wa.me/201042018241?text=%D9%86%D8%B3%D9%8A%D8%AA%20%D9%83%D9%84%D9%85%D8%A9%20%D8%A7%D9%84%D9%85%D8%B1%D9%88%D8%B1" target="_blank" rel="noopener" style="color:var(--accent2);font-weight:700;">كلّم الدعم على واتساب</a></p>
     </div>
 
     <div id="auth-register" style="display:none;">
@@ -715,7 +718,7 @@ tbody tr:hover td{background:rgba(255,255,255,.025);}
       <div class="field"><label>الاسم بالكامل</label><input id="regName"></div>
       <div class="field"><label>رقم الموبايل</label><input id="regPhone" type="tel" placeholder="01xxxxxxxxx"></div>
       <div class="field"><label>البريد الإلكتروني</label><input id="regEmail" type="email" placeholder="example@email.com"></div>
-      <div class="field"><label>كلمة المرور (6 حروف/أرقام على الأقل)</label><input id="regPasswordC" type="password"></div>
+      <div class="field"><label>كلمة المرور (8 حروف/أرقام على الأقل)</label><input id="regPasswordC" type="password"></div>
       <div class="field"><label>تأكيد كلمة المرور</label><input id="regPasswordC2" type="password" onkeydown="if(event.key==='Enter')registerCustomer()"></div>
       <button class="btn" style="width:100%;" onclick="registerCustomer()">إنشاء الحساب</button>
     </div>
@@ -1093,7 +1096,7 @@ tbody tr:hover td{background:rgba(255,255,255,.025);}
               <select id="stBackdropMode">
                 <option value="all">شغّالة في كل الألعاب</option>
                 <option value="selected">شغّالة في ألعاب محددة بس (تحددها من فورم اللعبة)</option>
-                <option value="off">مطفية في كل الألعاب</option>
+                <option value="off">مُطفأة في كل الألعاب</option>
               </select>
             </div>
             <div class="field full" style="margin-top:6px;">
@@ -1136,6 +1139,7 @@ tbody tr:hover td{background:rgba(255,255,255,.025);}
           <h3 style="margin:0 0 12px;">تغيير بيانات الدخول للوحة التحكم</h3>
           <div class="form-grid">
             <div class="field"><label>اسم المستخدم</label><input id="stAdminUser"></div>
+            <div class="field"><label>كلمة المرور الحالية (مطلوبة)</label><input id="stAdminPassCurrent" type="password" autocomplete="current-password"></div>
             <div class="field"><label>كلمة المرور الجديدة</label><input id="stAdminPass" type="password" placeholder="اتركها فارغة لعدم التغيير"></div>
             <div class="field"><label>تأكيد كلمة المرور</label><input id="stAdminPassConfirm" type="password" placeholder="اتركها فارغة لعدم التغيير"></div>
           </div>
@@ -1314,7 +1318,8 @@ function errText(e){
 }
 async function loadRemoteState(){
   try{
-    const { data, error } = await sb.from('store_state').select('*').eq('id', 1).abortSignal(timeoutSignal(45000)).maybeSingle();
+    /* أمان: بنطلب الأعمدة العامة بالاسم، وعمود admin_auth (بيانات دخول الأدمن) عمره ما بيتبعت للمتصفح */
+    const { data, error } = await sb.from('store_state').select('id,products,orders,settings,platforms,coupons,customers,updated_at').eq('id', 1).abortSignal(timeoutSignal(45000)).maybeSingle();
     if(error) throw error;
     if(data){
       products = migrateProducts(data.products); if(!products.length) products = defaultProducts();
@@ -1324,7 +1329,6 @@ async function loadRemoteState(){
       platforms = migratePlatforms(data.platforms); if(!platforms.length) platforms = defaultPlatforms();
       coupons = data.coupons || defaultCoupons();
       customers = []; // الحسابات بقت في جدول accounts المستقل
-      adminAuth = data.admin_auth || defaultAdminAuth();
     } else {
       // أول مرة يُفتح فيها الموقع: أنشئ الصف الافتراضي في قاعدة البيانات
       products = defaultProducts();
@@ -1332,9 +1336,8 @@ async function loadRemoteState(){
       platforms = defaultPlatforms();
       coupons = defaultCoupons();
       customers = [];
-      adminAuth = defaultAdminAuth();
       const { error: insErr } = await sb.from('store_state').insert({
-        id: 1, products, orders, settings, platforms, coupons, customers, admin_auth: adminAuth
+        id: 1, products, orders, settings, platforms, coupons, customers
       });
       if(insErr) throw insErr;
     }
@@ -1348,7 +1351,6 @@ async function loadRemoteState(){
     platforms = migratePlatforms(JSON.parse(localStorage.getItem(LS_PLATFORMS) || 'null')); if(!platforms.length) platforms = defaultPlatforms();
     coupons = JSON.parse(localStorage.getItem(LS_COUPONS) || 'null') || defaultCoupons();
     customers = [];
-    adminAuth = JSON.parse(localStorage.getItem(LS_ADMIN_AUTH) || 'null') || defaultAdminAuth();
     alert('تعذر الاتصال بقاعدة بيانات المتجر، جاري عرض آخر نسخة محفوظة على هذا الجهاز فقط.');
   }
 }
@@ -1366,7 +1368,7 @@ function persistLocalCache(){
     localStorage.setItem(LS_CUSTOMERS, JSON.stringify(customers));
     localStorage.setItem(LS_CURRENT_CUSTOMER, currentCustomerId || '');
     localStorage.setItem(LS_PLATFORMS, JSON.stringify(platforms.map(pl=>({...pl, image:null}))));
-    localStorage.setItem(LS_ADMIN_AUTH, JSON.stringify(adminAuth));
+    localStorage.removeItem(LS_ADMIN_AUTH); // مبنخزنش بيانات الأدمن على الجهاز أبداً
   }catch(e){console.warn('تعذر الحفظ محلياً',e);}
 }
 
@@ -1380,9 +1382,10 @@ function persist(){
     return Promise.resolve(false);
   }
   saveChain = saveChain.then(async ()=>{
+    /* الطلبات والعملاء بتتحفظ بس من persistPart عشان نسخة قديمة من المتصفح ما تمسحش طلبات جديدة */
     const { data, error } = await sb.from('store_state').update({
-      products, orders, settings, platforms, coupons, customers,
-      admin_auth: adminAuth, updated_at: new Date().toISOString()
+      products, settings, platforms, coupons,
+      updated_at: new Date().toISOString()
     }).eq('id', 1).select('id').abortSignal(timeoutSignal(90000));
     if(error) throw error;
     if(!data || !data.length) throw new Error('الخادم ما عدّلش أي صف — غالباً صلاحيات (RLS) في Supabase بتمنع التعديل على جدول store_state');
@@ -1672,7 +1675,7 @@ function renderTrending(){
     <div class="tcard ${isSoldOut(p)?'is-soldout':''}">
       <div class="thumb" onclick="openGamePage('${p.id}')">${thumbHtml(p,'card')}${ageBadgeHtml(p)}</div>
       <div class="tcard-info">
-        <div><span class="plat">${prodPlats(p).join(' · ')}</span><h3 class="game-link" onclick="openGamePage('${p.id}')">${escapeHtml(p.name)}</h3></div>
+        <div><span class="plat">${escapeHtml(prodPlats(p).join(' · '))}</span><h3 class="game-link" onclick="openGamePage('${p.id}')">${escapeHtml(p.name)}</h3></div>
         <button class="icon-round" ${isSoldOut(p)?'disabled':''} onclick="quickAdd('${p.id}')">${isSoldOut(p)?'⛔':'🛒'}</button>
       </div>
     </div>`).join('');
@@ -1684,7 +1687,7 @@ function renderMostPlayed(){
     <div class="mp-card ${isSoldOut(p)?'is-soldout':''}">
       <div class="mp-img" onclick="openGamePage('${p.id}')">${thumbHtml(p,'card')}${ageBadgeHtml(p)}</div>
       <div class="mp-body">
-        <p class="genre">${prodPlats(p).join(' · ')}</p>
+        <p class="genre">${escapeHtml(prodPlats(p).join(' · '))}</p>
         <h3 class="game-link" onclick="openGamePage('${p.id}')">${escapeHtml(p.name)}</h3>
         <div class="mp-foot">
           <span class="price-tag">${priceRangeText(p)}</span>
@@ -1705,7 +1708,7 @@ function renderCategories(){
     const subtitle = pl && pl.subtitle ? `<span class="cc-sub">${escapeHtml(pl.subtitle)}</span>` : '<span></span>';
     const tags = (pl && pl.tags && pl.tags.length) ? pl.tags : [];
     const tagsHtml = tags.length ? `<div class="cc-tags">${tags.map(t=>`<span>${escapeHtml(t)}</span>`).join('')}</div>` : '';
-    return `<a class="cat-card ${theme}${hasImg?' has-img':''}" href="#games" onclick="setFilter('${p}')"${bgStyle}>
+    return `<a class="cat-card ${theme}${hasImg?' has-img':''}" href="#games" data-n="${attrEsc(p)}" onclick="setFilter(this.dataset.n)"${bgStyle}>
       <div class="cc-top">
         <span class="cc-icon">${iconHtml}</span>
         ${subtitle}
@@ -1722,7 +1725,7 @@ function renderCategories(){
 function renderFilters(){
   const plats = ['الكل', ...new Set(products.flatMap(p=>prodPlats(p)))];
   document.getElementById('filters').innerHTML = plats.map(p=>
-    `<button class="chip ${p===activeFilter?'active':''}" onclick="setFilter('${p}')">${p}</button>`).join('');
+    `<button class="chip ${p===activeFilter?'active':''}" data-n="${attrEsc(p)}" onclick="setFilter(this.dataset.n)">${escapeHtml(p)}</button>`).join('');
 }
 function setFilter(p){ activeFilter=p; showAllGames=false; renderFilters(); renderGrid(); }
 function doSearch(){ searchTerm = document.getElementById('searchInput').value.trim(); showAllGames=false; document.getElementById('games').scrollIntoView({behavior:'smooth'}); renderGrid(); }
@@ -1784,13 +1787,13 @@ function renderGrid(){
   const visibleList = (!showAllGames && totalCount > GAMES_PREVIEW_COUNT) ? list.slice(0, GAMES_PREVIEW_COUNT) : list;
   grid.innerHTML = visibleList.map(p=>`
     <div class="card ${isSoldOut(p)?'is-soldout':''}">
-      <div class="thumb" onclick="openGamePage('${p.id}','${activeFilter}')">${thumbHtml(p,'card')}${ageBadgeHtml(p)}</div>
+      <div class="thumb" onclick="openGamePage('${p.id}',activeFilter)">${thumbHtml(p,'card')}${ageBadgeHtml(p)}</div>
       <div class="card-body">
-        <span class="plat">${activeFilter==='الكل' ? prodPlats(p).join(' · ') : activeFilter}</span>
-        <h4 class="game-link" onclick="openGamePage('${p.id}','${activeFilter}')">${escapeHtml(p.name)}</h4>
+        <span class="plat">${escapeHtml(activeFilter==='الكل' ? prodPlats(p).join(' · ') : activeFilter)}</span>
+        <h4 class="game-link" onclick="openGamePage('${p.id}',activeFilter)">${escapeHtml(p.name)}</h4>
         <div class="card-foot">
           <span class="price-tag" style="font-size:17px;">${priceRangeText(p, activeFilter)}</span>
-          <button class="btn small" ${isSoldOut(p)?'disabled':''} onclick="quickAdd('${p.id}','${activeFilter}')">${isSoldOut(p)?'نفدت الكمية':'أضف'}</button>
+          <button class="btn small" ${isSoldOut(p)?'disabled':''} onclick="quickAdd('${p.id}',activeFilter)">${isSoldOut(p)?'نفدت الكمية':'أضف'}</button>
         </div>
       </div>
     </div>`).join('');
@@ -1811,13 +1814,13 @@ function addToCart(id, editionId){
   if(!editionId) editionId = p.editions[0].id;
   const found = cart.find(c=>c.id===id && c.editionId===editionId);
   if(found) found.qty++; else cart.push({id, editionId, qty:1});
-  persist(); renderCart(); toggleCart(true);
+  persistLocalCache(); renderCart(); toggleCart(true); // السلة محلية على جهاز العميل، مش بتتبعت للخادم
 }
 function changeQty(id,editionId,delta){
   const it = cart.find(c=>c.id===id && c.editionId===editionId); if(!it) return;
   it.qty += delta;
   if(it.qty<=0) cart = cart.filter(c=>!(c.id===id && c.editionId===editionId));
-  persist(); renderCart();
+  persistLocalCache(); renderCart();
 }
 function cartSubtotal(){
   return cart.reduce((s,c)=>{
@@ -2043,7 +2046,7 @@ async function registerCustomer(){
   if(name.length < 2){ alert('اكتب اسمك بشكل صحيح'); return; }
   if(!isValidPhone(phone)){ alert('رقم الموبايل لازم يكون رقم مصري صحيح (مثال: 01012345678)'); return; }
   if(!EMAIL_RE.test(email)){ alert('يرجى إدخال بريد إلكتروني صحيح'); return; }
-  if(pw.length < 6){ alert('كلمة المرور لازم تكون 6 حروف أو أرقام على الأقل'); return; }
+  if(pw.length < 8){ alert('كلمة المرور لازم تكون 8 حروف أو أرقام على الأقل'); return; }
   if(pw !== pw2){ alert('كلمتا المرور مش متطابقتين'); return; }
   const btn = document.querySelector('#auth-register .btn');
   setBusy(btn, true, '⏳ جاري إنشاء الحساب...');
@@ -2106,7 +2109,7 @@ async function changePassword(){
   const pw = document.getElementById('pwNew').value;
   const pw2 = document.getElementById('pwNew2').value;
   if(!oldPw || !pw){ alert('اكتب كلمة المرور الحالية والجديدة'); return; }
-  if(pw.length < 6){ alert('كلمة المرور الجديدة لازم تكون 6 حروف أو أرقام على الأقل'); return; }
+  if(pw.length < 8){ alert('كلمة المرور الجديدة لازم تكون 8 حروف أو أرقام على الأقل'); return; }
   if(pw !== pw2){ alert('كلمتا المرور الجديدتان مش متطابقتين'); return; }
   try{
     const oldHash = await hashPassword(c.phone, oldPw);
@@ -2316,7 +2319,7 @@ async function confirmCheckout(){
   if(soldOutInCart.length){
     const names = soldOutInCart.map(c=>products.find(p=>p.id===c.id).name).join('، ');
     cart = cart.filter(c=>!soldOutInCart.includes(c));
-    persist(); renderCart(); updateCheckoutTotals();
+    persistLocalCache(); renderCart(); updateCheckoutTotals();
     alert('تم حذف ألعاب نفدت كميتها من السلة: ' + names);
     return;
   }
@@ -2405,8 +2408,15 @@ function openThankYou(name, pm, orderCode){
 function viewProof(orderId){
   const o = orders.find(x=>x.id===orderId);
   if(!o || !o.proofImage) return;
+  /* أمان: بنقبل صور data:image بس، وبنبني الصفحة بـ DOM (مش بدمج نص) عشان محدش يحقن كود في لوحة الإدارة */
+  if(!/^data:image\/(webp|jpeg|jpg|png|gif);base64,[A-Za-z0-9+\/=]+$/.test(o.proofImage)){ alert('ملف الإيصال غير صالح'); return; }
   const w = window.open('', '_blank');
-  if(w){ w.document.write('<title>إيصال الدفع</title><body style="margin:0;background:#111;display:flex;justify-content:center;"><img src="'+o.proofImage+'" style="max-width:100%;height:auto;">'); w.document.close(); }
+  if(!w) return;
+  w.document.title = 'إيصال الدفع';
+  w.document.body.style.cssText = 'margin:0;background:#111;display:flex;justify-content:center;';
+  const img = w.document.createElement('img');
+  img.src = o.proofImage; img.style.cssText = 'max-width:100%;height:auto;';
+  w.document.body.appendChild(img);
 }
 function closeThankYou(){ document.getElementById('thankyouOverlay').classList.remove('show'); }
 
@@ -2421,6 +2431,8 @@ function openAdmin(){
 function closeAdmin(){
   document.getElementById('admin').style.display='none';
   document.getElementById('store').style.display='block';
+  adminCreds = null;
+  if(location.hash === '#admin') history.replaceState(null, '', location.pathname + location.search);
 }
 let adminCreds = null, accountsList = [];
 async function loadAccountsList(){
@@ -2430,24 +2442,35 @@ async function loadAccountsList(){
     if(r && r.ok){ accountsList = r.accounts || []; renderCustomers(); }
   }catch(e){ console.error('تعذر تحميل الحسابات', e); }
 }
-function doLogin(){
+/* تسجيل دخول الأدمن بيتحقق منه الخادم نفسه (دالة admin_list_accounts)، مش المتصفح */
+let adminLoggingIn = false;
+async function doLogin(){
+  if(adminLoggingIn) return;
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value.trim();
-  if(u===adminAuth.username && p===adminAuth.password){
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('adminShell').style.display='grid';
-    adminCreds = {u, p};
-    renderAdminData();
-    loadAccountsList();
-  } else alert('بيانات الدخول غير صحيحة');
+  if(!u || !p){ alert('اكتب اسم المستخدم وكلمة المرور'); return; }
+  adminLoggingIn = true;
+  try{
+    const r = await callRpc('admin_list_accounts', {p_user:u, p_pass:p});
+    if(r && r.ok){
+      document.getElementById('loginScreen').style.display='none';
+      document.getElementById('adminShell').style.display='grid';
+      document.getElementById('loginPass').value = '';
+      adminCreds = {u, p};
+      accountsList = r.accounts || [];
+      renderAdminData();
+    } else alert('بيانات الدخول غير صحيحة');
+  }catch(e){ rpcFail(e); }
+  finally{ adminLoggingIn = false; }
 }
 let adminPageNow = 'dash';
 let adminOrderFilter = 'الكل';
 function setOrderFilter(f){ adminOrderFilter = f; renderAdminData(); }
-function markCancelsSeen(){
+async function markCancelsSeen(){
+  await refreshAccountsFromRemote(); // أحدث نسخة من الطلبات قبل التعديل
   let changed = false;
   orders.forEach(o=>{ if(o.cancelledBy==='العميل' && !o.cancelSeen){ o.cancelSeen = true; changed = true; } });
-  if(changed){ persist(); renderAdminData(); }
+  if(changed){ await persistPart(['orders']); renderAdminData(); }
 }
 function cancelTagHtml(o){
   if(o.status!=='ملغي' || !o.cancelledBy) return '';
@@ -2488,7 +2511,7 @@ function renderAdminData(){
       <button onclick="moveProduct(${idx},-1)" ${idx===0?'disabled':''} title="نقل لأعلى">▲</button>
       <button onclick="moveProduct(${idx},1)" ${idx===products.length-1?'disabled':''} title="نقل لأسفل">▼</button>
     </td>
-    <td>${thumbSrc(p,'card') ? `<img src="${thumbSrc(p,'card')}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;">` : `<span style="font-size:20px;">${p.icon}</span>`}</td><td>${escapeHtml(p.name)}${p.featured?' <span title="مروّجة" style="color:var(--accent);">⭐</span>':''}</td><td>${prodPlats(p).join(' · ')}</td><td>${p.age ? `<span class="age-chip age-${p.age}" style="margin:0;">${p.age}+</span>` : '<span style="color:var(--muted)">—</span>'}</td><td style="display:flex;flex-wrap:wrap;gap:5px;">${editionBadges}</td><td>${priceRangeText(p)}</td>
+    <td>${thumbSrc(p,'card') ? `<img src="${thumbSrc(p,'card')}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;">` : `<span style="font-size:20px;">${p.icon}</span>`}</td><td>${escapeHtml(p.name)}${p.featured?' <span title="مروّجة" style="color:var(--accent);">⭐</span>':''}</td><td>${escapeHtml(prodPlats(p).join(' · '))}</td><td>${p.age ? `<span class="age-chip age-${p.age}" style="margin:0;">${p.age}+</span>` : '<span style="color:var(--muted)">—</span>'}</td><td style="display:flex;flex-wrap:wrap;gap:5px;">${editionBadges}</td><td>${priceRangeText(p)}</td>
     <td class="${low?'stock-low':'stock-ok'}">${stock}${low?' ⚠':''}${p.soldOut?' <span class="soldout-badge">نفدت</span>':''}</td>
     <td class="row-actions">
       <button onclick="toggleSoldOut('${p.id}')" title="${p.soldOut?'إعادة التوفر':'تحديد كنفدت الكمية'}">${p.soldOut?'✅':'🚫'}</button>
@@ -2533,7 +2556,7 @@ function renderAdminData(){
   document.getElementById('stSocDiscord').value = _soc.discord || '';
   stCustomLinks = (settings.customLinks || []).map(l=>({id:l.id||uid(), label:l.label||'', url:l.url||''}));
   renderCustomLinksAdmin();
-  document.getElementById('stAdminUser').value = adminAuth.username;
+  document.getElementById('stAdminUser').value = adminCreds ? adminCreds.u : '';
   stHeroImage = settings.heroImage || null;
   document.getElementById('stHeroPreview').innerHTML = stHeroImage ? `<img src="${stHeroImage}">` : '🎮';
 }
@@ -2754,22 +2777,30 @@ function saveSettings(){
   persist(); applySettingsToStore(); renderAdminData(); renderAll();
   alert('تم حفظ الإعدادات بنجاح');
 }
-function saveAdminAuth(){
+/* تغيير بيانات الأدمن بيتم على الخادم (دالة admin_change_credentials من ملف الـ SQL) وبتتحقق من كلمة المرور الحالية هناك */
+async function saveAdminAuth(){
+  if(!adminCreds){ alert('سجّل دخول الأدمن الأول'); return; }
   const newUser = document.getElementById('stAdminUser').value.trim();
   const newPass = document.getElementById('stAdminPass').value;
   const confirmPass = document.getElementById('stAdminPassConfirm').value;
+  const currentPass = document.getElementById('stAdminPassCurrent').value;
   if(!newUser){ alert('يرجى إدخال اسم المستخدم'); return; }
+  if(!currentPass){ alert('اكتب كلمة المرور الحالية'); return; }
   if(newPass || confirmPass){
-    if(newPass.length < 4){ alert('كلمة المرور يجب ألا تقل عن 4 أحرف'); return; }
+    if(newPass.length < 8){ alert('كلمة المرور يجب ألا تقل عن 8 أحرف'); return; }
     if(newPass !== confirmPass){ alert('كلمة المرور وتأكيدها غير متطابقين'); return; }
-    adminAuth.password = newPass;
   }
-  adminAuth.username = newUser;
-  if(adminCreds) adminCreds = {u:newUser, p:adminAuth.password};
-  persist();
-  document.getElementById('stAdminPass').value = '';
-  document.getElementById('stAdminPassConfirm').value = '';
-  alert('تم حفظ بيانات الدخول بنجاح');
+  const finalPass = newPass || currentPass;
+  try{
+    const r = await callRpc('admin_change_credentials', {p_user:adminCreds.u, p_pass:currentPass, p_new_user:newUser, p_new_pass:finalPass});
+    if(r && r.error==='weak'){ alert('كلمة المرور لازم تكون 8 أحرف على الأقل، اكتب كلمة مرور جديدة'); return; }
+    if(!r || !r.ok){ alert('كلمة المرور الحالية غير صحيحة'); return; }
+    adminCreds = {u:newUser, p:finalPass};
+    ['stAdminPass','stAdminPassConfirm','stAdminPassCurrent'].forEach(id=>document.getElementById(id).value='');
+    alert('تم حفظ بيانات الدخول بنجاح');
+  }catch(e){
+    alert('تعذر حفظ بيانات الدخول. تأكد إنك شغّلت ملف الـ SQL الخاص بدالة admin_change_credentials في Supabase.\n' + errText(e));
+  }
 }
 
 /* ---------- روابط التواصل الاجتماعي ---------- */
@@ -2839,20 +2870,26 @@ function applySettingsToStore(){
   document.querySelectorAll('#store .logo, #admin .sidebar .logo').forEach(el=>{
     el.innerHTML = `🎮 ${settings.storeName.split(' ')[0]||''}<span>${settings.storeName.split(' ').slice(1).join(' ')||''}</span>`;
   });
+  document.querySelectorAll('#store footer > div:last-child').forEach(el=>{
+    el.textContent = `© 2026 ${settings.storeName} — متجر الألعاب الإلكترونية. جميع الحقوق محفوظة.`;
+  });
   const heroIcon = document.getElementById('heroIcon');
   if(heroIcon) heroIcon.innerHTML = settings.heroImage ? `<img src="${settings.heroImage}">` : '🎮';
 }
 
-function approveOrder(id){
+/* بنسحب أحدث الطلبات الأول وبعدين نعدّل ونحفظ الطلبات بس، علشان طلبات العملاء الجديدة ما تتمسحش */
+async function approveOrder(id){
+  await refreshAccountsFromRemote();
   const o = orders.find(o=>o.id===id); if(!o || o.status==='ملغي') return;
   o.status = 'مكتمل';
-  persist(); renderAdminData();
+  await persistPart(['orders']); renderAdminData();
 }
-function cancelOrder(id){
-  const o = orders.find(o=>o.id===id); if(!o) return;
+async function cancelOrder(id){
   if(!confirm('هل أنت متأكد من التراجع عن هذا الطلب؟')) return;
+  await refreshAccountsFromRemote();
+  const o = orders.find(o=>o.id===id); if(!o) return;
   o.status = 'ملغي'; o.cancelledBy = 'الإدارة'; o.cancelledAt = new Date().toISOString(); o.cancelSeen = true;
-  persist(); renderAdminData();
+  await persistPart(['orders']); renderAdminData();
 }
 
 let editingId = null, pfImage = null, pfCardImage = null, pfBgImage = null;
@@ -3166,15 +3203,25 @@ function renderAll(){
   renderTrending(); renderMostPlayed(); renderCategories(); renderFilters(); renderGrid(); renderCart(); renderAccountUI(); renderSocials(); renderCustomerService();
 }
 
+function openAdminFromHash(){
+  if(location.hash === '#admin') openAdmin();
+}
+window.addEventListener('hashchange', openAdminFromHash);
 (async function init(){
-  await loadRemoteState();
-  enforceBlockedSession(true); // بدون انتظار
-  applySettingsToStore();
-  renderAll();
-  hideGlobalLoader();
-  if(new URLSearchParams(location.search).get('cart') === '1'){
-    toggleCart(true);
-    history.replaceState(null, '', location.pathname + location.hash);
+  try{
+    await loadRemoteState();
+    enforceBlockedSession(true); // بدون انتظار
+    applySettingsToStore();
+    renderAll();
+    if(new URLSearchParams(location.search).get('cart') === '1'){
+      toggleCart(true);
+      history.replaceState(null, '', location.pathname + location.hash);
+    }
+    openAdminFromHash();
+  }catch(e){
+    console.error('خطأ أثناء تشغيل الصفحة', e);
+  }finally{
+    hideGlobalLoader(); // شاشة التحميل لازم تختفي حتى لو حصل خطأ
   }
 })();
 
